@@ -1,52 +1,48 @@
-﻿
+﻿using Definit.Results;
+
 namespace Definit.Configuration;
 
-public abstract class ConfigSectionBase<TSelf> : IConfigObject<TSelf>
-    where TSelf : ConfigSectionBase<TSelf>, ISectionName, IValidate<TSelf>
+public abstract record Config<TSection>
+(
+    string SectionName
+)
+: IConfig<Config<TSection>>
+where TSection : notnull
 {
-    public delegate IsValid<TSelf> Get();
-
-    public static IsValid<TSelf> Create(IConfiguration configuration)
+    public Func<IsValid<Holder>> Get { get; init; } = null!; 
+    
+    public sealed record Holder(TSection Section)
+        : IValidate
     {
-        return ConfigHelper.GetValue<TSelf>(configuration, TSelf.SectionName)
-            .Match(
-                value => value.IsValid(),
-                error => error,
-                error => error);
+        Result IValidate.Validate(string? propertyName)
+        {
+            return IValidate.DefaultValidate(Section, propertyName);
+        }
     }
 
-    public static IsValid<TSelf> Create(IServiceProvider _, IConfiguration configuration)
+    public static T Create<T>(IConfiguration configuration) 
+        where T : Config<TSection>, new()
     {
-        return Create(configuration);
+        var config = new T();
+        return new T()
+        {
+            Get = () =>
+            {
+                if(ConfigHelper.GetValue<TSection>(configuration, config.SectionName)
+                    .Is(out Error error)
+                    .Else(out var value))
+                {
+                    return error;
+                }
+                return new Holder(value).IsValid();
+            }
+        };
     }
 
-    public static ValidationResult Register(IServiceCollection services, IConfiguration configuration)
+    public static void Register<T>(IServiceCollection services, IConfiguration configuration)
+        where T : Config<TSection>, new()
     {
-        services.AddSingleton<Get>(provider => () => Create(configuration));
-
-        return Create(configuration).Success;
-    }
-
-    public static ValidationResult ValidateConfiguration(IConfiguration configuration)
-    {
-        return Create(configuration).Success;
+        services.AddSingleton<T>(_ => Create<T>(configuration));
     }
 }
 
-public abstract class ConfigSection<TSelf> : ConfigSectionBase<TSelf>, ISectionName, IValidate<TSelf>
-    where TSelf : ConfigSection<TSelf>, new()
-{
-    protected abstract string SectionName { get; }
-    protected abstract ValidationResult Validate(Validator<TSelf> context);
-
-    static string ISectionName.SectionName => new TSelf().SectionName;
-    static ValidationResult IValidate<TSelf>.Validate(Validator<TSelf> context) => new TSelf().Validate(context);
-}
-
-public static class ConfigSection
-{
-    public abstract class As<TSelf> : ConfigSection<TSelf>
-        where TSelf : As<TSelf>, new()
-    {
-    }
-}

@@ -1,6 +1,6 @@
 ﻿namespace Definit.Configuration.Tests.Unit;
 
-public sealed class TestSection : ConfigSection<TestSection>
+public sealed class TestSection : Config<TestSection>
 {
     protected override string SectionName { get; } = "testSection";
 
@@ -22,7 +22,7 @@ public sealed class TestValidation : IValidate<string>
     }
 }
 
-public sealed class TestValue : ConfigValue<TestValue, string, TestValidation>
+public sealed class TestValue : Config<TestValue, string, TestValidation>
 {
     protected override string SectionName { get; } = "testValue";
 }

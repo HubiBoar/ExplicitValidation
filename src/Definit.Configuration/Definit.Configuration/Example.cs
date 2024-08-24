@@ -7,35 +7,20 @@ internal static class Example
         public static string FeatureName => "Test";
     }
 
-    private sealed class Section : ConfigSection<Section>
+    private sealed record Value() : Config<string, ConnectionString>("ExampleValue");
+
+    private sealed record Section() : Config<
+    (
+        ConnectionString ConnectionString,
+        string Value
+    )>
+    ("ExampleSection");
+
+
+
+    private static async Task Get(Section section, Value value, FeatureToggle<Feature>.Get featureGetter)
     {
-        protected override string SectionName { get; } = "ExampleConfigSection";
-
-        public string Value1 { get; } = string.Empty;
-        
-        public string Value2 { get; } = string.Empty;
-
-        protected override ValidationResult Validate(Validator<Section> context)
-        {
-            return context.Fluent(validator =>
-            {
-                validator.RuleFor(x => x.Value1).IsConnectionString();
-
-                validator.RuleFor(x => x.Value2).IsConnectionString();
-            });
-        }
-    }
-
-    private sealed class Value : ConfigValue<Value, string, IsConnectionString>
-    {
-        protected override string SectionName => "Name";
-    }
-
-
-
-    private static async Task Get(Section.Get sectionGetter, Value.Get valueGetter, FeatureToggle<Feature>.Get featureGetter)
-    {
-        var section = sectionGetter();
+        var section = section.Get();
         var value = valueGetter();
         var isEnabled = await featureGetter();
     }

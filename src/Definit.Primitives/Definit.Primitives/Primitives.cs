@@ -1,6 +1,5 @@
 using Definit.Json;
 using Definit.Results;
-using Definit.Validation;
 using Newtonsoft.Json;
 
 namespace Definit.Primitives;
@@ -12,6 +11,7 @@ public abstract record Primitive<TValue>
     Primitive<TValue>.Options Opts
 ) 
 : IValidate, IJsonStaticConvertable<Primitive<TValue>>
+where TValue : notnull
 {
     public sealed record Options
     {
@@ -24,6 +24,12 @@ public abstract record Primitive<TValue>
             _results.Add(result);
             return this;
         }
+    }
+
+    public static T Create<T>(TValue value)
+        where T : Primitive<TValue>
+    {
+        return (T)System.Activator.CreateInstance(typeof(T), value)!;
     }
 
     protected static Options Rule()
@@ -54,6 +60,6 @@ public abstract record Primitive<TValue>
     {
         var value = JsonConvert.DeserializeObject<TValue>(json)!;
         
-        return (T)System.Activator.CreateInstance(typeof(T), value)!;
+        return Create<T>(value);
     }
 }

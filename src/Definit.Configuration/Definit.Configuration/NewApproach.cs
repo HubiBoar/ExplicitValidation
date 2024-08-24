@@ -1,3 +1,5 @@
+using Definit.Results;
+
 namespace Definit.ConfigurationNewApproach;
 
 public interface IConfig<TConf>
@@ -6,24 +8,60 @@ public interface IConfig<TConf>
         where T : TConf, new();
 }
 
-public abstract record ConfigValue<TValue, TValidation>
+public abstract record ConfigValue<TValue, TPrimitive>
 (
-    string ConfigName
+    string SectionName
 )
-: IConfig<ConfigValue<TValue, TValidation>>
-where TValidation : Primitive<TValue>
+: IConfig<ConfigValue<TValue, TPrimitive>>
+where TPrimitive : Primitive<TValue>
+where TValue : notnull
 {
-    public Func<IsValid<TValidation>> GetValue { get; init; } 
+    public Func<IsValid<TPrimitive>> GetValue { get; init; } = null!; 
 
     public static T Create<T>(IConfiguration configuration) 
-        where T : ConfigValue<TValue, TValidation>, new()
+        where T : ConfigValue<TValue, TPrimitive>, new()
     {
+        var config = new T();
         return new T()
         {
             GetValue = () =>
             {
-                var value = configuration.GetSection(config.ConfigName).GetValue<TValue>();
+                if(ConfigHelper.GetValue<TValue>(configuration, config.SectionName)
+                    .Is(out Error error)
+                    .Else(out var value))
+                {
+                    return error;
+                }
+                return Primitive<TValue>.Create<TPrimitive>(value);
             }
+        };
+    }
+}
+
+public static class ConfigHelper
+{
+    public static Result<TValue> GetValue<TValue>(IConfiguration configuration, string sectionName)
+        where TValue : notnull
+    {
+        try
+        {
+            var section = configuration.GetSection(sectionName);
+            if(section.Exists() == false)
+            {
+                return new Error($"Section: [{sectionName}] of type [{DefinitType.GetTypeVerboseName<TValue>()}] Is Missing");
+            }
+
+            var value = section.Get<TValue>();
+            if (value is null)
+            {
+                return new Error($"Section: [{sectionName}] of type [{DefinitType.GetTypeVerboseName<TValue>()}] Is Null");
+            }
+
+            return value;
+        }
+        catch(Exception exception)
+        {
+            return exception;
         }
     }
 }

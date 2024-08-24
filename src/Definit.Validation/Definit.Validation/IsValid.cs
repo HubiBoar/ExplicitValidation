@@ -4,19 +4,18 @@ using Error = Definit.Results.Error;
 namespace Definit.Validation;
 
 public sealed class IsValid<T>
-    where T : IValidate
 {
     public Result<Valid<T>> Result { get; }
 
-    public IsValid(T validate)
+    public IsValid(T value, Func<T, Result> validationMethod)
     {
-        if(validate.Validate().Is(out Error error))
+        if(validationMethod(value).Is(out Error error))
         {
             Result = error;
         }
         else
         {
-            Result = new Valid<T>(validate);
+            Result = new Valid<T>(value);
         }
     }
 
@@ -26,11 +25,9 @@ public sealed class IsValid<T>
     }
 
     public static implicit operator IsValid<T>(Error error) => new IsValid<T>(error);
-    public static implicit operator IsValid<T>(T validate)  => new IsValid<T>(validate);
 }
 
 public sealed class Valid<T>
-    where T : IValidate
 {
     public T Value { get; }
 

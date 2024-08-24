@@ -1,10 +1,12 @@
-﻿namespace Definit.Configuration;
+﻿using Definit.Primitives;
+
+namespace Definit.Configuration;
 
 internal static class Example
 {
     private sealed record Feature() : FeatureToggle("ExampleFeature");
 
-    private sealed record Value() : Config<string, ConnectionString>("ExampleValue");
+    private sealed record Value()  : Config<string, ConnectionString>("ExampleValue");
 
     private sealed record Section() : Config<
     (

@@ -9,17 +9,8 @@ public abstract record Config<TSection>
 : IConfig<Config<TSection>>
 where TSection : notnull
 {
-    public Func<IsValid<Holder>> Get { get; init; } = null!; 
+    public Func<IsValid<TSection>> Get { get; init; } = null!; 
     
-    public sealed record Holder(TSection Section)
-        : IValidate
-    {
-        Result IValidate.Validate(string? propertyName)
-        {
-            return IValidate.DefaultValidate(Section, propertyName);
-        }
-    }
-
     public static T Create<T>(IServiceProvider _, IConfiguration configuration) 
         where T : Config<TSection>, new()
     {
@@ -34,7 +25,7 @@ where TSection : notnull
                 {
                     return error;
                 }
-                return new Holder(value).IsValid();
+                return new IsValid<TSection>(value, v => IValidate.DefaultValidate(v, $"{typeof(T).Name}:{config.SectionName}"));
             }
         };
     }

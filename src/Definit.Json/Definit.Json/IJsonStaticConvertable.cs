@@ -7,5 +7,6 @@ public interface IJsonStaticConvertable<TSelf>
 {
     static abstract string ToJson(TSelf obj);
     
-    static abstract TSelf FromJson(string json);
+    static abstract T FromJson<T>(string json)
+        where T : TSelf;
 }

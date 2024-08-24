@@ -1,68 +1,42 @@
-﻿using Definit.Utils;
-using Definit.Results;
-using OneOf.Else;
+﻿using Definit.Results;
 using Error = Definit.Results.Error;
 
 namespace Definit.Validation;
 
-public sealed class IsValid<TValue> : ResultBase<Valid<TValue>, ValidationErrors>
-    where TValue : IValidate<TValue>
+public sealed class IsValid<T>
+    where T : IValidate
 {
-    public Result<TValue, ValidationErrors> Basic { get; }
-    public ValidationResult Success { get; }
+    public Result<Valid<T>> Result { get; }
 
-    private IsValid(OneOf<Valid<TValue>, ValidationErrors, Error> result) : base(result)
+    public IsValid(T validate)
     {
-        Basic   = result.Match<Result<TValue, ValidationErrors>>(x => x.ValidValue, e => e, e => e);
-        Success = result.Match(x => ValidationResult.Success, e => e, e => e);
-    }
-
-    public OneOfElse<OneOf<ValidationErrors, Error>> Is(out TValue value)
-    {
-        var result = Is(out Valid<TValue> valid);
-
-        value = default!;
-        if(result)
+        if(validate.Validate().Is(out Error error))
         {
-            value = valid.ValidValue;
+            Result = error;
         }
-
-        return result;
-    }
-
-    public IsValid(Valid<TValue> value) : this((OneOf<Valid<TValue>, ValidationErrors, Error>)value) {}
-    public IsValid(Error error)         : this((OneOf<Valid<TValue>, ValidationErrors, Error>)error) {}
-
-    public static implicit operator IsValid<TValue> (Error value)            => new (value);
-    public static implicit operator IsValid<TValue> (ValidationErrors value) => new (value);
-
-    public static IsValid<TValue> Null()
-    {
-        return new IsValid<TValue>(ValidationErrors.Null(DefinitType.GetTypeVerboseName<TValue>()));
-    }
-
-    public static IsValid<TValue> Create(TValue? value)
-    {
-        if (value is null)
+        else
         {
-            return Null();
+            Result = new Valid<T>(validate);
         }
-        
-        var context = new Validator<TValue>(value);
-        return TValue.Validate(context).Match(
-            success => new IsValid<TValue>(new Valid<TValue>(value)),
-            validationError => new IsValid<TValue>(validationError),
-            error => new IsValid<TValue>(error));
+    }
+
+    private IsValid(Error error)
+    {
+        Result = error;
+    }
+
+    public static implicit operator IsValid<T>(Error error) => new IsValid<T>(error);
+    public static implicit operator IsValid<T>(T validate)  => new IsValid<T>(validate);
+}
+
+public sealed class Valid<T>
+    where T : IValidate
+{
+    public T Value { get; }
+
+    internal Valid(T value)
+    {
+        Value = value;
     }
 }
 
-public class Valid<TValue>
-    where TValue : IValidate<TValue>
-{
-    public TValue ValidValue { get; }
-
-    internal Valid(TValue value)
-    {
-        ValidValue = value;
-    }
-}

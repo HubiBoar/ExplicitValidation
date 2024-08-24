@@ -2,12 +2,21 @@
 
 namespace Definit.Validation;
 
-public sealed record Validator<TValue>(TValue Value)
+public interface IValidate
 {
-    public delegate ValidationResult Delegate(Validator<TValue> context);
-}
+    public virtual Result Validate(string? propertyName = null)
+    {
+        return GetType()
+            .GetProperties()
+            .Where(x => x.PropertyType.IsAssignableFrom(typeof(IValidate)))
+            .Select(x => 
+            {
+                var value  = x.GetValue(this);
+                var casted = (IValidate)value!;
+                var result = casted.Validate(x.Name);
 
-public interface IValidate<TValue>
-{
-    public static abstract ValidationResult Validate(Validator<TValue> context);
+                return result;
+            })
+            .Merge(propertyName);
+    }
 }

@@ -29,8 +29,8 @@ internal static class Example
 
     private static async Task Create(IServiceCollection services, IConfiguration configuration)
     {
-        var section = Section.Create(configuration);
-        var value = Value.Create(configuration);
-        var isEnabled = await FeatureToggle<Feature>.Create(services);
+        var section   = services.GetConfig<Section>(configuration);
+        var value     = services.GetConfig<Value>(configuration);
+        var isEnabled = await services.GetConfig<Feature>(configuration).Get();
     }
 }

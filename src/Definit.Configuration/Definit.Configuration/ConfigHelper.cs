@@ -43,6 +43,20 @@ public static class ConfigHelper
         }
     }
 
+    public static T GetConfig<T>(this IServiceCollection services, IConfiguration configuration)
+        where T : class, IConfig, new()
+    {
+        using var scope = services.BuildServiceProvider().CreateScope();
+        var provider = scope.ServiceProvider;
+
+        var type = typeof(T);
+
+        var method = type.GetMethod("Create", BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)!;
+        var genericMethod = method.MakeGenericMethod(typeof(T));
+
+        return (T)genericMethod.Invoke(null, [provider, configuration])!;
+    }
+
     public static void AddConfig<T>(this IServiceCollection services, IConfiguration configuration)
         where T : class, IConfig, new()
     {
@@ -51,6 +65,6 @@ public static class ConfigHelper
         var method = type.GetMethod("Register", BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)!;
         var genericMethod = method.MakeGenericMethod(typeof(T));
 
-        genericMethod.Invoke(null, [services]);
+        genericMethod.Invoke(null, [services, configuration]);
     }
 }

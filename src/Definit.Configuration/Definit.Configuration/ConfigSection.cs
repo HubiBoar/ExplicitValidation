@@ -20,7 +20,7 @@ where TSection : notnull
         }
     }
 
-    public static T Create<T>(IConfiguration configuration) 
+    public static T Create<T>(IServiceProvider _, IConfiguration configuration) 
         where T : Config<TSection>, new()
     {
         var config = new T();
@@ -42,7 +42,7 @@ where TSection : notnull
     public static void Register<T>(IServiceCollection services, IConfiguration configuration)
         where T : Config<TSection>, new()
     {
-        services.AddSingleton<T>(_ => Create<T>(configuration));
+        services.AddSingleton<T>(provider => Create<T>(provider, configuration));
     }
 }
 

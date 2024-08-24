@@ -12,7 +12,7 @@ where TValue : notnull
 {
     public Func<IsValid<TPrimitive>> Get { get; init; } = null!; 
 
-    public static T Create<T>(IConfiguration configuration) 
+    public static T Create<T>(IServiceProvider _, IConfiguration configuration) 
         where T : Config<TValue, TPrimitive>, new()
     {
         var config = new T();
@@ -34,7 +34,7 @@ where TValue : notnull
     public static void Register<T>(IServiceCollection services, IConfiguration configuration)
         where T : Config<TValue, TPrimitive>, new()
     {
-        services.AddSingleton<T>(_ => Create<T>(configuration));
+        services.AddSingleton<T>(provider => Create<T>(provider, configuration));
     }
 }
 

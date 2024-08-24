@@ -9,7 +9,7 @@ public interface IConfig
 
 public interface IConfig<TConfig> : IConfig
 {
-    public static abstract T Create<T>(IConfiguration configuration)
+    public static abstract T Create<T>(IServiceProvider provider, IConfiguration configuration)
         where T : TConfig, new();
 
     public static abstract void Register<T>(IServiceCollection services, IConfiguration configuration)

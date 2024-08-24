@@ -1,65 +1,30 @@
 namespace Definit.Configuration;
 
-public interface IFeatureName
+public abstract record FeatureToggle
+(
+    string FeatureName
+)
+: IConfig<FeatureToggle>
 {
-    public static abstract string FeatureName { get; }    
-}
+    public Func<Task<bool>> Get { get; init; } = null!; 
+    
+    public static T Create<T>(IServiceProvider provider, IConfiguration configuration) 
+        where T : FeatureToggle, new()
+    {
+        var config = new T();
 
-public sealed class FeatureToggle<T> : IConfigObject<Value<bool, IsNotNull<bool>>>, ISectionName
-    where T : IFeatureName
-{
-    public static string SectionName { get; } = $"FeatureManagement:{FeatureName}";
-    private readonly static string FeatureName = T.FeatureName;
+        return new T()
+        {
+            Get = () => provider
+                .GetRequiredService<IFeatureManager>()
+                .IsEnabledAsync(config.FeatureName)
+        };
+    }
 
-    public delegate Task<bool> Get();
-
-    public static ValidationResult Register(IServiceCollection services, IConfiguration configuration)
+    public static void Register<T>(IServiceCollection services, IConfiguration configuration)
+        where T : FeatureToggle, new()
     {
         services.AddFeatureManagement();
-        services.AddSingleton<Get>(provider => () => Create(provider));
-
-        return ValidateConfiguration(configuration);
-    }
-
-    public static ValidationResult ValidateConfiguration(IConfiguration configuration)
-    {
-        try
-        {
-            var featureName = SectionName;
-            var section = configuration.GetSection(featureName);
-
-            if(section is null)
-            {
-                return new ValidationErrors(SectionName, $"Missing FeatureToggle");
-            }
-
-            return ValidationResult.Success;
-        }
-        catch(Exception exception)
-        {
-            return exception;
-        }
-    }
-
-    public static Task<bool> Create(IServiceCollection services)
-    {
-        using var scope = services.BuildServiceProvider().CreateScope();
-
-        return Create(scope.ServiceProvider);
-    }
-
-    public static Task<bool> Create(IServiceProvider provider)
-    {
-        return provider
-            .GetRequiredService<IFeatureManager>()
-            .IsEnabledAsync(FeatureName);
-    }
-
-    public static IsValid<Value<bool, IsNotNull<bool>>> Create(IServiceProvider provider, IConfiguration _)
-    {
-        return Create(provider)
-            .GetAwaiter()
-            .GetResult()
-            .IsValid<bool, IsNotNull<bool>>();
+        services.AddSingleton<T>(provider => Create<T>(provider, configuration));
     }
 }

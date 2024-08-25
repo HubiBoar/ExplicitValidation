@@ -46,7 +46,7 @@ public sealed record ExampleObject2
 
 public sealed record ExampleValue1() : Valid.Value<ExampleValue1, string>
 (
-    Rule()
+    Rule().NotNull().Min(5)
 );
 
 public static class Valid
@@ -77,18 +77,8 @@ public static class Valid
 
     public sealed class Context
     {
-        public IReadOnlyCollection<Result> Results => _results;
-
-        private readonly List<Result> _results;
-
         internal Context()
         {
-            _results = [];
-        }
-
-        public void AddResult(Result result)
-        {
-            _results.Add(result);
         }
     }
 
@@ -109,15 +99,28 @@ public static class Valid
 
         public static Valid Create(Context context, T value)
         {
-            //context add validation result
             return new Valid(value);
         }
 
         public static Result<Valid> Create(Func<Context, T> factory)
         {
-            var value = factory(new Context());
-            //Add validation Method
-            return new Valid(value); 
+            try
+            {
+                var value = factory(new Context());
+                var valid = new Valid(value);
+
+                if(((IValidate)valid).Validate()
+                    .Is(out Error error))
+                {
+                    return error;
+                }
+
+                return new Valid(value); 
+            }
+            catch(Exception exception)
+            {
+                return exception;
+            }
         }
     }
 
@@ -138,19 +141,28 @@ public static class Valid
 
         public static Valid Create(Context context, T value)
         {
-            //context add validation result
-            var valid = new Valid(value);
-
-            context.AddResult(((IValidate)valid).Validate());
-
-            return valid;
+            return new Valid(value);
         }
 
         public static Result<Valid> Create(Func<Context, T> factory)
         {
-            var value = factory(new Context());
-            //Add validation Method
-            return new Valid(value); 
+            try
+            {
+                var value = factory(new Context());
+                var valid = new Valid(value);
+
+                if(((IValidate)valid).Validate()
+                    .Is(out Error error))
+                {
+                    return error;
+                }
+
+                return new Valid(value); 
+            }
+            catch(Exception exception)
+            {
+                return exception;
+            }
         }
     }
 
@@ -195,14 +207,27 @@ public static class Valid
 
         public static Valid Create(Context context, T value)
         {
-            //context add validation result
             return new Valid(value);
         }
 
         public static Result<Valid> Create(T value)
         {
-            //Add validation Method
-            return new Valid(value); 
+            try
+            {
+                var valid = new Valid(value);
+
+                if(((IValidate)valid).Validate()
+                    .Is(out Error error))
+                {
+                    return error;
+                }
+
+                return new Valid(value); 
+            }
+            catch(Exception exception)
+            {
+                return exception;
+            }
         }
     }
 
@@ -218,9 +243,50 @@ public static class Valid
             _rules = [];
         }
 
-        public void AddRule(Func<T, Result> rule)
+        public Validator<T> AddRule(Func<T, Result> rule)
         {
             _rules.Add(rule);
+            return this;
         }
+    }
+}
+
+public static class ValidationOptionsExtensions
+{
+    public static Valid.Validator<TValue> NotNull<TValue>(this Valid.Validator<TValue> opts)
+        where TValue : notnull
+    {
+        return opts.AddRule(value =>
+        {
+            if(value is null)
+            {
+                return new Error($"was null but was expected to be {nameof(NotNull)}");
+            }
+            return Result.Success;
+        });
+    }
+
+    public static Valid.Validator<string> Min(this Valid.Validator<string> opts, int size)
+    {
+        return opts.AddRule(value =>
+        {
+            if(value.Length < size)
+            {
+                return new Error($"length was {value.Length} but was expected to be {nameof(Min)} of {size}");
+            }
+            return Result.Success;
+        });
+    }
+
+    public static Valid.Validator<string> Max(this Valid.Validator<string> opts, int size)
+    {
+        return opts.AddRule(value =>
+        {
+            if(value.Length > size)
+            {
+                return new Error($"length was {value.Length} but was expected to be {nameof(Max)} of {size}");
+            }
+            return Result.Success;
+        });
     }
 }

@@ -4,6 +4,9 @@
         <Title>Definit.Validation</Title>
         <Description>Definit Validation</Description>
         <PackageTags>validation</PackageTags>
+        
+        <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+        <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
     </PropertyGroup>
     
     <ItemGroup>
@@ -13,6 +16,7 @@
     <ItemGroup>
         <ProjectReference Include="..\..\Definit.Result\Definit.Result\Definit.Result.csproj" />
         <ProjectReference Include="..\..\Definit.Utils\Definit.Utils\Definit.Utils.csproj" />
+        <ProjectReference Include="..\Definit.Validation.Generator\Definit.Validation.Generator.csproj" OutputItemType="Analyzer" />
     </ItemGroup>
 
 </Project>

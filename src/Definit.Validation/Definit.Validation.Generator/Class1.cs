@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -24,16 +25,30 @@ public class ValidGenerator : IIncrementalGenerator
     private static void Execute
     (
         SourceProductionContext context,
-        Compilation left,
-        ImmutableArray<ClassDeclarationSyntax> right
+        Compilation compilation,
+        ImmutableArray<ClassDeclarationSyntax> typeList
     )
     {
-        var code = """
+//        if (!Debugger.IsAttached) Debugger.Launch();
+
+
+        var types = typeList.Select
+        (
+            x => compilation
+                .GetSemanticModel(x.SyntaxTree)
+                .GetDeclaredSymbol(x) as INamedTypeSymbol
+        )
+        .Where(x => x is not null)
+        .Select(x => x!.ToDisplayString());
+
+        var output = string.Join(", ", types);
+
+        var code = $$"""
         namespace SampleSourceGenerator;
 
         public static class ClassNames
         {
-            public static string Test = "Hello from Roslyn";
+            public static string Output = "{{output}}";
         }
         """;
 

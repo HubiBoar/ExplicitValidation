@@ -1,21 +1,32 @@
 ﻿using System.Collections.Immutable;
 using System.Diagnostics;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Definit.Validation.Generator;
+
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
+public sealed class ValidAttribute : Attribute
+{
+
+}
 
 [Generator]
 public class ValidGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        var provider = context.SyntaxProvider.CreateSyntaxProvider
+        var provider = context.SyntaxProvider.ForAttributeWithMetadataName
         (
-            predicate: (c, _) => c is ClassDeclarationSyntax,
-            transform: (n, _) => (ClassDeclarationSyntax)n.Node
-        )
-        .Where(m => m is not null);
+            typeof(ValidAttribute).FullName,
+
+            predicate: static (c, _) =>
+                c is TypeDeclarationSyntax type
+                && type.Modifiers.Any(m => m.IsKind(SyntaxKind.PartialKeyword)),
+
+            transform: static (n, _) => n
+        );
 
         var compilation = context.CompilationProvider.Combine(provider.Collect());
 
@@ -26,18 +37,17 @@ public class ValidGenerator : IIncrementalGenerator
     (
         SourceProductionContext context,
         Compilation compilation,
-        ImmutableArray<ClassDeclarationSyntax> typeList
+        ImmutableArray<GeneratorAttributeSyntaxContext> typeList
     )
     {
 //        if (!Debugger.IsAttached) Debugger.Launch();
 
-
-        var types = typeList.Select
-        (
-            x => compilation
-                .GetSemanticModel(x.SyntaxTree)
-                .GetDeclaredSymbol(x) as INamedTypeSymbol
-        )
+        var types = typeList.Select(x =>
+        {
+            return compilation
+                .GetSemanticModel(x.TargetNode.SyntaxTree)
+                .GetDeclaredSymbol(x.TargetNode) as INamedTypeSymbol;
+        })
         .Where(x => x is not null)
         .Select(x => x!.ToDisplayString());
 

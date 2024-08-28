@@ -2,5 +2,5 @@
 
 public static class ClassNames
 {
-    public static string Output = "TestClass";
+    public static string Output = "TestRecord";
 }

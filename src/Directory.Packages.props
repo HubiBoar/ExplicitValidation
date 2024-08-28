@@ -9,7 +9,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageVersion>
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" />
     <PackageVersion Include="OneOf" Version="3.0.263" />
     <PackageVersion Include="OneOf.Else" Version="$(OneOfElseVersion)" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.1" />

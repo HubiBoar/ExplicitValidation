@@ -1,7 +1,6 @@
-﻿    namespace SampleSourceGenerator
-    {
-        public static class ClassNames
-        {
-            public static string Test = "Hello from Roslyn";
-        }
-    }
+﻿namespace SampleSourceGenerator;
+
+public static class ClassNames
+{
+    public static string Test = "Hello from Roslyn";
+}

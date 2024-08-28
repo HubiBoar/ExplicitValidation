@@ -29,13 +29,12 @@ public class ValidGenerator : IIncrementalGenerator
     )
     {
         var code = """
-            namespace SampleSourceGenerator
-            {
-                public static class ClassNames
-                {
-                    public static string Test = "Hello from Roslyn";
-                }
-            }
+        namespace SampleSourceGenerator;
+
+        public static class ClassNames
+        {
+            public static string Test = "Hello from Roslyn";
+        }
         """;
 
         context.AddSource("ClassNames.g.cs", code);

@@ -4,9 +4,6 @@
         <Title>Definit.Validation</Title>
         <Description>Definit Validation</Description>
         <PackageTags>validation</PackageTags>
-        
-        <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-        <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
     </PropertyGroup>
     
     <ItemGroup>
@@ -19,4 +16,17 @@
         <ProjectReference Include="..\Definit.Validation.Generator\Definit.Validation.Generator.csproj" OutputItemType="Analyzer" />
     </ItemGroup>
 
+    <PropertyGroup>
+        <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+        <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
+    </PropertyGroup>
+
+    <Target Name="CleanSourceGeneratedFiles" BeforeTargets="BeforeBuild" DependsOnTargets="$(BeforeBuildDependsOn)">
+        <RemoveDir Directories="Generated" />
+    </Target>
+
+    <ItemGroup>
+        <Compile Remove="Generated\**" />
+        <Content Include="Generated\**" />
+    </ItemGroup> 
 </Project>

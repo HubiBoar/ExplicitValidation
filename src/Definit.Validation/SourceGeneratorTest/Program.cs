@@ -15,3 +15,7 @@ public partial record TestRecord
     TestClass TestClassInTestRecord,
     string StringInTestRecord
 );
+
+partial record TestRecord
+{
+}

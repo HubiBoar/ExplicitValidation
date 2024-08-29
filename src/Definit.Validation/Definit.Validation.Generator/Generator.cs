@@ -177,10 +177,9 @@ public class ValidGenerator : IIncrementalGenerator
             var prefix = AddTabs(tabsCount);
             return code
                 .Append(prefix)
-                .Append(Keyword) 
                 .Append(" partial ")
+                .Append(Keyword) 
                 .Append(Name) 
-                .Append(" ")
                 .Append(Constraints) 
                 .AppendLine(prefix)
                 .Append(@"{")

@@ -1,0 +1,4 @@
+﻿	record partial TestRecord 	
+{
+
+}

@@ -82,11 +82,8 @@ public class ValidGenerator : IIncrementalGenerator
         if (hasNamespace)
         {
             fullClassName.Append($"{nameSpace}.");
-            code
-                .Append("namespace ")
-                .Append(nameSpace)
-                .AppendLine()
-                .Append("{");
+            code.AddLine(0, $"namespace {nameSpace}")
+                .AddLine(0, "{");
         }
    
         int tabsStartCount = hasNamespace ? 1 : 0;
@@ -101,24 +98,31 @@ public class ValidGenerator : IIncrementalGenerator
 
         code.AppendLine()
             .Append(typeInfo.GenerateTypeName(tabsCount));
+      
+        //Valid Creation
+        {
+            tabsCount += 1;
+            code.AddLine(tabsCount, $"public sealed {typeInfo.Keyword} Valid")
+                .AddLine(tabsCount, "{")
+                .AddLine(tabsCount, "}");
+        }
 
         for (int i = tabsCount; i >= tabsStartCount; i--)
         {
-            code.AppendLine()
-                .Append(AddTabs(i)).Append(@"}");
+            code.AddLine(tabsCount, "}");
         }
 
         if (hasNamespace)
         {
-            code.AppendLine()
-                .Append("}");
+            code.AddLine(0, "}");
         }
 
 
         fullClassName.Append(className);
         return (code.ToString(), fullClassName.ToString());
     }
-    
+   
+
     private static string GetNamespace(TypeDeclarationSyntax syntax)
     {
         // If we don't have a namespace at all we'll return an empty string
@@ -179,7 +183,7 @@ public class ValidGenerator : IIncrementalGenerator
         public string GenerateTypeName(int tabsCount)
         {
             var code = new StringBuilder();
-            var prefix = AddTabs(tabsCount);
+            var prefix = StringHelper.AddTabs(tabsCount);
             return code.Append($"{prefix}partial {Keyword} {Name} {Constraints}")
                 .AppendLine()
                 .Append(prefix)
@@ -188,10 +192,6 @@ public class ValidGenerator : IIncrementalGenerator
         }
     }
 
-    private static string AddTabs(int count)
-    {
-        return string.Join("", Enumerable.Range(0, count).Select(x => "\t"));
-    }
 
     private static (TypeInfo TypeInfo, Stack<TypeInfo> Parents) GetTypeInfo(TypeDeclarationSyntax typeSyntax)
     {
@@ -214,5 +214,18 @@ public class ValidGenerator : IIncrementalGenerator
         kind == SyntaxKind.StructDeclaration ||
         kind == SyntaxKind.RecordDeclaration ||
         kind == SyntaxKind.InterfaceDeclaration;
+}
+
+public static class StringHelper
+{
+    public static string AddTabs(int count)
+    {
+        return string.Join("", Enumerable.Range(0, count).Select(x => "\t"));
+    }
+
+    public static StringBuilder AddLine(this StringBuilder builder, int tabs, string value)
+    {
+        return builder.AppendLine().Append(AddTabs(tabs)).Append(value);
+    }
 }
 

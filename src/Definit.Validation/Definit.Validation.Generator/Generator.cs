@@ -82,7 +82,7 @@ public class ValidGenerator : IIncrementalGenerator
         if (hasNamespace)
         {
             fullClassName.Append($"{nameSpace}.");
-            code.AddLine(0, $"namespace {nameSpace}")
+            code.AppendLine($"namespace {nameSpace}")
                 .AddLine(0, "{");
         }
    
@@ -103,18 +103,12 @@ public class ValidGenerator : IIncrementalGenerator
         {
             tabsCount += 1;
             code.AddLine(tabsCount, $"public sealed {typeInfo.Keyword} Valid")
-                .AddLine(tabsCount, "{")
-                .AddLine(tabsCount, "}");
+                .AddLine(tabsCount, "{");
         }
 
-        for (int i = tabsCount; i >= tabsStartCount; i--)
+        for (int i = tabsCount; i >= 0; i--)
         {
-            code.AddLine(tabsCount, "}");
-        }
-
-        if (hasNamespace)
-        {
-            code.AddLine(0, "}");
+            code.AddLine(i, "}");
         }
 
 

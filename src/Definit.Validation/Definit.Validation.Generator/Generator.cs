@@ -6,6 +6,10 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Definit.Validation.Generator;
 
+public interface IValid
+{
+}
+
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
 public sealed class ValidAttribute : Attribute
 {
@@ -43,21 +47,29 @@ public class ValidGenerator : IIncrementalGenerator
     {
         var hierarchyList = typeList.Select(GetHierarchy);
 
-        var typesList = typeList.Select(x =>
+        var typesList = typeList.SelectMany(x =>
         {
-            return compilation
-                .GetSemanticModel(x.SyntaxTree)
-                .GetDeclaredSymbol(x) as INamedTypeSymbol;
-        })
-        .Where(x => x is not null)
-        .Select(x => x!.ToDisplayString());
+            var symbol = compilation.GetSemanticModel(x.SyntaxTree).GetDeclaredSymbol(x) as ITypeSymbol;
+            return symbol!.AllInterfaces.Select(x => x.ToDisplayString());
+            //if(symbol!.AllInterfaces.Any(x => x.ToDisplayString() == nameof(IValid)))
+            //{
+            //    return compilation
+            //        .GetSemanticModel(x.SyntaxTree)
+            //        .GetDeclaredSymbol(x) as INamedTypeSymbol;
+            //}
+
+        });
+        //.Where(x => x is not null)
+        //.Select(x => x!.ToDisplayString());
 
         var code = $$"""
         namespace SampleSourceGenerator;
 
         public static class ClassNames
         {
-            public static string TypesList = "{{string.Join(", ", typesList)}}";
+
+
+            public static string TypesList = "comp4 :  {{string.Join(", ", typesList)}}";
         }
         """;
 
@@ -78,7 +90,7 @@ public class ValidGenerator : IIncrementalGenerator
         var code = new StringBuilder();
 
         var fullClassName = new StringBuilder();
-        var hasNamespace = string.IsNullOrEmpty(nameSpace) == false;
+        var hasNamespace  = string.IsNullOrEmpty(nameSpace) == false;
         if (hasNamespace)
         {
             fullClassName.Append($"{nameSpace}.");
@@ -91,13 +103,11 @@ public class ValidGenerator : IIncrementalGenerator
         foreach(var parent in parents)
         {
             fullClassName.Append($"{parent.Name}.");
-            code.AppendLine()
-                .Append(parent.GenerateTypeName(tabsCount));
+            code.Append(parent.GenerateTypeName(tabsCount));
             tabsCount++;
         }
 
-        code.AppendLine()
-            .Append(typeInfo.GenerateTypeName(tabsCount));
+        code.Append(typeInfo.GenerateTypeName(tabsCount));
       
         //Valid Creation
         {
@@ -177,11 +187,8 @@ public class ValidGenerator : IIncrementalGenerator
         public string GenerateTypeName(int tabsCount)
         {
             var code = new StringBuilder();
-            var prefix = StringHelper.AddTabs(tabsCount);
-            return code.Append($"{prefix}partial {Keyword} {Name} {Constraints}")
-                .AppendLine()
-                .Append(prefix)
-                .Append(@"{")
+            return code.AddLine(tabsCount, $"partial {Keyword} {Name} {Constraints}")
+                .AddLine(tabsCount, "{")
                 .ToString();
         }
     }

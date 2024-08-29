@@ -4,7 +4,7 @@ using SampleSourceGenerator;
 Console.WriteLine(ClassNames.TypesList);
 
 [Valid]
-public partial class TestClass
+public partial class TestClass : IValid
 {
     public string? StringInTestClass { get; set; } 
 }

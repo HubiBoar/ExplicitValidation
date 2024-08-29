@@ -1,5 +1,6 @@
-﻿namespace Test{
-	partial record TestRecord 	
+﻿namespace Test
 {
-	
-}}
+	partial record TestRecord 
+	{
+	}
+}

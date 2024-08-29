@@ -1,5 +1,6 @@
-﻿namespace Test{
-	partial class TestClass 	
+﻿namespace Test
 {
-	
-}}
+	partial class TestClass 
+	{
+	}
+}

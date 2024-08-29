@@ -85,7 +85,8 @@ public class ValidGenerator : IIncrementalGenerator
             code
                 .Append("namespace ")
                 .Append(nameSpace)
-                .AppendLine(@"{");
+                .AppendLine()
+                .Append("{");
         }
    
         int tabsStartCount = hasNamespace ? 1 : 0;
@@ -93,20 +94,24 @@ public class ValidGenerator : IIncrementalGenerator
         foreach(var parent in parents)
         {
             fullClassName.Append($"{parent.Name}.");
-            code.AppendLine(parent.GenerateTypeName(tabsCount));
+            code.AppendLine()
+                .Append(parent.GenerateTypeName(tabsCount));
             tabsCount++;
         }
 
-        code.AppendLine(typeInfo.GenerateTypeName(tabsCount));
+        code.AppendLine()
+            .Append(typeInfo.GenerateTypeName(tabsCount));
 
         for (int i = tabsCount; i >= tabsStartCount; i--)
         {
-            code.AppendLine(AddTabs(i)).Append(@"}");
+            code.AppendLine()
+                .Append(AddTabs(i)).Append(@"}");
         }
 
         if (hasNamespace)
         {
-            code.AppendLine(@"}");
+            code.AppendLine()
+                .Append("}");
         }
 
 
@@ -176,7 +181,8 @@ public class ValidGenerator : IIncrementalGenerator
             var code = new StringBuilder();
             var prefix = AddTabs(tabsCount);
             return code.Append($"{prefix}partial {Keyword} {Name} {Constraints}")
-                .AppendLine(prefix)
+                .AppendLine()
+                .Append(prefix)
                 .Append(@"{")
                 .ToString();
         }
@@ -195,7 +201,7 @@ public class ValidGenerator : IIncrementalGenerator
         TypeDeclarationSyntax? parentSyntax = typeSyntax.Parent as TypeDeclarationSyntax;
         while (parentSyntax != null && IsAllowedKind(parentSyntax.Kind()))
         {
-            parents.Push(new TypeInfo(typeSyntax));
+            parents.Push(new TypeInfo(parentSyntax));
             parentSyntax = (parentSyntax.Parent as TypeDeclarationSyntax);
         }
 

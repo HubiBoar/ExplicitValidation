@@ -87,20 +87,21 @@ public class ValidGenerator : IIncrementalGenerator
                 .Append(nameSpace)
                 .AppendLine(@"{");
         }
-    
-        int parentsCount = 0;
+   
+        int tabsStartCount = hasNamespace ? 1 : 0;
+        int tabsCount = tabsStartCount;
         foreach(var parent in parents)
         {
             fullClassName.Append($"{parent.Name}.");
-            code.AppendLine(parent.GenerateTypeName(parentsCount));
-            parentsCount++;
+            code.AppendLine(parent.GenerateTypeName(tabsCount));
+            tabsCount++;
         }
 
-        code.AppendLine(typeInfo.GenerateTypeName(parentsCount+1));
+        code.AppendLine(typeInfo.GenerateTypeName(tabsCount+1));
 
-        for (int i = 0; i < parentsCount; i++)
+        for (int i = tabsCount; i >= tabsStartCount; i--)
         {
-            code.AppendLine(AddTabs(parentsCount)).Append(@"}");
+            code.AppendLine(AddTabs(i)).Append(@"}");
         }
 
         if (hasNamespace)

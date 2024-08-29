@@ -19,3 +19,23 @@ public partial record TestRecord
 partial record TestRecord
 {
 }
+
+namespace Test
+{
+    [Valid]
+    public partial class TestClass
+    {
+        public string? StringInTestClass { get; set; } 
+    }
+
+    [Valid]
+    public partial record TestRecord
+    (
+        TestClass TestClassInTestRecord,
+        string StringInTestRecord
+    );
+
+    partial record TestRecord
+    {
+    }
+}

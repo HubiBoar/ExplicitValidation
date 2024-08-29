@@ -97,7 +97,7 @@ public class ValidGenerator : IIncrementalGenerator
             tabsCount++;
         }
 
-        code.AppendLine(typeInfo.GenerateTypeName(tabsCount+1));
+        code.AppendLine(typeInfo.GenerateTypeName(tabsCount));
 
         for (int i = tabsCount; i >= tabsStartCount; i--)
         {
@@ -175,12 +175,7 @@ public class ValidGenerator : IIncrementalGenerator
         {
             var code = new StringBuilder();
             var prefix = AddTabs(tabsCount);
-            return code
-                .Append(prefix)
-                .Append(" partial ")
-                .Append(Keyword) 
-                .Append(Name) 
-                .Append(Constraints) 
+            return code.Append($"{prefix}partial {Keyword} {Name} {Constraints}")
                 .AppendLine(prefix)
                 .Append(@"{")
                 .ToString();

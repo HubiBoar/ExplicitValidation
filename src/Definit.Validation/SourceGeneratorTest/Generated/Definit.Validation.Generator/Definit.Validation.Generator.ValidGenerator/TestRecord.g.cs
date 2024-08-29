@@ -1,4 +1,4 @@
-﻿	record partial TestRecord 	
+﻿partial record TestRecord 
 {
 
 }

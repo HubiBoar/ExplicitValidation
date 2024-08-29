@@ -1,4 +1,4 @@
-﻿	class partial TestClass 	
+﻿partial class TestClass 
 {
 
 }

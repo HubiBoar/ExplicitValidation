@@ -41,7 +41,7 @@ public class ValidGenerator : IIncrementalGenerator
         ImmutableArray<TypeDeclarationSyntax> typeList
     )
     {
-        var hierarchyList = typeList.Select(x => GetHierarchy(compilation, x));
+        var hierarchyList = typeList.Select(GetHierarchy);
 
         var typesList = typeList.Select(x =>
         {
@@ -68,71 +68,44 @@ public class ValidGenerator : IIncrementalGenerator
         }
     }
 
-    private static (string Code, string ClassName) GetHierarchy(Compilation compilation, TypeDeclarationSyntax type)
+    private static (string Code, string ClassName) GetHierarchy(TypeDeclarationSyntax type)
     {
-        var namedSymbol = compilation
-            .GetSemanticModel(type.SyntaxTree)
-            .GetDeclaredSymbol(type) as INamedTypeSymbol;
 
-        var className = namedSymbol!.ToDisplayString();  
+        var nameSpace           = GetNamespace(type);
+        var (typeInfo, parents) = GetTypeInfo(type);
+        var className           = typeInfo.Name;
 
-        var nameSpace = GetNamespace(type);
-        var parentClass = GetParentClass(type);
         var code = new StringBuilder();
 
         var fullClassName = new StringBuilder();
-        // If we don't have a namespace, generate the code in the "default"
-        // namespace, either global:: or a different <RootNamespace>
-        var hasNamespace = !string.IsNullOrEmpty(nameSpace);
+        var hasNamespace = string.IsNullOrEmpty(nameSpace) == false;
         if (hasNamespace)
         {
             fullClassName.Append($"{nameSpace}.");
-            // We could use a file-scoped namespace here which would be a little impler, 
-            // but that requires C# 10, which might not be available. 
-            // Depends what you want to support!
             code
                 .Append("namespace ")
                 .Append(nameSpace)
-                .AppendLine(@"
-        {");
+                .AppendLine(@"{");
         }
     
         int parentsCount = 0;
-        // Loop through the full parent type hiearchy, starting with the outermost
-        while (parentClass is not null)
+        foreach(var parent in parents)
         {
-            fullClassName.Append($"{parentClass.Name}.");
-            code
-                .Append("    partial ")
-                .Append(parentClass.Keyword) // e.g. class/struct/record
-                .Append(' ')
-                .Append(parentClass.Name) // e.g. Outer/Generic<T>
-                .Append(' ')
-                .Append(parentClass.Constraints) // e.g. where T: new()
-                .AppendLine(@"
-            {");
-            parentsCount++; // keep track of how many layers deep we are
-            parentClass = parentClass.Child; // repeat with the next child
+            fullClassName.Append($"{parent.Name}.");
+            code.AppendLine(parent.GenerateTypeName(parentsCount));
+            parentsCount++;
         }
 
-        // Write the actual target generation code here. Not shown for brevity
-        code.AppendLine($$"""
-        public partial readonly struct {{className}}
-        {
-        }
-        """);
+        code.AppendLine(typeInfo.GenerateTypeName(parentsCount+1));
 
-        // We need to "close" each of the parent types, so write
-        // the required number of '}'
         for (int i = 0; i < parentsCount; i++)
         {
-            code.AppendLine(@"    }");
+            code.AppendLine(AddTabs(parentsCount)).Append(@"}");
         }
 
-        // Close the namespace, if we had one
         if (hasNamespace)
         {
-            code.Append('}').AppendLine();
+            code.AppendLine(@"}");
         }
 
 
@@ -184,47 +157,54 @@ public class ValidGenerator : IIncrementalGenerator
         return nameSpace;
     }
 
-    private class ParentClass
+    private class TypeInfo
     {
-        public ParentClass(string keyword, string name, string constraints, ParentClass? child)
+        public string Keyword     { get; }
+        public string Name        { get; }
+        public string Constraints { get; }
+
+        public TypeInfo(TypeDeclarationSyntax type)
         {
-            Keyword = keyword;
-            Name = name;
-            Constraints = constraints;
-            Child = child;
+            Keyword     = type.Keyword.ValueText;
+            Name        = type.Identifier.ToString() + type.TypeParameterList;
+            Constraints = type.ConstraintClauses.ToString();
         }
 
-        public ParentClass? Child { get; }
-        public string Keyword { get; }
-        public string Name { get; }
-        public string Constraints { get; }
+        public string GenerateTypeName(int tabsCount)
+        {
+            var code = new StringBuilder();
+            var prefix = AddTabs(tabsCount);
+            return code
+                .Append(prefix)
+                .Append(Keyword) 
+                .Append(" partial ")
+                .Append(Name) 
+                .Append(" ")
+                .Append(Constraints) 
+                .AppendLine(prefix)
+                .Append(@"{")
+                .ToString();
+        }
     }
 
-    private static ParentClass? GetParentClass(TypeDeclarationSyntax typeSyntax)
+    private static string AddTabs(int count)
     {
-        // Try and get the parent syntax. If it isn't a type like class/struct, this will be null
-        TypeDeclarationSyntax? parentSyntax = typeSyntax.Parent as TypeDeclarationSyntax;
-        ParentClass? parentClassInfo = null;
+        return string.Join("", Enumerable.Range(0, count).Select(x => "\t"));
+    }
 
-        // Keep looping while we're in a supported nested type
+    private static (TypeInfo TypeInfo, Stack<TypeInfo> Parents) GetTypeInfo(TypeDeclarationSyntax typeSyntax)
+    {
+        var typeInfo = new TypeInfo(typeSyntax);
+        var parents  = new Stack<TypeInfo>();
+
+        TypeDeclarationSyntax? parentSyntax = typeSyntax.Parent as TypeDeclarationSyntax;
         while (parentSyntax != null && IsAllowedKind(parentSyntax.Kind()))
         {
-            // Record the parent type keyword (class/struct etc), name, and constraints
-            parentClassInfo = new ParentClass
-            (
-                parentSyntax.Keyword.ValueText,
-                parentSyntax.Identifier.ToString() + parentSyntax.TypeParameterList,
-                parentSyntax.ConstraintClauses.ToString(),
-                parentClassInfo
-            ); // set the child link (null initially)
-
-            // Move to the next outer type
+            parents.Push(new TypeInfo(typeSyntax));
             parentSyntax = (parentSyntax.Parent as TypeDeclarationSyntax);
         }
 
-        // return a link to the outermost parent type
-        return parentClassInfo;
-
+        return (typeInfo, parents);
     }
 
     // We can only be nested in class/struct/record

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Immutable;
-using System.Diagnostics;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -42,13 +41,7 @@ public class ValidGenerator : IIncrementalGenerator
         ImmutableArray<TypeDeclarationSyntax> typeList
     )
     {
-        var classCopies = typeList.Select(x => 
-        {
-            var builder = new StringBuilder();
-            var model = compilation.GetSemanticModel(x.SyntaxTree);
-            var nameSpace = GetNamespace(x);
-            return nameSpace;
-        });
+        var hierarchyList = typeList.Select(x => GetHierarchy(compilation, x));
 
         var typesList = typeList.Select(x =>
         {
@@ -69,23 +62,35 @@ public class ValidGenerator : IIncrementalGenerator
         """;
 
         context.AddSource("ClassNames.g.cs", code);
+        foreach(var hierarchy in hierarchyList)
+        {
+            context.AddSource($"{hierarchy.ClassName}.g.cs", hierarchy.Code);
+        }
     }
 
-    private static string GetHierarchy(TypeDeclarationSyntax type)
+    private static (string Code, string ClassName) GetHierarchy(Compilation compilation, TypeDeclarationSyntax type)
     {
+        var namedSymbol = compilation
+            .GetSemanticModel(type.SyntaxTree)
+            .GetDeclaredSymbol(type) as INamedTypeSymbol;
+
+        var className = namedSymbol!.ToDisplayString();  
+
         var nameSpace = GetNamespace(type);
         var parentClass = GetParentClass(type);
-        var sb = new StringBuilder();
+        var code = new StringBuilder();
 
+        var fullClassName = new StringBuilder();
         // If we don't have a namespace, generate the code in the "default"
         // namespace, either global:: or a different <RootNamespace>
         var hasNamespace = !string.IsNullOrEmpty(nameSpace);
         if (hasNamespace)
         {
+            fullClassName.Append($"{nameSpace}.");
             // We could use a file-scoped namespace here which would be a little impler, 
             // but that requires C# 10, which might not be available. 
             // Depends what you want to support!
-            sb
+            code
                 .Append("namespace ")
                 .Append(nameSpace)
                 .AppendLine(@"
@@ -96,7 +101,8 @@ public class ValidGenerator : IIncrementalGenerator
         // Loop through the full parent type hiearchy, starting with the outermost
         while (parentClass is not null)
         {
-            sb
+            fullClassName.Append($"{parentClass.Name}.");
+            code
                 .Append("    partial ")
                 .Append(parentClass.Keyword) // e.g. class/struct/record
                 .Append(' ')
@@ -110,24 +116,28 @@ public class ValidGenerator : IIncrementalGenerator
         }
 
         // Write the actual target generation code here. Not shown for brevity
-        sb.AppendLine(@"public partial readonly struct TestId
+        code.AppendLine($$"""
+        public partial readonly struct {{className}}
         {
-        }");
+        }
+        """);
 
         // We need to "close" each of the parent types, so write
         // the required number of '}'
         for (int i = 0; i < parentsCount; i++)
         {
-            sb.AppendLine(@"    }");
+            code.AppendLine(@"    }");
         }
 
         // Close the namespace, if we had one
         if (hasNamespace)
         {
-            sb.Append('}').AppendLine();
+            code.Append('}').AppendLine();
         }
 
-        return sb.ToString();
+
+        fullClassName.Append(className);
+        return (code.ToString(), fullClassName.ToString());
     }
     
     private static string GetNamespace(TypeDeclarationSyntax syntax)

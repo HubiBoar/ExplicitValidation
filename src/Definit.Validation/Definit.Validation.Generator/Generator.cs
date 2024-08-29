@@ -82,7 +82,7 @@ public class ValidGenerator : IIncrementalGenerator
         if (hasNamespace)
         {
             fullClassName.Append($"{nameSpace}.");
-            code.AppendLine($"namespace {nameSpace}")
+            code.Append($"namespace {nameSpace}")
                 .AddLine(0, "{");
         }
    

@@ -1,5 +1,4 @@
-﻿
-namespace Test2
+﻿namespace Test2
 {
 	partial class TestHolder 
 	{
@@ -8,6 +7,6 @@ namespace Test2
 			public sealed record Valid
 			{
 			}
-			}
-			}
-			}
+		}
+	}
+}

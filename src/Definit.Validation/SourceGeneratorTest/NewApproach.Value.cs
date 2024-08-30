@@ -2,7 +2,7 @@ using Definit.Results;
 
 namespace NewApproach;
 
-public sealed partial record Email() : IsValid<string>(Rule.NotNull.Min(5));
+public partial record Email() : IsValid<string>(Rule.NotNull.Min(5));
 
 public static class ExampleValue
 {

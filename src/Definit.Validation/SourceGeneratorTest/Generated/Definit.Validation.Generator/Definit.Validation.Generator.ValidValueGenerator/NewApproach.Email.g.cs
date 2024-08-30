@@ -4,7 +4,7 @@ using Definit.Results;
 
 namespace NewApproach
 {
-	partial record Email 
+	sealed partial record Email 
 	{
 		public Result<Valid> IsValid => _isValid ??= Valid.IsValid(this);
 		private Result<Valid>? _isValid = null;

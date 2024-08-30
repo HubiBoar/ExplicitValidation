@@ -225,7 +225,7 @@ public class ValidValueGenerator : IIncrementalGenerator
         public string GenerateTypeName(int tabsCount)
         {
             var code = new StringBuilder();
-            return code.AddLine(tabsCount, $"partial {Keyword} {Name} {Constraints}")
+            return code.AddLine(tabsCount, $"sealed partial {Keyword} {Name} {Constraints}")
                 .AddLine(tabsCount, "{")
                 .ToString();
         }

@@ -115,6 +115,7 @@ public class ValidValueGenerator : IIncrementalGenerator
 
             code.AddLine(tabsCount, $$"""
                 public Result<{{validName}}> {{isValid}} => {{backingIsValid}} ??= {{validName}}.IsValid(this);
+
                 private Result<{{validName}}>? {{backingIsValid}} = null;
 
                 public static implicit operator {{className}}({{valueType}} value) => new {{className}}
@@ -135,6 +136,7 @@ public class ValidValueGenerator : IIncrementalGenerator
 
             code.AddLine(tabsCount, $$"""
                 public {{valueType}} Value => Holder.Value;
+
                 private {{className}} Holder { get; }
 
                 private Valid({{className}} holder)
@@ -150,6 +152,7 @@ public class ValidValueGenerator : IIncrementalGenerator
                     {
                         return error;
                     }
+
                     return new Valid(value);
                 """);
         }

@@ -1,58 +1,34 @@
 ﻿using SampleSourceGenerator;
 using NewApproach;
+using Definit.Results;
 
 Console.WriteLine(ClassNames.TypesList);
 
-public partial record TestClass : IsValid
+namespace Examples
 {
-    public string? StringInTestClass { get; set; } 
-}
+    public partial record Email() : IsValid<string>(Rule.NotNull.Min(5));
 
-public partial record TestRecord
-(
-    TestClass TestClassInTestRecord,
-    string StringInTestRecord
-);
-
-partial record TestRecord
-{
-}
-
-namespace Test
-{
-    public partial class TestClass
+    public static partial class Parent1
     {
-        public string? StringInTestClass { get; set; } 
+        public partial record Value1() : IsValid<string>(Rule.NotNull.Min(5));
     }
 
-    public partial record TestRecord
-    (
-        TestClass TestClassInTestRecord,
-        string StringInTestRecord
-    );
-
-    partial record TestRecord
+    public static class ExampleValue
     {
-    }
-}
-
-namespace Test2
-{
-    public partial class TestHolder
-    {
-        public partial class TestClass
+        private static async Task<Result> Endpoint(Email body)
         {
-            public string? StringInTestClass { get; set; } 
+            if(body.IsValid.Is(out Error error).Else(out var valid))
+            {
+                return error;
+            }
+
+            return await Run(valid);
         }
 
-        public partial record TestRecord
-        (
-            TestClass TestClassInTestRecord,
-            string StringInTestRecord
-        );
-
-        partial record TestRecord
+        private static async Task<Result> Run(Email.Valid valid)
         {
+            await Task.CompletedTask;
+            return Result.Success;
         }
     }
 }

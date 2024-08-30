@@ -1,4 +1,5 @@
 using Definit.Results;
+using Examples;
 
 namespace NewApproach;
 

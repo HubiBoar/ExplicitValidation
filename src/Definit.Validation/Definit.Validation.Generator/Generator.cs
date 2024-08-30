@@ -51,25 +51,14 @@ public class ValidGenerator : IIncrementalGenerator
         {
             var symbol = compilation.GetSemanticModel(x.SyntaxTree).GetDeclaredSymbol(x) as ITypeSymbol;
             return symbol!.AllInterfaces.Select(x => x.ToDisplayString());
-            //if(symbol!.AllInterfaces.Any(x => x.ToDisplayString() == nameof(IValid)))
-            //{
-            //    return compilation
-            //        .GetSemanticModel(x.SyntaxTree)
-            //        .GetDeclaredSymbol(x) as INamedTypeSymbol;
-            //}
-
         });
-        //.Where(x => x is not null)
-        //.Select(x => x!.ToDisplayString());
 
         var code = $$"""
         namespace SampleSourceGenerator;
 
         public static class ClassNames
         {
-
-
-            public static string TypesList = "comp4 :  {{string.Join(", ", typesList)}}";
+            public static string TypesList = "{{string.Join(", ", typesList)}}";
         }
         """;
 

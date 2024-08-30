@@ -1,15 +1,13 @@
-﻿using Definit.Validation.Generator;
-using SampleSourceGenerator;
+﻿using SampleSourceGenerator;
+using NewApproach;
 
 Console.WriteLine(ClassNames.TypesList);
 
-[Valid]
-public partial class TestClass : IValid
+public partial record TestClass : IsValid
 {
     public string? StringInTestClass { get; set; } 
 }
 
-[Valid]
 public partial record TestRecord
 (
     TestClass TestClassInTestRecord,
@@ -22,13 +20,11 @@ partial record TestRecord
 
 namespace Test
 {
-    [Valid]
     public partial class TestClass
     {
         public string? StringInTestClass { get; set; } 
     }
 
-    [Valid]
     public partial record TestRecord
     (
         TestClass TestClassInTestRecord,
@@ -44,13 +40,11 @@ namespace Test2
 {
     public partial class TestHolder
     {
-        [Valid]
         public partial class TestClass
         {
             public string? StringInTestClass { get; set; } 
         }
 
-        [Valid]
         public partial record TestRecord
         (
             TestClass TestClassInTestRecord,

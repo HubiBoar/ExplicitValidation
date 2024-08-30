@@ -6,30 +6,18 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Definit.Validation.Generator;
 
-public interface IValid
-{
-}
-
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
-public sealed class ValidAttribute : Attribute
-{
-
-}
-
 [Generator]
-public class ValidGenerator : IIncrementalGenerator
+public class ValidValueGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        var provider = context.SyntaxProvider.ForAttributeWithMetadataName
+        var provider = context.SyntaxProvider.CreateSyntaxProvider
         (
-            typeof(ValidAttribute).FullName,
-
             predicate: static (c, _) =>
-                c is TypeDeclarationSyntax type
+                c is RecordDeclarationSyntax type
                 && type.Modifiers.Any(m => m.IsKind(SyntaxKind.PartialKeyword)),
 
-            transform: static (n, _) => (n.TargetNode as TypeDeclarationSyntax)!
+            transform: static (n, _) => (n.Node as RecordDeclarationSyntax)!
         )
         .Where(x => x is not null);
 
@@ -42,35 +30,54 @@ public class ValidGenerator : IIncrementalGenerator
     (
         SourceProductionContext context,
         Compilation compilation,
-        ImmutableArray<TypeDeclarationSyntax> typeList
+        ImmutableArray<RecordDeclarationSyntax> typeList
     )
     {
-        var hierarchyList = typeList.Select(GetHierarchy);
-
-        var typesList = typeList.SelectMany(x =>
+        var typesList = typeList.Select(x =>
         {
             var symbol = compilation.GetSemanticModel(x.SyntaxTree).GetDeclaredSymbol(x) as ITypeSymbol;
-            return symbol!.AllInterfaces.Select(x => x.ToDisplayString());
+            var baseName = symbol!.BaseType?.ToDisplayString();
+            return (Symbol: symbol, Record: x, BaseName: baseName);
+        })
+        .DistinctBy(x => x.Symbol.ToDisplayString())
+        .Where(x => x.BaseName is not null && x.BaseName.StartsWith("NewApproach.IsValid<"))
+        .Select(x => 
+        {
+            var type = x.Symbol.BaseType!.TypeArguments.Single().ToDisplayString(); 
+            return (Symbol: x.Symbol, Record: x.Record, BaseName: x.BaseName, Type: type);
         });
+
+        var names = typesList.Select(x => $"{x.Symbol.ToDisplayString()} => {x.BaseName} => {x.Type}");
 
         var code = $$"""
         namespace SampleSourceGenerator;
 
         public static class ClassNames
         {
-            public static string TypesList = "{{string.Join(", ", typesList)}}";
+            public static string TypesList = "{{string.Join(" :: ", names)}}";
         }
         """;
 
         context.AddSource("ClassNames.g.cs", code);
+
+        var hierarchyList = typesList.Select(x => GetHierarchy(x.Record, x.Symbol, x.Type));
+
         foreach(var hierarchy in hierarchyList)
         {
             context.AddSource($"{hierarchy.ClassName}.g.cs", hierarchy.Code);
         }
     }
 
-    private static (string Code, string ClassName) GetHierarchy(TypeDeclarationSyntax type)
+    private static (string Code, string ClassName) GetHierarchy
+    (
+        TypeDeclarationSyntax type,
+        ITypeSymbol symbol,
+        string valueType
+    )
     {
+        const string validName      = "Valid";
+        const string isValid        = "IsValid";
+        const string backingIsValid = "_isValid";
 
         var nameSpace           = GetNamespace(type);
         var (typeInfo, parents) = GetTypeInfo(type);
@@ -83,7 +90,11 @@ public class ValidGenerator : IIncrementalGenerator
         if (hasNamespace)
         {
             fullClassName.Append($"{nameSpace}.");
-            code.Append($"namespace {nameSpace}")
+            code.AppendLine("#nullable enable")
+                .AppendLine()
+                .AppendLine("using Definit.Results;")
+                .AppendLine()
+                .Append($"namespace {nameSpace}")
                 .AddLine(0, "{");
         }
    
@@ -101,8 +112,46 @@ public class ValidGenerator : IIncrementalGenerator
         //Valid Creation
         {
             tabsCount += 1;
-            code.AddLine(tabsCount, $"public sealed {typeInfo.Keyword} Valid")
-                .AddLine(tabsCount, "{");
+
+            code.AddLine(tabsCount, $$"""
+                public Result<{{validName}}> {{isValid}} => {{backingIsValid}} ??= {{validName}}.IsValid(this);
+                private Result<{{validName}}>? {{backingIsValid}} = null;
+
+                public static implicit operator {{className}}({{valueType}} value) => new {{className}}
+                {
+                    Value = value,
+                };
+
+                public static implicit operator {{valueType}}({{className}} value) => value.Value;
+
+                """);
+
+            code.AddLine(tabsCount, $$"""
+                public sealed record {{validName}}
+                {
+                """);
+
+            tabsCount += 1;
+
+            code.AddLine(tabsCount, $$"""
+                public {{valueType}} Value => Holder.Value;
+                private {{className}} Holder { get; }
+
+                private Valid({{className}} holder)
+                {
+                    Holder = holder;
+                }
+
+                public static implicit operator {{className}}(Valid value) => value.Holder;
+
+                public static Result<Valid> IsValid({{className}} value)
+                {
+                    if(value.Validate().Is(out Error error))
+                    {
+                        return error;
+                    }
+                    return new Valid(value);
+                """);
         }
 
         for (int i = tabsCount; i >= 0; i--)
@@ -213,9 +262,22 @@ public static class StringHelper
         return string.Join("", Enumerable.Range(0, count).Select(x => "\t"));
     }
 
-    public static StringBuilder AddLine(this StringBuilder builder, int tabs, string value)
+    public static StringBuilder AddLine(this StringBuilder builder, int tabsCount, string value)
     {
-        return builder.AppendLine().Append(AddTabs(tabs)).Append(value);
+        var tabs = AddTabs(tabsCount);
+        var lines = string.Join("\n", value.Split('\n').Select(x => $"{tabs}{x}"));
+        return builder.AppendLine().Append(lines);
+    }
+
+    public static IEnumerable<TSource> DistinctBy<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector)
+    {
+        var keys = new HashSet<TKey>();
+        foreach (var element in source)
+        {
+            if (keys.Contains(keySelector(element))) continue;
+            keys.Add(keySelector(element));
+            yield return element;
+        }
     }
 }
 

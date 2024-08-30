@@ -24,8 +24,74 @@ public static class ExampleValue
 }
 
 
-//Logic
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//Logic
 public sealed record Validator(Result Result)
 {
     public Validator NotNull => this;
@@ -48,37 +114,37 @@ public abstract record IsValid<TValue>(Validator Validator)
 
 
 //Auto generated
-public sealed partial record Email
-{
-    public Result<Valid> IsValid => _idValid ??= Valid.IsValid(this);
-    private Result<Valid>? _idValid = null;
-
-    public static implicit operator Email(string value) => new Email
-    {
-        Value = value,
-    };
-
-    public static implicit operator string(Email value) => value.Value;
-
-    public sealed record Valid
-    {
-        public string Value => Holder.Value;
-        private Email Holder { get; }
-
-        private Valid(Email holder)
-        {
-            Holder = holder;
-        }
-
-        public static implicit operator Email(Valid value) => value.Holder;
-
-        public static Result<Valid> IsValid(Email value)
-        {
-            if(value.Validate().Is(out Error error))
-            {
-                return error;
-            }
-            return new Valid(value);
-        }
-    }
-}
+//public sealed partial record Email
+//{
+//    public Result<Valid> IsValid => _idValid ??= Valid.IsValid(this);
+//    private Result<Valid>? _idValid = null;
+//
+//    public static implicit operator Email(string value) => new Email
+//    {
+//        Value = value,
+//    };
+//
+//    public static implicit operator string(Email value) => value.Value;
+//
+//    public sealed record Valid
+//    {
+//        public string Value => Holder.Value;
+//        private Email Holder { get; }
+//
+//        private Valid(Email holder)
+//        {
+//            Holder = holder;
+//        }
+//
+//        public static implicit operator Email(Valid value) => value.Holder;
+//
+//        public static Result<Valid> IsValid(Email value)
+//        {
+//            if(value.Validate().Is(out Error error))
+//            {
+//                return error;
+//            }
+//            return new Valid(value);
+//        }
+//    }
+//}

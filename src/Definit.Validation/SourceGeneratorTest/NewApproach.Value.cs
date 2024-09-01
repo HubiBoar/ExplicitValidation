@@ -2,6 +2,43 @@ using Definit.Results;
 
 namespace NewApproach;
 
+public interface IIsValid
+{
+    Result Validate();
+}
+
+public sealed class Valid<T>
+    where T : IIsValid
+{
+    public T Value { get; }
+
+    private Valid(T value)
+    {
+        Value = value;
+    }
+
+    public static Result<Valid<T>> IsValid(T value)
+    {
+        if(value.Validate().Is(out Error error))
+        {
+            return error;
+        }
+
+        return new Valid<T>(value);
+    }
+
+    public static implicit operator T(Valid<T> value) => value.Value;
+}
+
+public static class ValidExtensions
+{
+    public static Result<Valid<T>> IsValid<T>(this T value)
+        where T : IIsValid
+    { 
+        return Valid<T>.IsValid(value);
+    }
+}
+
 public sealed record Validator(Result Result)
 {
     public Validator NotNull => this;
@@ -10,14 +47,34 @@ public sealed record Validator(Result Result)
 }    
 
 public abstract record IsValid<TValue>(Validator Validator)
+    : IIsValid
 {
     public required TValue Value { get; init; }
 
-    protected Result Validate()
+    public Result Validate()
     {
         return Validator.Result;
     }
 
-
     protected static Validator Rule => new Validator(Result.Success);
 }
+
+
+
+//Example
+
+public partial record ValueTest() : IsValid<string>(Rule.NotNull);
+
+
+
+//Auto generated
+sealed partial record ValueTest
+{
+    public static implicit operator ValueTest(string value) => new ValueTest
+    {
+        Value = value,
+    };
+    
+    public static implicit operator string(ValueTest value) => value.Value;
+}
+

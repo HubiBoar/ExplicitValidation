@@ -3,20 +3,20 @@ using Examples;
 
 namespace NewApproach;
 
-public sealed partial record UserData
+public partial record UserData
 (
     string Name,
     Email Email,
     Address Address
 )
-: IsValid;
+: IIsValid;
 
-public sealed partial record Address
+public partial record Address
 (
     string PostalCode,
     Email Email
 )
-: IsValid;
+: IIsValid;
 
 public static class ExampleObject
 {
@@ -30,7 +30,7 @@ public static class ExampleObject
         return await Run(valid);
     }
 
-    private static async Task<Result> Run(UserData.Valid valid)
+    private static async Task<Result> Run(Valid<UserData> valid)
     {
         await Task.CompletedTask;
         return Result.Success;
@@ -92,11 +92,6 @@ public static class ExampleObject
 
 
 
-
-//Logic
-public abstract record IsValid
-{
-}
 
 //Auto generated
 public sealed partial record UserData

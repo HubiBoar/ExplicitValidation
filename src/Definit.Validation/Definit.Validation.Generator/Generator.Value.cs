@@ -53,34 +53,18 @@ public class ValidValueGenerator : IIncrementalGenerator
                 .TypeArguments
                 .Single();
 
-            return (Symbol: x.Symbol, Record: x.Record, Type: type);
+            return GetType(x.Record, type.ToDisplayString());
         });
 
-        var names = typesList.Select(x => $"{x.Symbol.ToDisplayString()} => {x.Type.ToDisplayString()}");
-
-        var code = $$"""
-        namespace SampleSourceGenerator;
-
-        public static class ClassNames
+        foreach(var type in typesList)
         {
-            public static string TypesList = "{{string.Join(" :: ", names)}}";
-        }
-        """;
-
-        context.AddSource("ClassNames.g.cs", code);
-
-        var hierarchyList = typesList.Select(x => GetHierarchy(x.Record, x.Symbol, x.Type.ToDisplayString()));
-
-        foreach(var hierarchy in hierarchyList)
-        {
-            context.AddSource($"{hierarchy.ClassName}.g.cs", hierarchy.Code);
+            context.AddSource($"{type.ClassName}.g.cs", type.Code);
         }
     }
 
-    private static (string Code, string ClassName) GetHierarchy
+    private static (string Code, string ClassName) GetType
     (
         TypeDeclarationSyntax type,
-        ITypeSymbol symbol,
         string valueType
     )
     {

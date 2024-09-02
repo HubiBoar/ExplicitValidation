@@ -7,12 +7,12 @@ public interface IIsValid
     Result Validate();
 }
 
-public sealed class Valid<T>
+public readonly struct Valid<T>
     where T : IIsValid
 {
     public T Value { get; }
 
-    private Valid(T value)
+    internal Valid(T value)
     {
         Value = value;
     }

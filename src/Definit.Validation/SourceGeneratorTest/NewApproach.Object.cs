@@ -22,7 +22,7 @@ public static class ExampleObject
 {
     private static async Task<Result> Endpoint(UserData body)
     {
-        if(body.IsValid.Is(out Error error).Else(out var valid))
+        if(body.IsValid().Is(out Error error).Else(out var valid))
         {
             return error;
         }
@@ -94,79 +94,80 @@ public static class ExampleObject
 
 
 //Auto generated
-public sealed partial record UserData
+partial record UserData
 {
-    public Result<Valid> IsValid => _idValid ??= Valid.IsValid(this);
-    private Result<Valid>? _idValid = null;
+    private (string PropertyName, Result Result)[] ValidateProperties() => 
+    [
+        ("Email", Email.Validate()),
+        ("Address", Address.Validate()),
+    ];
 
-    public sealed record Valid
-    (
-        string Name,
-        Email.Valid Email,
-        Address.Valid Address
-    )
+    public Result Validate()
     {
-        public static implicit operator UserData(Valid value) => new
-        (
-            value.Name,
-            value.Email,
-            value.Address
-        );
-
-        public static Result<Valid> IsValid(UserData value)
+        var errors =
+            ValidateProperties()
+            .Where(x => x.Result.Is(out Error _))
+            .Select(x => 
+            {
+                x.Result.Is(out Error error);
+                return (PropertyName: x.PropertyName, Error: error);
+            })
+            .ToArray();
+    
+        if(errors.Length > 0)
         {
-            List<Error> errors = new();
-            if(value.Email.IsValid.Is(out Error error).Else(out var validEmail))
-            {
-                errors.Add(error);
-            }
-
-            if(value.Address.IsValid.Is(out error).Else(out var validAddress))
-            {
-                errors.Add(error);
-            }
-
-            if(errors.Count > 0)
-            {
-                return new Error(string.Join(", ", errors.Select(x => x.Message)));
-            }
-            
-            return new Valid(value.Name, validEmail, validAddress);
+            return new Error(string.Join(", ", errors.Select(x => $"{x.PropertyName} :: {x.Error.Message}")));
         }
+
+        return Result.Success;
+    }
+}
+
+public static class NewApproach_UserData_Valid
+{
+    public static Valid<Email> Email(this Valid<UserData> valid)
+    {
+        return new Valid<Email>(valid.Value.Email);
+    }
+
+    public static Valid<Address> Address(this Valid<UserData> valid)
+    {
+        return new Valid<Address>(valid.Value.Address);
     }
 }
 
 public sealed partial record Address
 {
-    public Result<Valid> IsValid => _idValid ??= Valid.IsValid(this);
-    private Result<Valid>? _idValid = null;
+    private (string PropertyName, Result Result)[] ValidateProperties() => 
+    [
+        ("Email", Email.Validate()),
+    ];
 
-    public sealed record Valid
-    (
-        string PostalCode,
-        Email.Valid Email
-    )
+    public Result Validate()
     {
-        public static implicit operator Address(Valid value) => new
-        (
-            value.PostalCode,
-            value.Email
-        );
-
-        public static Result<Valid> IsValid(Address value)
+        var errors =
+            ValidateProperties()
+            .Where(x => x.Result.Is(out Error _))
+            .Select(x => 
+            {
+                x.Result.Is(out Error error);
+                return (PropertyName: x.PropertyName, Error: error);
+            })
+            .ToArray();
+    
+        if(errors.Length > 0)
         {
-            List<Error> errors = new();
-            if(value.Email.IsValid.Is(out Error error).Else(out var validEmail))
-            {
-                errors.Add(error);
-            }
-
-            if(errors.Count > 0)
-            {
-                return new Error(string.Join(", ", errors.Select(x => x.Message)));
-            }
-            
-            return new Valid(value.PostalCode, validEmail);
+            return new Error(string.Join(", ", errors.Select(x => $"{x.PropertyName} :: {x.Error.Message}")));
         }
+
+        return Result.Success;
+    }
+}
+
+public static class NewApproach_Address_Valid
+{
+    public static Valid<Email> Email(this Valid<Address> valid)
+    {
+        return new Valid<Email>(valid.Value.Email);
     }
 }

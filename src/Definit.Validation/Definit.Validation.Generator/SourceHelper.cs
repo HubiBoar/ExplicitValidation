@@ -6,6 +6,7 @@ namespace Definit.Validation.Generator;
 
 public sealed class TypeInfo
 {
+    public string? NameSpace  { get; }
     public string Keyword     { get; }
     public string Name        { get; }
     public string Constraints { get; }
@@ -21,6 +22,8 @@ public sealed class TypeInfo
             parentsNames.Length > 0 ? $"{string.Join(".", parentsNames)}.{Name}" : Name
             :
             parentsNames.Length > 0 ? $"{nameSpace}.{string.Join(".", parentsNames)}.{Name}" : $"{nameSpace}.{Name}";
+
+        NameSpace  = nameSpace;
     }
 
     public string GenerateTypeName()

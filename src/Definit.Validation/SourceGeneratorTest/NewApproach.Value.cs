@@ -78,24 +78,3 @@ public interface IIsValid<TValue> : IIsValid
         return new Error(rule.ErrorMessage);
     }
 }
-
-
-
-//Example
-
-
-
-//Auto generated
-//partial struct Email
-//{
-//    public string Value { get; }
-//
-//    public Email(string value)
-//    {
-//        Value = value;
-//    }
-//
-//    public static implicit operator Email(string value) => new (value);
-//    
-//    public static implicit operator string(Email value) => value.Value;
-//}

@@ -1,8 +1,7 @@
-﻿using SampleSourceGenerator;
-using NewApproach;
+﻿using NewApproach;
 using Definit.Results;
 
-Console.WriteLine(ClassNames.TypesList);
+Console.WriteLine("Hello");
 
 namespace Examples
 {

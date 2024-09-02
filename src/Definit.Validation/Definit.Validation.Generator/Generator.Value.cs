@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace Definit.Validation.Generator;
 
 [Generator]
-public class ValidValueGenerator : IIncrementalGenerator
+public class ValueGenerator : IIncrementalGenerator
 {
     private const string interfaceName = "NewApproach.IIsValid<";
 

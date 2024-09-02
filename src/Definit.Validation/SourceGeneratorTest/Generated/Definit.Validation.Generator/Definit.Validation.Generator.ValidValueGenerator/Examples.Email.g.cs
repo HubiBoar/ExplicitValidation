@@ -1,43 +1,20 @@
-﻿#nullable enable
+﻿using Definit.Results;
 
-using Definit.Results;
-
-namespace Examples;
-
-sealed partial record Email
+namespace Examples
 {
-	public Result<Valid> IsValid => _isValid ??= Valid.IsValid(this);
-	
-	private Result<Valid>? _isValid = null;
-	
-	public static implicit operator Email(string value) => new Email
+	partial struct Email 
 	{
-	    Value = value,
-	};
-	
-	public static implicit operator string(Email value) => value.Value;
-	
-	public sealed record Valid
-	{
-		public string Value => Holder.Value;
+		public string Value { get; }
 		
-		private Email Holder { get; }
-		
-		private Valid(Email holder)
+		public Email(string value)
 		{
-		    Holder = holder;
+		    Value = value;
 		}
 		
-		public static implicit operator Email(Valid value) => value.Holder;
+		public static implicit operator Email(string value) => new (value);
 		
-		public static Result<Valid> IsValid(Email value)
-		{
-		    if(value.Validate().Is(out Error error))
-		    {
-		        return error;
-		    }
+		public static implicit operator string(Email value) => value.Value;
 		
-		    return new Valid(value);
-		}
+		public Result Validate() => NewApproach.IIsValid<string>.DefaultValidate(this);
 	}
 }

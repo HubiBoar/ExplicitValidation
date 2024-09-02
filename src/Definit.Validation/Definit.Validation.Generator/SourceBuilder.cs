@@ -10,6 +10,16 @@ public sealed class SourceBuilder
     public SourceBuilder(string[] usings, string? nameSpace = null)
     {
         _code = new();
+
+        foreach(var u in usings)
+        {
+            _code.AppendLine($"using {u};");
+        }
+
+        if(string.IsNullOrEmpty(nameSpace) == false)
+        {
+            _code.AppendLine().Append($"namespace {nameSpace}");
+        }
     }
 
     public override string ToString()
@@ -28,8 +38,7 @@ public sealed class SourceBuilder
 
     public SourceBuilder AddBlock(string value)
     {
-        _code.AppendLine()
-            .AppendLine("{");
+        _code.AppendLine().Append($$"""{{AddTabs(_indentation)}}{""");
 
         _indentation += 1;
 

@@ -1,4 +1,5 @@
 using Definit.Results;
+using Examples;
 
 namespace NewApproach;
 
@@ -13,7 +14,7 @@ public partial record UserData
 public partial record Address
 (
     string PostalCode,
-    Examples.Email Email
+    Email Email
 )
 : IIsValid;
 

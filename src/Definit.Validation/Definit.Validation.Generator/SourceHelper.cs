@@ -1,4 +1,3 @@
-using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -12,16 +11,16 @@ public sealed class TypeInfo
     public string Constraints { get; }
     public string FullName    { get; }
 
-    public TypeInfo(string? nameSpace, IEnumerable<string> parentsNames, TypeDeclarationSyntax type)
+    public TypeInfo(string? nameSpace, string[] parentsNames, TypeDeclarationSyntax type)
     {
         Keyword     = type.Keyword.ValueText;
         Name        = type.Identifier.ToString() + type.TypeParameterList;
         Constraints = type.ConstraintClauses.ToString();
-        FullName    = nameSpace is null
+        FullName    = string.IsNullOrEmpty(nameSpace)
             ?
-            $"{string.Join(".", parentsNames)}.{Name}"
+            parentsNames.Length > 0 ? $"{string.Join(".", parentsNames)}.{Name}" : Name
             :
-            $"{nameSpace}.{string.Join(".", parentsNames)}.{Name}";
+            parentsNames.Length > 0 ? $"{nameSpace}.{string.Join(".", parentsNames)}.{Name}" : $"{nameSpace}.{Name}";
     }
 
     public string GenerateTypeName()
@@ -35,14 +34,21 @@ public static class SourceHelper
     public static (SourceBuilder Code, TypeInfo TypeInfo) BuildTypeHierarchy
     (
         this TypeDeclarationSyntax syntax,
-        ImmutableArray<string> usings
+        params string[] usings
     )
     {
-       var (nameSpace, typeInfo, parents) = GetTypeAndParentsInfo(syntax); 
+        var (nameSpace, typeInfo, parents) = GetTypeAndParentsInfo(syntax); 
        
-       var code = new SourceBuilder(usings.ToArray(), nameSpace); 
+        var code = new SourceBuilder(usings.ToArray(), nameSpace); 
 
-        
+        foreach(var parent in parents)
+        {
+            code.AddBlock(parent.GenerateTypeName());
+        }
+
+        code.AddBlock(typeInfo.GenerateTypeName());
+
+        return (code, typeInfo);
     }
 
     private static (string? NameSpace, TypeInfo TypeInfo, Stack<TypeInfo> Parents) GetTypeAndParentsInfo
@@ -57,13 +63,13 @@ public static class SourceHelper
         TypeDeclarationSyntax? parentSyntax = syntax.Parent as TypeDeclarationSyntax;
         while (parentSyntax != null && IsAllowedKind(parentSyntax.Kind()))
         {
-            var parent = new TypeInfo(nameSpace, parentNames, parentSyntax);
+            var parent = new TypeInfo(nameSpace, parentNames.ToArray(), parentSyntax);
             parents.Push(parent);
             parentNames.Add(parent.Name);
             parentSyntax = (parentSyntax.Parent as TypeDeclarationSyntax);
         }
 
-        var typeInfo = new TypeInfo(nameSpace, parentNames, syntax);
+        var typeInfo = new TypeInfo(nameSpace, parentNames.ToArray(), syntax);
         return (nameSpace, typeInfo, parents);
     }
 

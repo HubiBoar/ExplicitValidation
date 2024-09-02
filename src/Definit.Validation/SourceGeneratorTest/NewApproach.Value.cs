@@ -62,11 +62,13 @@ public interface IIsValid<TValue> : IIsValid
 {
     public TValue Value { get; }
 
-    Result IIsValid.Validate()
-    {
-        var rule = new Rule<TValue>(Value);
+    protected void Rule(Rule<TValue> rule);
 
-        Rule(rule);
+    protected static Result DefaultValidate(IIsValid<TValue> valid)
+    {
+        var rule = new Rule<TValue>(valid.Value);
+
+        valid.Rule(rule);
 
         if(rule.IsSuccess)
         {
@@ -75,8 +77,6 @@ public interface IIsValid<TValue> : IIsValid
 
         return new Error(rule.ErrorMessage);
     }
-
-    protected void Rule(Rule<TValue> rule);
 }
 
 
@@ -86,16 +86,16 @@ public interface IIsValid<TValue> : IIsValid
 
 
 //Auto generated
-partial struct Email
-{
-    public string Value { get; }
-
-    public Email(string value)
-    {
-        Value = value;
-    }
-
-    public static implicit operator Email(string value) => new Email(value);
-    
-    public static implicit operator string(Email value) => value.Value;
-}
+//partial struct Email
+//{
+//    public string Value { get; }
+//
+//    public Email(string value)
+//    {
+//        Value = value;
+//    }
+//
+//    public static implicit operator Email(string value) => new (value);
+//    
+//    public static implicit operator string(Email value) => value.Value;
+//}

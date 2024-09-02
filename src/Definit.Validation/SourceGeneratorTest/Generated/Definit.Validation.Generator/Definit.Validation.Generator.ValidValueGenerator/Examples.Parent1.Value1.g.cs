@@ -1,46 +1,23 @@
-﻿#nullable enable
+﻿using Definit.Results;
 
-using Definit.Results;
-
-namespace Examples;
-
-partial class Parent1 
+namespace Examples
 {
-	sealed partial record Value1
+	partial class Parent1 
 	{
-		public Result<Valid> IsValid => _isValid ??= Valid.IsValid(this);
-		
-		private Result<Valid>? _isValid = null;
-		
-		public static implicit operator Value1(string value) => new Value1
+		partial struct Value1 
 		{
-		    Value = value,
-		};
-		
-		public static implicit operator string(Value1 value) => value.Value;
-		
-		public sealed record Valid
-		{
-			public string Value => Holder.Value;
+			public string Value { get; }
 			
-			private Value1 Holder { get; }
-			
-			private Valid(Value1 holder)
+			public Value1(string value)
 			{
-			    Holder = holder;
+			    Value = value;
 			}
 			
-			public static implicit operator Value1(Valid value) => value.Holder;
+			public static implicit operator Value1(string value) => new (value);
 			
-			public static Result<Valid> IsValid(Value1 value)
-			{
-			    if(value.Validate().Is(out Error error))
-			    {
-			        return error;
-			    }
+			public static implicit operator string(Value1 value) => value.Value;
 			
-			    return new Valid(value);
-			}
+			public Result Validate() => NewApproach.IIsValid<string>.DefaultValidate(this);
 		}
 	}
 }

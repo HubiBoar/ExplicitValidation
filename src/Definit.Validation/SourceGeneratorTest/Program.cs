@@ -6,18 +6,24 @@ Console.WriteLine(ClassNames.TypesList);
 
 namespace Examples
 {
-    public partial record Email() : IsValid<string>(Rule.NotNull.Min(5));
+    public readonly partial struct Email : IIsValid<string>
+    {
+        public void Rule(Rule<string> rule) => rule.NotNull();
+    }
 
     public static partial class Parent1
     {
-        public partial record Value1() : IsValid<string>(Rule.NotNull.Min(5));
+        public readonly partial struct Value1 : IIsValid<string>
+        {
+            public void Rule(Rule<string> rule) => rule.NotNull();
+        }
     }
 
     public static class ExampleValue
     {
         private static async Task<Result> Endpoint(Email body)
         {
-            if(body.IsValid.Is(out Error error).Else(out var valid))
+            if(body.IsValid().Is(out Error error).Else(out var valid))
             {
                 return error;
             }
@@ -25,7 +31,7 @@ namespace Examples
             return await Run(valid);
         }
 
-        private static async Task<Result> Run(Email.Valid valid)
+        private static async Task<Result> Run(Valid<Email> valid)
         {
             await Task.CompletedTask;
             return Result.Success;

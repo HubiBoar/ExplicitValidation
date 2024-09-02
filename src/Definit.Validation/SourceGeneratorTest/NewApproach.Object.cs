@@ -1,5 +1,4 @@
 using Definit.Results;
-using Examples;
 
 namespace NewApproach;
 
@@ -14,7 +13,7 @@ public partial record UserData
 public partial record Address
 (
     string PostalCode,
-    Email Email
+    Examples.Email Email
 )
 : IIsValid;
 
@@ -27,10 +26,10 @@ public static class ExampleObject
             return error;
         }
 
-        return await Run(valid);
+        return await Run(valid.Address());
     }
 
-    private static async Task<Result> Run(Valid<UserData> valid)
+    private static async Task<Result> Run(Valid<Address> valid)
     {
         await Task.CompletedTask;
         return Result.Success;
@@ -166,8 +165,8 @@ public sealed partial record Address
 
 public static class NewApproach_Address_Valid
 {
-    public static Valid<Email> Email(this Valid<Address> valid)
+    public static Valid<Examples.Email> Email(this Valid<Address> valid)
     {
-        return new Valid<Email>(valid.Value.Email);
+        return new Valid<Examples.Email>(valid.Value.Email);
     }
 }

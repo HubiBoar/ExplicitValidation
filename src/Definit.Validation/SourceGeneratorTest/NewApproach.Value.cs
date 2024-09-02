@@ -39,42 +39,63 @@ public static class ValidExtensions
     }
 }
 
-public sealed record Validator(Result Result)
+public readonly record struct Rule<TValue>(TValue Value)
 {
-    public Validator NotNull => this;
+    public bool IsSuccess { get; init; }
+    public string ErrorMessage { get; init; }
+}
 
-    public Validator Min(int size) => this;
-}    
-
-public abstract record IsValid<TValue>(Validator Validator)
-    : IIsValid
+public static class RuleExtensions
 {
-    public required TValue Value { get; init; }
-
-    public Result Validate()
+    public static Rule<TValue> NotNull<TValue>(this Rule<TValue> rule)
     {
-        return Validator.Result;
+        return rule;
     }
 
-    protected static Validator Rule => new Validator(Result.Success);
+    public static Rule<string> Min(this Rule<string> rule)
+    {
+        return rule;
+    }
+}
+
+public interface IIsValid<TValue> : IIsValid
+{
+    public TValue Value { get; }
+
+    Result IIsValid.Validate()
+    {
+        var rule = new Rule<TValue>(Value);
+
+        Rule(rule);
+
+        if(rule.IsSuccess)
+        {
+            return Result.Success;
+        }
+
+        return new Error(rule.ErrorMessage);
+    }
+
+    protected void Rule(Rule<TValue> rule);
 }
 
 
 
 //Example
 
-public partial record ValueTest() : IsValid<string>(Rule.NotNull);
-
 
 
 //Auto generated
-sealed partial record ValueTest
+partial struct Email
 {
-    public static implicit operator ValueTest(string value) => new ValueTest
-    {
-        Value = value,
-    };
-    
-    public static implicit operator string(ValueTest value) => value.Value;
-}
+    public string Value { get; }
 
+    public Email(string value)
+    {
+        Value = value;
+    }
+
+    public static implicit operator Email(string value) => new Email(value);
+    
+    public static implicit operator string(Email value) => value.Value;
+}

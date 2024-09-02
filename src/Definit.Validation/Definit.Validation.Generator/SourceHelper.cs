@@ -42,7 +42,7 @@ public static class SourceHelper
        
        var code = new SourceBuilder(usings.ToArray(), nameSpace); 
 
-
+        
     }
 
     private static (string? NameSpace, TypeInfo TypeInfo, Stack<TypeInfo> Parents) GetTypeAndParentsInfo

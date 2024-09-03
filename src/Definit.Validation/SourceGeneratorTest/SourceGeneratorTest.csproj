@@ -12,6 +12,7 @@
         <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
     </PropertyGroup>
 
+    <!--
     <Target Name="CleanSourceGeneratedFiles" BeforeTargets="BeforeBuild" DependsOnTargets="$(BeforeBuildDependsOn)">
         <RemoveDir Directories="Generated" />
     </Target>
@@ -20,6 +21,7 @@
         <Compile Remove="Generated\**" />
         <Content Include="Generated\**" />
     </ItemGroup> 
+    -->
 
     <ItemGroup>
         <ProjectReference Include="..\..\Definit.Result\Definit.Result\Definit.Result.csproj" />

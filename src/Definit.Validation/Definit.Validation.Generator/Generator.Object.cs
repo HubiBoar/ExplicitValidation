@@ -12,6 +12,11 @@ public class ObjectGenerator : IIncrementalGenerator
     private const string interfaceName = "NewApproach.IIsValid";
     private const string valueInterfaceName = "NewApproach.IIsValid<";
 
+    private static bool IsValid(ITypeSymbol typeSymbol)
+    {
+        return typeSymbol.AllInterfaces.Any(x => x.ToDisplayString() == interfaceName);
+    }
+
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var provider = context.SyntaxProvider.CreateSyntaxProvider
@@ -66,14 +71,22 @@ public class ObjectGenerator : IIncrementalGenerator
         var (code, typeInfo) = type.BuildTypeHierarchy("Definit.Results");
 
         var name = typeInfo.Name;
-        var properties = typeSymbol.GetMembers().Select(x => x.ToDisplayString());
+
+        var properties = typeSymbol
+            .GetMembers()
+            .OfType<IPropertySymbol>()
+            .Where(x => IsValid(x.Type))
+            .Select(x => (Name: x.Name, Type: x.Type.ToDisplayString()));
+
+        var validateProperties = string.Join("\n\t", properties.Select(x => $$"""("{{x.Name}}", {{x.Name}}.Validate()),"""));
+        var extensionMethods = string.Join("\n\n", properties.Select(x => $$"""
+            public static Valid<{{x.Type}}> {{x.Name}}(this Valid<{{name}}> valid) => new (valid.Value.{{x.Name}});
+        """));
 
         code.AddBlock($$"""
         private (string PropertyName, Result Result)[] ValidateProperties() => 
         [
-            // {{string.Join(" :: ", properties)}} 
-            // ("Email", Email.Validate()),
-            // ("Address", Address.Validate()),
+            {{validateProperties}}
         ];
 
         public Result Validate()
@@ -102,15 +115,7 @@ public class ObjectGenerator : IIncrementalGenerator
         extensionCode.AddBlock($$"""
         public static class {{string.Join("_", typeInfo.FullName.Split('.'))}}
         {
-           // public static Valid<Email> Email(this Valid<UserData> valid)
-           // {
-           //     return new Valid<Email>(valid.Value.Email);
-           // }
-
-           // public static Valid<Address> Address(this Valid<UserData> valid)
-           // {
-           //     return new Valid<Address>(valid.Value.Address);
-           // }
+        {{extensionMethods}}
         }
         """);
         

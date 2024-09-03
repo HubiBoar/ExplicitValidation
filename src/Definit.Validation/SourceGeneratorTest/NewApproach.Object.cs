@@ -14,7 +14,7 @@ public partial record UserData
 public partial record Address
 (
     string PostalCode,
-    Email Email
+    Email EmailProp
 )
 : IIsValid;
 

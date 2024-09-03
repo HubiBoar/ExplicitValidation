@@ -71,8 +71,17 @@ public class ValueGenerator : IIncrementalGenerator
         var (code, typeInfo) = type.BuildTypeHierarchy("Definit.Results");
 
         var name = typeInfo.Name;
+        var fullName = typeInfo.FullName;
 
         code.AddBlock($$"""
+        private readonly static Rule<{{valueType}}> _rule;
+
+        static {{name}}()
+        {
+            _rule = new();
+            Rule(_rule);
+        }
+
         public {{valueType}} Value { get; }
 
         public {{name}}({{valueType}} value)
@@ -80,11 +89,33 @@ public class ValueGenerator : IIncrementalGenerator
             Value = value;
         }
 
-        public static implicit operator {{name}}({{valueType}} value) => new (value);
+        public static implicit operator {{fullName}}({{valueType}} value) => new (value);
 
-        public static implicit operator {{valueType}}({{name}} value) => value.Value;
+        public static implicit operator {{valueType}}({{fullName}} value) => value.Value;
 
-        public Result Validate() => {{interfaceName}}{{valueType}}>.DefaultValidate(this);
+        public Result Validate() => _rule.Validate(Value);
+
+        public Result<Valid> IsValid() => Valid.Create(this);
+
+        public readonly struct Valid
+        {
+            public {{fullName}} Value { get; }
+
+            private Valid({{fullName}} Value)
+            {
+                this.Value = Value;
+            }
+
+            public static Result<Valid> Create({{fullName}} Value)
+            {
+                if(Value.Validate().Is(out Error error))
+                {
+                    return error;
+                }
+
+                return new Valid(Value);
+            }
+        }
         """);
 
         return (code.ToString(), typeInfo.FullName);

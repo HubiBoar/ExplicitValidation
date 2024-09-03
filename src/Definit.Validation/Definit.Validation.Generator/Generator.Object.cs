@@ -1,5 +1,4 @@
 ﻿using System.Collections.Immutable;
-using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -78,53 +77,54 @@ public class ObjectGenerator : IIncrementalGenerator
             .Where(x => IsValid(x.Type))
             .Select(x => (Name: x.Name, Type: x.Type.ToDisplayString()));
 
-        var validateProperties = string.Join("\n\t", properties.Select(x => $$"""("{{x.Name}}", {{x.Name}}.Validate()),"""));
-        var extensionMethods = string.Join("\n\n", properties.Select(x => $$"""
-            public static Valid<{{x.Type}}> {{x.Name}}(this Valid<{{name}}> valid) => new (valid.Value.{{x.Name}});
+        var propertiesDeclarations = string.Join("\n\t", properties.Select(x => $$"""public {{x.Type}}.Valid {{x.Name}} { get; }"""));
+        var constructorParams = string.Join(", ", properties.Select(x => $"{x.Type}.Valid {x.Name}"));
+        var constructorAssignment = string.Join("\n\t\t", properties.Select(x => $"this.{x.Name} = {x.Name};"));
+        var validation = string.Join("\n\n", properties.Select(x => $$"""
+                if(value.{{x.Name}}.IsValid().Is(out Error error_{{x.Name}}).Else(out var valid_{{x.Name}}))
+                {
+                    errors.Add((error_{{x.Name}}.Message, "{{x.Name}}"));
+                }
         """));
 
-        code.AddBlock($$"""
-        private (string PropertyName, Result Result)[] ValidateProperties() => 
-        [
-            {{validateProperties}}
-        ];
+        var validCreation = string.Join(", ", properties.Select(x => $"valid_{x.Name}")).TrimEnd(',');
 
-        public Result Validate()
+        code.AddBlock($$"""
+        public Result Validate() => IsValid();
+
+        public Result<Valid> IsValid() => Valid.Create(this);
+
+        public readonly struct Valid
         {
-            var errors =
-                ValidateProperties()
-                .Where(x => x.Result.Is(out Error _))
-                .Select(x => 
-                {
-                    x.Result.Is(out Error error);
-                    return (PropertyName: x.PropertyName, Error: error);
-                })
-                .ToArray();
-        
-            if(errors.Length > 0)
+            public {{typeInfo.FullName}} Value { get; } 
+    
+            {{propertiesDeclarations}}
+
+            private Valid({{typeInfo.FullName}} Value, {{constructorParams}})
             {
-                return new Error(string.Join(", ", errors.Select(x => $"{x.PropertyName} :: {x.Error.Message}")));
+                this.Value = Value;
+                {{constructorAssignment}}
             }
 
-            return Result.Success;
+            public static Result<Valid> Create({{typeInfo.FullName}} value)
+            {
+                List<(string Error, string PropertyName)> errors = [];
+                
+        {{validation}}
+
+                if(errors.Count > 0)
+                {
+                    return new Error(string.Join(" :: ", errors.Select(x => $"{x.PropertyName} => {x.Error}")));
+                }
+
+                return new Valid(value, {{validCreation}});
+            }
+
+            public static implicit operator {{typeInfo.FullName}}(Valid value) => value.Value;
         }
         """);
 
-        var extensionCode = new SourceBuilder([], typeInfo.NameSpace);
-
-        extensionCode.AddBlock($$"""
-        public static class {{string.Join("_", typeInfo.FullName.Split('.'))}}
-        {
-        {{extensionMethods}}
-        }
-        """);
-        
-        var builder = new StringBuilder(code.ToString())
-            .AppendLine()
-            .Append(extensionCode.ToString());
-
-
-        return (builder.ToString(), typeInfo.FullName);
+        return (code.ToString(), typeInfo.FullName);
     }
 }
 

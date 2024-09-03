@@ -7,42 +7,36 @@ public interface IIsValid
     Result Validate();
 }
 
-public readonly struct Valid<T>
-    where T : IIsValid
+public sealed record Rule<TValue>()
 {
-    public T Value { get; }
+    private readonly List<Func<TValue, Result>> _rules = [];
 
-    internal Valid(T value)
+    public Result Validate(TValue value)
     {
-        Value = value;
-    }
-
-    public static Result<Valid<T>> IsValid(T value)
-    {
-        if(value.Validate().Is(out Error error))
+        List<string> errors = [];
+        foreach(var rule in _rules)
         {
-            return error;
+            if(rule(value).Is(out Error error))
+            {
+                errors.Add(error.Message);
+            }
         }
 
-        return new Valid<T>(value);
-    }
+        if(errors.Count > 0)
+        {
+            return new Error(string.Join("; ", errors));
+        }
 
-    public static implicit operator T(Valid<T> value) => value.Value;
-}
-
-public static class ValidExtensions
-{
-    public static Result<Valid<T>> IsValid<T>(this T value)
-        where T : IIsValid
-    { 
-        return Valid<T>.IsValid(value);
+        return Result.Success;
     }
 }
 
-public readonly record struct Rule<TValue>(TValue Value)
+public static class Rule
 {
-    public bool IsSuccess { get; init; }
-    public string ErrorMessage { get; init; }
+    public static Rule<TValue> Get<TValue>()
+    {
+        return new Rule<TValue>();
+    }
 }
 
 public static class RuleExtensions
@@ -62,19 +56,84 @@ public interface IIsValid<TValue> : IIsValid
 {
     public TValue Value { get; }
 
-    protected void Rule(Rule<TValue> rule);
+    abstract static void Rule(Rule<TValue> rule);
+}
 
-    protected static Result DefaultValidate(IIsValid<TValue> valid)
+public readonly partial struct Email : IIsValid<string>
+{
+    public static void Rule(Rule<string> rule) => rule.NotNull();
+}
+
+public static partial class Parent1
+{
+    public readonly partial struct Value1 : IIsValid<string>
     {
-        var rule = new Rule<TValue>(valid.Value);
-
-        valid.Rule(rule);
-
-        if(rule.IsSuccess)
-        {
-            return Result.Success;
-        }
-
-        return new Error(rule.ErrorMessage);
+        public static void Rule(Rule<string> rule) => rule.NotNull();
     }
 }
+
+public static class ExampleValue
+{
+    private static async Task<Result> Endpoint(Email body)
+    {
+        if(body.IsValid().Is(out Error error).Else(out var valid))
+        {
+            return error;
+        }
+
+        return await Run(valid);
+    }
+
+    private static async Task<Result> Run(Email.Valid valid)
+    {
+        await Task.CompletedTask;
+        return Result.Success;
+    }
+}
+
+
+//Auto generated
+//partial struct Email
+//{
+//    private readonly static Rule<string> _rule;
+//
+//    static Email()
+//    {
+//        _rule = new();
+//        Rule(_rule);
+//    }
+//
+//    public string Value { get; }
+//    
+//    public Email(string value)
+//    {
+//        Value = value;
+//    }
+//    
+//    public static implicit operator Email(string value) => new (value);
+//    
+//    public static implicit operator string(Email value) => value.Value;
+//
+//    public Result Validate() => _rule.Validate(Value);
+//    public Result<Valid> IsValid() => Valid.Create(this);
+//
+//    public readonly struct Valid
+//    {
+//        public Email Value { get; }
+//
+//        private Valid(Email Value)
+//        {
+//            this.Value = Value;
+//        }
+//
+//        public static Result<Valid> Create(Email Value)
+//        {
+//            if(Value.Validate().Is(out Error error))
+//            {
+//                return error;
+//            }
+//
+//            return new Valid(Value);
+//        }
+//    }
+//}

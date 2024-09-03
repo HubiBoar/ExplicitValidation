@@ -4,37 +4,40 @@ namespace NewApproach
 {
 	partial record Address 
 	{
-		private (string PropertyName, Result Result)[] ValidateProperties() => 
-		[
-		    ("EmailProp", EmailProp.Validate()),
-		];
+		public Result Validate() => IsValid();
 		
-		public Result Validate()
+		public Result<Valid> IsValid() => Valid.Create(this);
+		
+		public readonly struct Valid
 		{
-		    var errors =
-		        ValidateProperties()
-		        .Where(x => x.Result.Is(out Error _))
-		        .Select(x => 
-		        {
-		            x.Result.Is(out Error error);
-		            return (PropertyName: x.PropertyName, Error: error);
-		        })
-		        .ToArray();
+		    public NewApproach.Address Value { get; } 
 		
-		    if(errors.Length > 0)
+		    public NewApproach.Email.Valid EmailProp { get; }
+		
+		    private Valid(NewApproach.Address Value, NewApproach.Email.Valid EmailProp)
 		    {
-		        return new Error(string.Join(", ", errors.Select(x => $"{x.PropertyName} :: {x.Error.Message}")));
+		        this.Value = Value;
+		        this.EmailProp = EmailProp;
 		    }
 		
-		    return Result.Success;
+		    public static Result<Valid> Create(NewApproach.Address value)
+		    {
+		        List<(string Error, string PropertyName)> errors = [];
+		        
+		        if(value.EmailProp.IsValid().Is(out Error error_EmailProp).Else(out var valid_EmailProp))
+		        {
+		            errors.Add((error_EmailProp.Message, "EmailProp"));
+		        }
+		
+		        if(errors.Count > 0)
+		        {
+		            return new Error(string.Join(" :: ", errors.Select(x => $"{x.PropertyName} => {x.Error}")));
+		        }
+		
+		        return new Valid(value, valid_EmailProp);
+		    }
+		
+		    public static implicit operator NewApproach.Address(Valid value) => value.Value;
 		}
-	}
-}
-
-namespace NewApproach
-{
-	public static class NewApproach_Address
-	{
-	    public static Valid<Examples.Email> EmailProp(this Valid<Address> valid) => new (valid.Value.EmailProp);
 	}
 }

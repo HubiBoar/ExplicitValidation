@@ -4,40 +4,47 @@ namespace NewApproach
 {
 	partial record UserData 
 	{
-		private (string PropertyName, Result Result)[] ValidateProperties() => 
-		[
-		    ("Email", Email.Validate()),
-			("Address", Address.Validate()),
-		];
+		public Result Validate() => IsValid();
 		
-		public Result Validate()
+		public Result<Valid> IsValid() => Valid.Create(this);
+		
+		public readonly struct Valid
 		{
-		    var errors =
-		        ValidateProperties()
-		        .Where(x => x.Result.Is(out Error _))
-		        .Select(x => 
-		        {
-		            x.Result.Is(out Error error);
-		            return (PropertyName: x.PropertyName, Error: error);
-		        })
-		        .ToArray();
+		    public NewApproach.UserData Value { get; } 
 		
-		    if(errors.Length > 0)
+		    public NewApproach.Email.Valid Email { get; }
+			public NewApproach.Address.Valid Address { get; }
+		
+		    private Valid(NewApproach.UserData Value, NewApproach.Email.Valid Email, NewApproach.Address.Valid Address)
 		    {
-		        return new Error(string.Join(", ", errors.Select(x => $"{x.PropertyName} :: {x.Error.Message}")));
+		        this.Value = Value;
+		        this.Email = Email;
+				this.Address = Address;
 		    }
 		
-		    return Result.Success;
+		    public static Result<Valid> Create(NewApproach.UserData value)
+		    {
+		        List<(string Error, string PropertyName)> errors = [];
+		        
+		        if(value.Email.IsValid().Is(out Error error_Email).Else(out var valid_Email))
+		        {
+		            errors.Add((error_Email.Message, "Email"));
+		        }
+		
+		        if(value.Address.IsValid().Is(out Error error_Address).Else(out var valid_Address))
+		        {
+		            errors.Add((error_Address.Message, "Address"));
+		        }
+		
+		        if(errors.Count > 0)
+		        {
+		            return new Error(string.Join(" :: ", errors.Select(x => $"{x.PropertyName} => {x.Error}")));
+		        }
+		
+		        return new Valid(value, valid_Email, valid_Address);
+		    }
+		
+		    public static implicit operator NewApproach.UserData(Valid value) => value.Value;
 		}
-	}
-}
-
-namespace NewApproach
-{
-	public static class NewApproach_UserData
-	{
-	    public static Valid<Examples.Email> Email(this Valid<UserData> valid) => new (valid.Value.Email);
-	
-	    public static Valid<NewApproach.Address> Address(this Valid<UserData> valid) => new (valid.Value.Address);
 	}
 }

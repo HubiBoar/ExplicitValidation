@@ -43,7 +43,7 @@ public class ValueGenerator : IIncrementalGenerator
         var valueType = genericTypeSymbol.ToDisplayString();
 
         code.AddBlock($$"""
-        private static Rule<{{valueType}}> _rule { get; }
+        private readonly static Rule<{{valueType}}> _rule;
 
         static {{name}}()
         {

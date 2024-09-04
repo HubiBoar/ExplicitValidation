@@ -7,7 +7,7 @@ namespace Example
 	{
 		partial struct Value1 : Definit.Validation.IIsValid<string>
 		{
-			private static Rule<string> _rule { get; }
+			private readonly static Rule<string> _rule;
 			
 			static Value1()
 			{

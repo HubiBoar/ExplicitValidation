@@ -37,6 +37,7 @@ public static class SourceHelper
     public static (SourceBuilder Code, TypeInfo TypeInfo) BuildTypeHierarchy
     (
         this TypeDeclarationSyntax syntax,
+        Func<string, string> editTypeInfo,
         params string[] usings
     )
     {
@@ -49,7 +50,7 @@ public static class SourceHelper
             code.AddBlock(parent.GenerateTypeName());
         }
 
-        code.AddBlock(typeInfo.GenerateTypeName());
+        code.AddBlock(editTypeInfo(typeInfo.GenerateTypeName()));
 
         return (code, typeInfo);
     }

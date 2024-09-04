@@ -1,5 +1,4 @@
-﻿using NewApproach;
-using Definit.Results;
+﻿using Example;
 
+//new Email("Test");
 Console.WriteLine("Hello");
-

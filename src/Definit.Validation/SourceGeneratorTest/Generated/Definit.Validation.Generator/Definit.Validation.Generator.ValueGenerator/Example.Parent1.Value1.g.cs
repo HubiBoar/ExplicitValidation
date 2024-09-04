@@ -1,12 +1,13 @@
 ﻿using Definit.Results;
+using Definit.Validation;
 
-namespace NewApproach
+namespace Example
 {
 	partial class Parent1 
 	{
-		partial struct Value1 
+		partial struct Value1 : Definit.Validation.IIsValid<string>
 		{
-			private readonly static Rule<string> _rule;
+			private static Rule<string> _rule { get; }
 			
 			static Value1()
 			{
@@ -21,9 +22,9 @@ namespace NewApproach
 			    Value = value;
 			}
 			
-			public static implicit operator NewApproach.Parent1.Value1(string value) => new (value);
+			public static implicit operator Example.Parent1.Value1(string value) => new (value);
 			
-			public static implicit operator string(NewApproach.Parent1.Value1 value) => value.Value;
+			public static implicit operator string(Example.Parent1.Value1 value) => value.Value;
 			
 			public Result Validate() => _rule.Validate(Value);
 			
@@ -31,14 +32,14 @@ namespace NewApproach
 			
 			public readonly struct Valid
 			{
-			    public NewApproach.Parent1.Value1 Value { get; }
+			    public Example.Parent1.Value1 Value { get; }
 			
-			    private Valid(NewApproach.Parent1.Value1 Value)
+			    private Valid(Example.Parent1.Value1 Value)
 			    {
 			        this.Value = Value;
 			    }
 			
-			    public static Result<Valid> Create(NewApproach.Parent1.Value1 Value)
+			    public static Result<Valid> Create(Example.Parent1.Value1 Value)
 			    {
 			        if(Value.Validate().Is(out Error error))
 			        {

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Definit.Validation.Generator;
@@ -8,54 +7,19 @@ namespace Definit.Validation.Generator;
 [Generator]
 public class ObjectGenerator : IIncrementalGenerator
 {
-    private const string interfaceName = "NewApproach.IIsValid";
-    private const string valueInterfaceName = "NewApproach.IIsValid<";
-
-    private static bool IsValid(ITypeSymbol typeSymbol)
-    {
-        return typeSymbol.AllInterfaces.Any(x => x.ToDisplayString() == interfaceName);
-    }
-
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        var provider = context.SyntaxProvider.CreateSyntaxProvider
-        (
-            predicate: static (c, _) =>
-                c is TypeDeclarationSyntax type
-                && type.Modifiers.Any(m => m.IsKind(SyntaxKind.PartialKeyword)),
-
-            transform: static (n, _) => (n.Node as TypeDeclarationSyntax)!
-        )
-        .Where(x => x is not null);
-
-        var compilation = context.CompilationProvider.Combine(provider.Collect());
-
-        context.RegisterSourceOutput(compilation, (spc, source) => Execute(spc, source.Left, source.Right)); 
+        Helper.RunIsValid(context, (s, c, v) => Execute(s, c, v));
     }
 
     private static void Execute
     (
         SourceProductionContext context,
         Compilation compilation,
-        ImmutableArray<TypeDeclarationSyntax> typeList
+        ImmutableArray<Helper.Object> typeList
     )
     {
-        var typesList = typeList.Select(x =>
-        {
-            var symbol = compilation.GetSemanticModel(x.SyntaxTree).GetDeclaredSymbol(x) as ITypeSymbol;
-            return (Symbol: symbol!, Record: x);
-        })
-        .DistinctBy(x => x.Symbol.ToDisplayString())
-        .Where(x =>
-            x.Symbol.AllInterfaces.All(y => y.ToDisplayString().StartsWith(valueInterfaceName) == false)
-            && x.Symbol.AllInterfaces.SingleOrDefault(y => y.ToDisplayString() == interfaceName) is not null)
-        .Select(x => 
-        {
-
-            return GetType(x.Record, x.Symbol);
-        });
-
-        foreach(var type in typesList)
+        foreach(var type in typeList.Select(x => GetType(x.Type, x.Symbol)))
         {
             context.AddSource($"{type.ClassName}.g.cs", type.Code);
         }
@@ -67,14 +31,19 @@ public class ObjectGenerator : IIncrementalGenerator
         ITypeSymbol typeSymbol
     )
     {
-        var (code, typeInfo) = type.BuildTypeHierarchy("Definit.Results");
+        var (code, typeInfo) = type.BuildTypeHierarchy
+        (
+            name => $"{name}: {Helper.IsValidName}",
+            "Definit.Results",
+            "Definit.Validation"
+        );
 
         var name = typeInfo.Name;
 
         var properties = typeSymbol
             .GetMembers()
             .OfType<IPropertySymbol>()
-            .Where(x => IsValid(x.Type))
+            .Where(x => Helper.IsValid(x.Type))
             .Select(x => (Name: x.Name, Type: x.Type.ToDisplayString()));
 
         var propertiesDeclarations = string.Join("\n\t", properties.Select(x => $$"""public {{x.Type}}.Valid {{x.Name}} { get; }"""));

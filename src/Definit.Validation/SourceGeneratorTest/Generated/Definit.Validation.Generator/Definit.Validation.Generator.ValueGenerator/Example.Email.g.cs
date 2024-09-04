@@ -1,10 +1,11 @@
 ﻿using Definit.Results;
+using Definit.Validation;
 
-namespace NewApproach
+namespace Example
 {
-	partial struct Email 
+	partial struct Email : Definit.Validation.IIsValid<string>
 	{
-		private readonly static Rule<string> _rule;
+		private static Rule<string> _rule { get; }
 		
 		static Email()
 		{
@@ -19,9 +20,9 @@ namespace NewApproach
 		    Value = value;
 		}
 		
-		public static implicit operator NewApproach.Email(string value) => new (value);
+		public static implicit operator Example.Email(string value) => new (value);
 		
-		public static implicit operator string(NewApproach.Email value) => value.Value;
+		public static implicit operator string(Example.Email value) => value.Value;
 		
 		public Result Validate() => _rule.Validate(Value);
 		
@@ -29,14 +30,14 @@ namespace NewApproach
 		
 		public readonly struct Valid
 		{
-		    public NewApproach.Email Value { get; }
+		    public Example.Email Value { get; }
 		
-		    private Valid(NewApproach.Email Value)
+		    private Valid(Example.Email Value)
 		    {
 		        this.Value = Value;
 		    }
 		
-		    public static Result<Valid> Create(NewApproach.Email Value)
+		    public static Result<Valid> Create(Example.Email Value)
 		    {
 		        if(Value.Validate().Is(out Error error))
 		        {

@@ -1,8 +1,9 @@
 ﻿using Definit.Results;
+using Definit.Validation;
 
-namespace NewApproach
+namespace Example
 {
-	partial record UserData 
+	partial record UserData : Definit.Validation.IIsValid
 	{
 		public Result Validate() => IsValid();
 		
@@ -10,19 +11,19 @@ namespace NewApproach
 		
 		public readonly struct Valid
 		{
-		    public NewApproach.UserData Value { get; } 
+		    public Example.UserData Value { get; } 
 		
-		    public NewApproach.Email.Valid Email { get; }
-			public NewApproach.Address.Valid Address { get; }
+		    public Example.Email.Valid Email { get; }
+			public Example.Address.Valid Address { get; }
 		
-		    private Valid(NewApproach.UserData Value, NewApproach.Email.Valid Email, NewApproach.Address.Valid Address)
+		    private Valid(Example.UserData Value, Example.Email.Valid Email, Example.Address.Valid Address)
 		    {
 		        this.Value = Value;
 		        this.Email = Email;
 				this.Address = Address;
 		    }
 		
-		    public static Result<Valid> Create(NewApproach.UserData value)
+		    public static Result<Valid> Create(Example.UserData value)
 		    {
 		        List<(string Error, string PropertyName)> errors = [];
 		        
@@ -44,7 +45,7 @@ namespace NewApproach
 		        return new Valid(value, valid_Email, valid_Address);
 		    }
 		
-		    public static implicit operator NewApproach.UserData(Valid value) => value.Value;
+		    public static implicit operator Example.UserData(Valid value) => value.Value;
 		}
 	}
 }

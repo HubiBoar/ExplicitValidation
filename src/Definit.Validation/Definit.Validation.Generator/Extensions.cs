@@ -1,6 +1,6 @@
 namespace Definit.Validation.Generator;
 
-public static class LinqExtensions
+internal static class LinqExtensions
 {
     public static IEnumerable<TSource> DistinctBy<TSource, TKey>
     (

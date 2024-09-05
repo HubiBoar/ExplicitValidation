@@ -1,6 +1,5 @@
 using Definit.Results;
 using Definit.Validation;
-
 namespace Example;
 
 [IsValid<string>]

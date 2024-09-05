@@ -14,7 +14,6 @@ public sealed class IsValidAttribute : Attribute
 
 [System.AttributeUsage
 (
-    System.AttributeTargets.Class |
     System.AttributeTargets.Struct,
     AllowMultiple = false
 )]

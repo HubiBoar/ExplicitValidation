@@ -70,19 +70,19 @@ public class ValueGenerator : IIncrementalGenerator
         {
             public {{fullName}} Value { get; }
 
-            private Valid({{fullName}} Value)
+            private Valid({{fullName}} value)
             {
-                this.Value = Value;
+                Value = value;
             }
 
-            public static Result<Valid> Create({{fullName}} Value)
+            public static Result<Valid> Create({{fullName}} value)
             {
-                if(Value.Validate().Is(out Error error))
+                if(value.Validate().Is(out Error error))
                 {
                     return error;
                 }
 
-                return new Valid(Value);
+                return new Valid(value);
             }
         }
         """);

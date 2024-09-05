@@ -36,6 +36,7 @@ internal static class Helper
         (
             IsValidValueAttribute,
             context,
+            type => type.Modifiers.Any(x => x.IsKind(SyntaxKind.ReadOnlyKeyword)), 
             (s, c, v) =>
             {
                 var values = v
@@ -58,6 +59,7 @@ internal static class Helper
         (
             IsValidAttribute,
             context,
+            kind => true, 
             (s, c, v) =>
             {
                 var values = v
@@ -84,16 +86,17 @@ internal static class Helper
     (
         string attributeName,
         IncrementalGeneratorInitializationContext context,
+        Func<TypeDeclarationSyntax, bool> preficdate,
         Action<SourceProductionContext, Compilation, ImmutableArray<(TypeDeclarationSyntax Type, GeneratorAttributeSyntaxContext Attribute)>> execute
     )
     {
         var provider = context.SyntaxProvider.ForAttributeWithMetadataName
         (
             attributeName,
-            predicate: static (c, _) =>
+            predicate: (c, _) =>
                 c is TypeDeclarationSyntax type
                 && type.Modifiers.Any(m => m.IsKind(SyntaxKind.PartialKeyword))
-                && type.Modifiers.Any(m => m.IsKind(SyntaxKind.StaticKeyword)) == false,
+                && preficdate(type),
 
             transform: (n, _) => ((n.TargetNode as TypeDeclarationSyntax)!, n)
         );

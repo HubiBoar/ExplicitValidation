@@ -32,19 +32,19 @@ namespace Example
 		{
 		    public Example.Email Value { get; }
 		
-		    private Valid(Example.Email Value)
+		    private Valid(Example.Email value)
 		    {
-		        this.Value = Value;
+		        Value = value;
 		    }
 		
-		    public static Result<Valid> Create(Example.Email Value)
+		    public static Result<Valid> Create(Example.Email value)
 		    {
-		        if(Value.Validate().Is(out Error error))
+		        if(value.Validate().Is(out Error error))
 		        {
 		            return error;
 		        }
 		
-		        return new Valid(Value);
+		        return new Valid(value);
 		    }
 		}
 	}

@@ -34,19 +34,19 @@ namespace Example
 			{
 			    public Example.Parent1.Value1 Value { get; }
 			
-			    private Valid(Example.Parent1.Value1 Value)
+			    private Valid(Example.Parent1.Value1 value)
 			    {
-			        this.Value = Value;
+			        Value = value;
 			    }
 			
-			    public static Result<Valid> Create(Example.Parent1.Value1 Value)
+			    public static Result<Valid> Create(Example.Parent1.Value1 value)
 			    {
-			        if(Value.Validate().Is(out Error error))
+			        if(value.Validate().Is(out Error error))
 			        {
 			            return error;
 			        }
 			
-			        return new Valid(Value);
+			        return new Valid(value);
 			    }
 			}
 		}

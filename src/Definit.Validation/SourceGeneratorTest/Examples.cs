@@ -17,15 +17,6 @@ public static partial class Parent1
     }
 }
 
-public static partial class Test
-{
-}
-
-public static partial class Test
-{
-   static partial void Run();
-}
-
 [IsValid]
 public partial record UserData
 (

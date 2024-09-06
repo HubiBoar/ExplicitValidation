@@ -1,115 +1,181 @@
+using System.Diagnostics.CodeAnalysis;
+using static Definit.NewApproach.Result;
+
 namespace Definit.NewApproach;
 
 file static class Test
 {
     private static int Run()
     {
-        return Try.Catch(c =>
-        {
-            var (str, error) = NewResult().Get(c);
+        var (str, error) = Try(NewResult);
 
-            return NewResult2(str);
-        },
-        error => throw new Exception());
+        if(error is not null)
+        {
+            var (e, ex) = error.Value;
+            return 0;
+        }
+
+        (var i, str, error) = Try(() => NewResult2(str!));
+
+        if(error is not null)
+        {
+            return 0;
+        }
+
+        if(i is not null)
+        {
+            return i.Value;
+        }
+
+        var s = str!;
+
+        return 1;
     }
 
-    private static Result<string> NewResult() => Try.Catch<string>(c => 
+    private static Result<string, int> NewResult() 
     {
-        return new Error(""); 
-    });
+        return new Exception(""); 
+    }
 
-    private static Result<int> NewResult2(string str) => Try.Catch<int>(c =>
+    private static Result<int, string> NewResult2(string str) 
     {
-        var (s, error) = NewResult().Get(c); 
-        return new Error(s); 
-    });
+        return 5;
+    }
+}
 
-    private sealed record Error(string Message);
-
-
-    private static class Try
+file static class Result
+{
+    public static (Null<T0>?, Enum<T1, Exception>?) Try<T0, T1>(Func<Result<T0, T1>> match)
     {
-        public sealed record Context();
-
-        public static TResult Catch<TResult>(Func<Context, Result<TResult>> func, Func<Error, TResult> onError)
+        try
         {
-            try
-            {
-                return func(new Context());
-            }
-            catch(Exception ex)
-            {
-                return onError(new Error(ex.Message));
-            }
+            var (t0, t1) = match().Value;
+
+            return new Enum<T0, Enum<T1, Exception>>((t0, new Enum<T1, Exception>((t1, null)))).Value;
         }
-
-        public static TResult Catch<TResult>(Func<Context, Result<TResult>.Builder> func, Func<Error, TResult> onError)
+        catch(Exception ex)
         {
-            try
-            {
-                return func(new Context());
-            }
-            catch(Exception ex)
-            {
-                return onError(new Error(ex.Message));
-            }
-        }
-
-        public static Result<TResult> Catch<TResult>(Func<Context, Result<TResult>.Builder> func)
-        {
-            try
-            {
-                return func(new Context()).Result;
-            }
-            catch(Exception ex)
-            {
-                return new Result<TResult>.Builder(new Error(ex.Message)).Result;
-            }
+            return (null, ex);
         }
     }
 
-    private sealed class Result<T>
+    public static (Null<T0>?, Enum<T1, T2, Exception>?) Try<T0, T1, T2>(Func<Result<T0, T1, T2>> match)
     {
-        private (T? Value, Error? Error) Value { get; }
-        
-        private Result(T value)
+        try
         {
-            Value = (value, null);
-        }
+            var (t0, t1) = match().Value;
 
-        private Result(Error error)
+            return (t0, t1);
+        }
+        catch(Exception ex)
         {
-            Value = (default(T), error);
+            return (null, ex);
         }
-
-        public (T? Value, Error? Error) Get(Try.Context context)
-        {
-           return Value; 
-        }
-
-        public sealed class Builder
-        {
-            internal Result<T> Result { get; }
-
-            public Builder(Result<T> result)
-            {
-                Result = result;
-            }
-
-            public Builder(T value)
-            {
-                Result = new (value);
-            }
-
-            public Builder(Error error)
-            {
-                Result = new (error);
-            }
-
-            public static implicit operator Builder(Result<T> value) => new (value);
-            public static implicit operator Builder(T value) => new (value);
-            public static implicit operator Builder(Error error) => new (error);
-        }
-        
     }
+}
+
+public record struct Null<T>(T Value)
+{
+    public static implicit operator T(Null<T> value) => value.Value;
+    public static implicit operator Null<T>(T value) => new (value);
+}
+
+public record struct Result<T0, T1>
+{
+    internal (Null<T0>?, Null<T1>?) Value { get; }
+    
+    private Result(T0 value)
+    {
+        Value = (value, null);
+    }
+
+    private Result(T1 value)
+    {
+        Value = (null, value);
+    }
+
+    public static implicit operator Result<T0, T1>([DisallowNull] T0 value) => new (value);
+    public static implicit operator Result<T0, T1>([DisallowNull] T1 value) => new (value);
+}
+
+public record struct Result<T0, T1, T2>
+{
+    internal (Null<T0>?, Enum<T1, T2>?) Value { get; }
+    
+    private Result(T0 value)
+    {
+        Value = (value, null);
+    }
+
+    private Result([DisallowNull] T1 value)
+    {
+        Value = (null, value);
+    }
+
+    private Result([DisallowNull] T2 value)
+    {
+        Value = (null, value);
+    }
+
+    public static implicit operator Result<T0, T1, T2>([DisallowNull] T0 value) => new (value);
+    public static implicit operator Result<T0, T1, T2>([DisallowNull] T1 value) => new (value);
+    public static implicit operator Result<T0, T1, T2>([DisallowNull] T2 value) => new (value);
+}
+
+public record struct Enum<T0, T1>
+{
+    public (Null<T0>?, Null<T1>?) Value { get; }
+    
+    public Enum(T0 value)
+    {
+        Value = (value, null);
+    }
+
+    public Enum(T1 value)
+    {
+        Value = (null, value);
+    }
+
+    internal Enum((Null<T0>?, Null<T1>?) value)
+    {
+        Value = value;
+    }
+
+    public void Deconstruct(out Null<T0>? t0, out Null<T1>? t1) => (t0, t1) = Value;
+
+    public static implicit operator Enum<T0, T1>([DisallowNull] T0 value) => new (value);
+    public static implicit operator Enum<T0, T1>([DisallowNull] T1 value) => new (value);
+}
+
+public record struct Enum<T0, T1, T2>
+{
+    public (Null<T0>?, Null<T1>?, Null<T2>?) Value { get; }
+    
+    public Enum(T0 value)
+    {
+        Value = (value, null, null);
+    }
+
+    public Enum(T1 value)
+    {
+        Value = (null, value, null);
+    }
+
+    public Enum(T2 value)
+    {
+        Value = (null, null, value);
+    }
+
+    internal Enum((Null<T0>?, Null<T1>?, Null<T2>?) value)
+    {
+        Value = value;
+    }
+
+    public void Deconstruct(out Null<T0>? t0, out Null<T1>? t1, out Null<T2>? t2) => (t0, t1, t2) = Value;
+
+    public static implicit operator Enum<T0, T1, T2>([DisallowNull] Enum<T0, T1> value) => new ((value.Value.Item1, value.Value.Item2, null));
+    public static implicit operator Enum<T0, T1, T2>([DisallowNull] Enum<T1, T0> value) => new ((value.Value.Item2, value.Value.Item1, null));
+    public static implicit operator Enum<T0, T1, T2>([DisallowNull] T0 value) => new (value);
+    public static implicit operator Enum<T0, T1, T2>([DisallowNull] T1 value) => new (value);
+    public static implicit operator Enum<T0, T1, T2>([DisallowNull] T2 value) => new (value);
 }

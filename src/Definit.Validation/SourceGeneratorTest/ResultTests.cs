@@ -11,11 +11,11 @@ file static class Test
 
         if(error is not null)
         {
-            var (e, ex) = error.Value;
+            var (e, ex2) = error.Value;
             return 0;
         }
 
-        (var i, str, error) = Try(() => NewResult2(str!));
+        (var i, str, var ex) = Try(() => NewResult2(str!));
 
         if(error is not null)
         {
@@ -34,7 +34,7 @@ file static class Test
 
     private static Result<string, int> NewResult() 
     {
-        return new Exception(""); 
+        return 3; 
     }
 
     private static Result<int, string> NewResult2(string str) 
@@ -45,32 +45,26 @@ file static class Test
 
 file static class Result
 {
-    public static (Null<T0>?, Enum<T1, Exception>?) Try<T0, T1>(Func<Result<T0, T1>> match)
+    public static Enum<T0, T1, Exception> Try<T0, T1>(Func<Result<T0, T1>> match)
     {
         try
         {
             var (t0, t1) = match().Value;
 
-            return new Enum<T0, Enum<T1, Exception>>((t0, new Enum<T1, Exception>((t1, null)))).Value;
+            return new ((t0, t1, null));
         }
         catch(Exception ex)
         {
-            return (null, ex);
+            return new ((null, null, ex));
         }
     }
+}
 
-    public static (Null<T0>?, Enum<T1, T2, Exception>?) Try<T0, T1, T2>(Func<Result<T0, T1, T2>> match)
+public static class Extensions
+{
+    public static void Deconstruct<T0, T1>(this Null<Enum<T0, T1>> value, out Null<T0>? t0, out Null<T1>? t1)
     {
-        try
-        {
-            var (t0, t1) = match().Value;
-
-            return (t0, t1);
-        }
-        catch(Exception ex)
-        {
-            return (null, ex);
-        }
+        (t0, t1) = value.Value;
     }
 }
 
@@ -100,21 +94,21 @@ public record struct Result<T0, T1>
 
 public record struct Result<T0, T1, T2>
 {
-    internal (Null<T0>?, Enum<T1, T2>?) Value { get; }
+    internal (Null<T0>?, Null<T1>?, Null<T2>?) Value { get; }
     
     private Result(T0 value)
     {
-        Value = (value, null);
+        Value = (value, null, null);
     }
 
     private Result([DisallowNull] T1 value)
     {
-        Value = (null, value);
+        Value = (null, value, null);
     }
 
     private Result([DisallowNull] T2 value)
     {
-        Value = (null, value);
+        Value = (null, null, value);
     }
 
     public static implicit operator Result<T0, T1, T2>([DisallowNull] T0 value) => new (value);
@@ -172,6 +166,7 @@ public record struct Enum<T0, T1, T2>
     }
 
     public void Deconstruct(out Null<T0>? t0, out Null<T1>? t1, out Null<T2>? t2) => (t0, t1, t2) = Value;
+    public void Deconstruct(out Null<T0>? t0, out Null<Enum<T1, T2>>? t2) => (t0, t1, t2) = Value;
 
     public static implicit operator Enum<T0, T1, T2>([DisallowNull] Enum<T0, T1> value) => new ((value.Value.Item1, value.Value.Item2, null));
     public static implicit operator Enum<T0, T1, T2>([DisallowNull] Enum<T1, T0> value) => new ((value.Value.Item2, value.Value.Item1, null));

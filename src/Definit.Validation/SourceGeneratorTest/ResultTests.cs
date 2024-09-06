@@ -9,6 +9,7 @@ file static class Test
     {
         var (str, error) = Try(NewResult);
 
+        var (e1, ex3) = error.Value; 
         if(error is not null)
         {
             var (e, ex2) = error.Value;
@@ -27,7 +28,7 @@ file static class Test
             return i.Value;
         }
 
-        var s = str!;
+        var str2 = Try(NewResult, i => "", ex => "");
 
         return 1;
     }
@@ -45,6 +46,20 @@ file static class Test
 
 file static class Result
 {
+    public static T0 Try<T0, T1>(Func<Result<T0, T1>> match, Func<T1, T0> map1, Func<Exception, T0> map2)
+    {
+        try
+        {
+            var (t0, t1) = match().Value;
+
+            return new ((t0, t1, null));
+        }
+        catch(Exception ex)
+        {
+            return new ((null, null, ex));
+        }
+    }
+
     public static Enum<T0, T1, Exception> Try<T0, T1>(Func<Result<T0, T1>> match)
     {
         try

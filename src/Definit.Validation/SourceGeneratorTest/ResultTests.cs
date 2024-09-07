@@ -7,79 +7,135 @@ file static class Test
 {
     private static int Run()
     {
-        var (str, error) = Try(NewResult);
+        var (str, error) = NewResult();
 
-        var (e1, ex3) = error.Value; 
+        var (notFound, ex) = error.Value; 
         if(error is not null)
         {
-            var (e, ex2) = error.Value;
+            (notFound, ex) = error.Value;
             return 0;
         }
 
-        (var i, str, var ex) = Try(() => NewResult2(str!));
+        (var i, var not, ex) = NewResult(str!);
 
         if(error is not null)
         {
             return 0;
         }
 
-        if(i is not null)
+        if(str is not null)
         {
-            return i.Value;
+            return 5;
         }
 
-        var str2 = Try(NewResult, i => "", ex => "");
+        var str2 = NewResult().Match(i => "", ex => "");
 
         return 1;
     }
 
-    private static Result<string, int> NewResult() 
+    public static Result<string, NotFound> NewResult() => Try<string, NotFound>(c =>  
     {
-        return 3; 
-    }
+        var i = NewResult("test").Forward(c, not => new NotFound());
 
-    private static Result<int, string> NewResult2(string str) 
+        return i.ToString();
+    });
+
+    public static Result<int, Not> NewResult(string value) => Try<int, Not>(c =>  
     {
-        return 5;
-    }
+        return 0;
+    });
 }
 
-file static class Result
-{
-    public static T0 Try<T0, T1>(Func<Result<T0, T1>> match, Func<T1, T0> map1, Func<Exception, T0> map2)
-    {
-        try
-        {
-            var (t0, t1) = match().Value;
+public readonly struct NotFound();
+public readonly struct Not();
 
-            return new ((t0, t1, null));
-        }
-        catch(Exception ex)
+public static class Result
+{
+    public sealed class ForwardException<T> : Exception
+    {
+        [NotNull]
+        public T Value { get; }
+
+        internal ForwardException([DisallowNull] T value)
         {
-            return new ((null, null, ex));
+            Value = value;
         }
     }
 
-    public static Enum<T0, T1, Exception> Try<T0, T1>(Func<Result<T0, T1>> match)
+    private static ForwardException<T> ForwardEx<T>([DisallowNull] T value) => new (value); 
+
+    public static Result<T0, T1> Try<T0, T1>
+    (
+        Func<Context<T0, T1>, Either<T0, T1, Exception>> func
+    )
     {
         try
         {
-            var (t0, t1) = match().Value;
-
-            return new ((t0, t1, null));
+            return new (func(Context<T0,T1>.Instance));
         }
-        catch(Exception ex)
+        catch (ForwardException<T0> forwardT0)
         {
-            return new ((null, null, ex));
+            return new (forwardT0.Value);
+        }
+        catch (ForwardException<T1> forwardT1)
+        {
+            return new (forwardT1.Value);
+        }
+        catch (ForwardException<Exception> forwardEx)
+        {
+            return new (forwardEx.Value);
+        }
+        catch (Exception ex)
+        {
+            return new (ex);
+        }
+    }
+
+    public sealed class Context<TC0, TC1>
+    { 
+        internal static readonly Context<TC0, TC1> Instance = new ();
+
+        private Context()
+        {
+        }
+
+        internal T0 Match<T0, T1>(Result<T0, T1> result, Func<T1, TC0> func, Func<Exception, Exception> funcEx)
+        {
+            return result.Match(t0 => throw ForwardEx(func(t0)!), ex => throw ForwardEx(funcEx(ex)));  
+        }
+
+        internal T0 Match<T0, T1>(Result<T0, T1> result, Func<T1, TC1> func, Func<Exception, Exception> funcEx)
+        {
+            return result.Match(t0 => throw ForwardEx(func(t0)!), ex => throw ForwardEx(funcEx(ex)));  
         }
     }
 }
 
 public static class Extensions
 {
-    public static void Deconstruct<T0, T1>(this Null<Enum<T0, T1>> value, out Null<T0>? t0, out Null<T1>? t1)
+    public static void Deconstruct<T0, T1>(this Null<Either<T0, T1>> value, out Null<T0>? t0, out Null<T1>? t1)
     {
         (t0, t1) = value.Value;
+    }
+
+    public static T0 Forward<T0, T1>(this Result<T0, T1> value, Result.Context<T1,T0> context)  
+    {
+        return context.Match(value, v => v, e => e);
+    }
+
+    public static T0 Forward<T0, T1>(this Result<T0, T1> value, Result.Context<T0,T1> context)  
+    {
+        return context.Match(value, v => v, e => e);
+    }
+
+    public static T0 Forward<T0, T1, TC0, TC1>(this Result<T0, T1> value, Result.Context<TC0,TC1> context, Func<T1, TC0> func)  
+    {
+        return context.Match(value, func, e => e);
+    }
+
+    public static T0 Forward<T0, T1, TC0, TC1>(this Result<T0, T1> value, Result.Context<TC0,TC1> context, Func<T1, TC1> func)  
+    {
+        return context.Match(value, func, e => e);
     }
 }
 
@@ -91,26 +147,33 @@ public record struct Null<T>(T Value)
 
 public record struct Result<T0, T1>
 {
-    internal (Null<T0>?, Null<T1>?) Value { get; }
-    
-    private Result(T0 value)
+    public Either<T0, T1, Exception> Value { get; }
+
+    internal Result(Either<T0, T1, Exception> value)
     {
-        Value = (value, null);
+        Value = value;
     }
 
-    private Result(T1 value)
+    public void Deconstruct(out Null<T0>? t0, out Null<T1>? t1, out Null<Exception>? t2) => (t0, t1, t2) = Value;
+    public void Deconstruct(out Null<T0>? t0, out Null<Either<T1, Exception>>? t2) => (t0, t1, t2) = Value;
+
+    public T0 Match(Func<T1, T0> func1, Func<Exception, T0> func2)
     {
-        Value = (null, value);
     }
 
-    public static implicit operator Result<T0, T1>([DisallowNull] T0 value) => new (value);
-    public static implicit operator Result<T0, T1>([DisallowNull] T1 value) => new (value);
+    public TResult Match<TResult>(Func<T0, TResult> func0, Func<T1, TResult> func1, Func<Exception, TResult> func2)
+    {
+    }
 }
 
 public record struct Result<T0, T1, T2>
 {
     internal (Null<T0>?, Null<T1>?, Null<T2>?) Value { get; }
-    
+   
+    public record struct Builder
+    {
+    }
+
     private Result(T0 value)
     {
         Value = (value, null, null);
@@ -131,61 +194,69 @@ public record struct Result<T0, T1, T2>
     public static implicit operator Result<T0, T1, T2>([DisallowNull] T2 value) => new (value);
 }
 
-public record struct Enum<T0, T1>
+public record struct Either<T0, T1>
 {
     public (Null<T0>?, Null<T1>?) Value { get; }
     
-    public Enum(T0 value)
+    public Either(T0 value)
     {
         Value = (value, null);
     }
 
-    public Enum(T1 value)
+    public Either(T1 value)
     {
         Value = (null, value);
     }
 
-    internal Enum((Null<T0>?, Null<T1>?) value)
+    internal Either((Null<T0>?, Null<T1>?) value)
     {
         Value = value;
     }
 
     public void Deconstruct(out Null<T0>? t0, out Null<T1>? t1) => (t0, t1) = Value;
 
-    public static implicit operator Enum<T0, T1>([DisallowNull] T0 value) => new (value);
-    public static implicit operator Enum<T0, T1>([DisallowNull] T1 value) => new (value);
+    public static implicit operator Either<T0, T1>([DisallowNull] T0 value) => new (value);
+    public static implicit operator Either<T0, T1>([DisallowNull] T1 value) => new (value);
 }
 
-public record struct Enum<T0, T1, T2>
+public record struct Either<T0, T1, T2>
 {
     public (Null<T0>?, Null<T1>?, Null<T2>?) Value { get; }
     
-    public Enum(T0 value)
+    public Either(T0 value)
     {
         Value = (value, null, null);
     }
 
-    public Enum(T1 value)
+    public Either(T1 value)
     {
         Value = (null, value, null);
     }
 
-    public Enum(T2 value)
+    public Either(T2 value)
     {
         Value = (null, null, value);
     }
 
-    internal Enum((Null<T0>?, Null<T1>?, Null<T2>?) value)
+    internal Either((Null<T0>?, Null<T1>?, Null<T2>?) value)
     {
         Value = value;
     }
 
     public void Deconstruct(out Null<T0>? t0, out Null<T1>? t1, out Null<T2>? t2) => (t0, t1, t2) = Value;
-    public void Deconstruct(out Null<T0>? t0, out Null<Enum<T1, T2>>? t2) => (t0, t1, t2) = Value;
+    public void Deconstruct(out Null<T0>? t0, out Null<Either<T1, T2>>? t2) => (t0, t1, t2) = Value;
 
-    public static implicit operator Enum<T0, T1, T2>([DisallowNull] Enum<T0, T1> value) => new ((value.Value.Item1, value.Value.Item2, null));
-    public static implicit operator Enum<T0, T1, T2>([DisallowNull] Enum<T1, T0> value) => new ((value.Value.Item2, value.Value.Item1, null));
-    public static implicit operator Enum<T0, T1, T2>([DisallowNull] T0 value) => new (value);
-    public static implicit operator Enum<T0, T1, T2>([DisallowNull] T1 value) => new (value);
-    public static implicit operator Enum<T0, T1, T2>([DisallowNull] T2 value) => new (value);
+    public T0 Match(Func<T1, T0> func1, Func<T2, T0> func2)
+    {
+    }
+
+    public TResult Match<TResult>(Func<T0, TResult> func0, Func<T1, TResult> func1, Func<T2, TResult> func2)
+    {
+    }
+
+    public static implicit operator Either<T0, T1, T2>([DisallowNull] Either<T0, T1> value) => new ((value.Value.Item1, value.Value.Item2, null));
+    public static implicit operator Either<T0, T1, T2>([DisallowNull] Either<T1, T0> value) => new ((value.Value.Item2, value.Value.Item1, null));
+    public static implicit operator Either<T0, T1, T2>([DisallowNull] T0 value) => new (value);
+    public static implicit operator Either<T0, T1, T2>([DisallowNull] T1 value) => new (value);
+    public static implicit operator Either<T0, T1, T2>([DisallowNull] T2 value) => new (value);
 }

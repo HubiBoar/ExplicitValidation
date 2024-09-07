@@ -9,6 +9,13 @@ file static class Test
     {
         var (str, error) = NewResult();
 
+        var (notFound, ex) = error.Value; 
+        if(error is not null)
+        {
+            (notFound, ex) = error.Value;
+            return 0;
+        }
+
         (var i, var not, ex) = NewResult(str!);
 
         if(error is not null)
@@ -26,7 +33,7 @@ file static class Test
         return 1;
     }
 
-    public static Either<string, NotFound> NewResult() => Try<string, NotFound>(c =>  
+    public static Result<string, NotFound> NewResult() => Try<string, NotFound>(c =>  
     {
         var i = NewResult("test").Forward(c, not => new NotFound());
 
@@ -34,7 +41,7 @@ file static class Test
     },
     ex => new NotFound());
 
-    public static Either<int, Not> NewResult(string value) => Try<int, Not>(c =>  
+    public static Result<int, Not> NewResult(string value) => Try<int, Not>(c =>  
     {
         return 0;
     },
@@ -59,7 +66,7 @@ public static class Result
 
     private static ForwardException<T> ForwardEx<T>([DisallowNull] T value) => new (value); 
 
-    public static Either<T0, T1> Try<T0, T1>
+    public static Result<T0, T1> Try<T0, T1>
     (
         Func<Context<T0, T1>, Either<T0, T1>> func,
         Func<Exception, Either<T0, T1>> onException
@@ -67,7 +74,7 @@ public static class Result
     {
         try
         {
-            return func(Context<T0,T1>.Instance);
+            return new (func(Context<T0,T1>.Instance));
         }
         catch (ForwardException<T0> forwardT0)
         {
@@ -79,7 +86,7 @@ public static class Result
         }
         catch (Exception ex)
         {
-            return onException(ex);
+            return new (onException(ex));
         }
     }
 
@@ -91,12 +98,12 @@ public static class Result
         {
         }
 
-        internal T0 Match<T0, T1>(Either<T0, T1> result, Func<T1, TC0> func)
+        internal T0 Match<T0, T1>(Result<T0, T1> result, Func<T1, TC0> func)
         {
             return result.Match(t0 => throw ForwardEx(func(t0)!));  
         }
 
-        internal T0 Match<T0, T1>(Either<T0, T1> result, Func<T1, TC1> func)
+        internal T0 Match<T0, T1>(Result<T0, T1> result, Func<T1, TC1> func)
         {
             return result.Match(t0 => throw ForwardEx(func(t0)!));  
         }
@@ -110,22 +117,22 @@ public static class Extensions
         (t0, t1) = value.Value;
     }
 
-    public static T0 Forward<T0, T1>(this Either<T0, T1> value, Result.Context<T1,T0> context)  
+    public static T0 Forward<T0, T1>(this Result<T0, T1> value, Result.Context<T1,T0> context)  
     {
         return context.Match(value, v => v, e => e);
     }
 
-    public static T0 Forward<T0, T1>(this Either<T0, T1> value, Result.Context<T0,T1> context)  
+    public static T0 Forward<T0, T1>(this Result<T0, T1> value, Result.Context<T0,T1> context)  
     {
         return context.Match(value, v => v, e => e);
     }
 
-    public static T0 Forward<T0, T1, TC0, TC1>(this Either<T0, T1> value, Result.Context<TC0,TC1> context, Func<T1, TC0> func)  
+    public static T0 Forward<T0, T1, TC0, TC1>(this Result<T0, T1> value, Result.Context<TC0,TC1> context, Func<T1, TC0> func)  
     {
         return context.Match(value, func, e => e);
     }
 
-    public static T0 Forward<T0, T1, TC0, TC1>(this Either<T0, T1> value, Result.Context<TC0,TC1> context, Func<T1, TC1> func)  
+    public static T0 Forward<T0, T1, TC0, TC1>(this Result<T0, T1> value, Result.Context<TC0,TC1> context, Func<T1, TC1> func)  
     {
         return context.Match(value, func, e => e);
     }
@@ -135,6 +142,54 @@ public record struct Null<T>(T Value)
 {
     public static implicit operator T(Null<T> value) => value.Value;
     public static implicit operator Null<T>(T value) => new (value);
+}
+
+public sealed class Result<T0, T1>
+{
+    public Either<T0, T1> Value { get; }
+
+    internal Result(Either<T0, T1> value)
+    {
+        Value = value;
+    }
+
+    public void Deconstruct(out Null<T0>? t0, out Null<T1>? t1) => (t0, t1) = Value;
+
+    public T0 Match(Func<T1, T0> func1)
+    {
+    }
+
+    public TResult Match<TResult>(Func<T0, TResult> func0, Func<T1, TResult> func)
+    {
+    }
+}
+
+public sealed class Result<T0, T1, T2>
+{
+    internal (Null<T0>?, Null<T1>?, Null<T2>?) Value { get; }
+   
+    public record struct Builder
+    {
+    }
+
+    private Result(T0 value)
+    {
+        Value = (value, null, null);
+    }
+
+    private Result([DisallowNull] T1 value)
+    {
+        Value = (null, value, null);
+    }
+
+    private Result([DisallowNull] T2 value)
+    {
+        Value = (null, null, value);
+    }
+
+    public static implicit operator Result<T0, T1, T2>([DisallowNull] T0 value) => new (value);
+    public static implicit operator Result<T0, T1, T2>([DisallowNull] T1 value) => new (value);
+    public static implicit operator Result<T0, T1, T2>([DisallowNull] T2 value) => new (value);
 }
 
 public record struct Either<T0, T1>
@@ -154,14 +209,6 @@ public record struct Either<T0, T1>
     internal Either((Null<T0>?, Null<T1>?) value)
     {
         Value = value;
-    }
-
-    public T0 Match(Func<T1, T0> func)
-    {
-    }
-
-    public TResult Match<TResult>(Func<T0, TResult> func0, Func<T1, TResult> func)
-    {
     }
 
     public void Deconstruct(out Null<T0>? t0, out Null<T1>? t1) => (t0, t1) = Value;

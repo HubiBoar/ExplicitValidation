@@ -1,4 +1,5 @@
 using static Definit.NewApproach.Result;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Definit.NewApproach;
 
@@ -78,7 +79,6 @@ public readonly struct Not() : IError<Not>
 
 [Result<string, NotFound>]
 public readonly partial struct CustomResult;
-
 
 //Auto generated
 public readonly partial struct CustomResult : IResult<string, NotFound>

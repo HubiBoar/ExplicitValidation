@@ -6,26 +6,30 @@ namespace Definit.Results.NewApproach
 {
 	partial class Test 
 	{
+		private Definit.Results.NewApproach.Result<string, Definit.Results.NewApproach.Test.NotFound>.Value PrivateRun(string t)
+		{
+		    try
+		    {
+		        return new Definit.Results.NewApproach.Result<string, Definit.Results.NewApproach.Test.NotFound>.Value(_PrivateRun(t));
+		    }
+		    catch(Exception exception)
+		    {
+		        return new Definit.Results.NewApproach.Result<string, Definit.Results.NewApproach.Test.NotFound>.Value(Definit.Results.NewApproach.Test.NotFound.Create(exception)); 
+		    }
+		}
 		
-		keyword: private
-		displayString: Definit.Results.NewApproach.Test._PrivateRun(string)
-		params: string t
-		typeParams: 
-		typeArgs: 
-		parts: Definit, , Definit.Results, , Definit.Results.NewApproach, , Definit.Results.NewApproach.Test, , Definit.Results.NewApproach.Test._PrivateRun(string), , string, 
-		return: string
-		name: _PrivateRun
-		modifiers: private, static
-		modifiers:     private , static 
-		keyword: public
-		displayString: Definit.Results.NewApproach.Test._PublicRun(string)
-		params: string t
-		typeParams: 
-		typeArgs: 
-		parts: Definit, , Definit.Results, , Definit.Results.NewApproach, , Definit.Results.NewApproach.Test, , Definit.Results.NewApproach.Test._PublicRun(string), , string, 
-		return: string
-		name: _PublicRun
-		modifiers: private, static
-		modifiers:     private , static 
+		public static async System.Threading.Tasks.Task<Definit.Results.NewApproach.Result<string, Definit.Results.NewApproach.Test.NotFound>.Value> PublicRun(string t)
+		{
+		    try
+		    {
+		        return new Definit.Results.NewApproach.Result<string, Definit.Results.NewApproach.Test.NotFound>.Value(await _PublicRun(t));
+		    }
+		    catch(Exception exception)
+		    {
+		        return new Definit.Results.NewApproach.Result<string, Definit.Results.NewApproach.Test.NotFound>.Value(Definit.Results.NewApproach.Test.NotFound.Create(exception)); 
+		    }
+		}
+		
+		
 	}
 }

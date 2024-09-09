@@ -10,6 +10,8 @@ namespace Definit.Results.Generator;
 [Generator]
 public class ResultGenerator : IIncrementalGenerator
 {
+    private const string ResultType = "Definit.Results.NewApproach.IResult";
+
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var provider = context.SyntaxProvider.ForAttributeWithMetadataName
@@ -57,7 +59,7 @@ public class ResultGenerator : IIncrementalGenerator
 
         var interf = symbol.AllInterfaces
             .Single(x => x.ToDisplayString()
-            .StartsWith("Definit.Results.NewApproach.IResult"));
+            .StartsWith(ResultType));
 
         var genericArgs = interf.TypeArguments.Select(x => x.ToDisplayString()).ToArray();
 

@@ -2,16 +2,21 @@ namespace Definit.Results.NewApproach;
 
 public partial class Test
 {
-    [GenerateMethod.Private.Override]
-    private string _PrivateRun(string t)
+    public readonly struct NotFound() : IError<NotFound>
+    {
+        public static NotFound Create(Exception exception) => new NotFound();
+    }
+
+    [GenerateMethod.Private]
+    private Result<string, NotFound> _PrivateRun(string t)
     {
         return t;
     }
 
     [GenerateMethod.Public]
-    private static async Task<string> _PublicRun(string t)
+    private static Task<Result<string, NotFound>> _PublicRun(string t)
     {
-        return t;
+        return Task.FromResult<Result<string, NotFound>>(t);
     }
 }
 
@@ -39,6 +44,9 @@ public static class GenerateMethod
     {
         [System.AttributeUsage(System.AttributeTargets.Method, AllowMultiple = false)]
         public sealed class OverrideAttribute : Attribute;
+
+        [System.AttributeUsage(System.AttributeTargets.Method, AllowMultiple = false)]
+        public sealed class VirtualAttribute : Attribute;
     }
 
     [System.AttributeUsage(System.AttributeTargets.Method, AllowMultiple = false)]
@@ -48,6 +56,9 @@ public static class GenerateMethod
     {
         [System.AttributeUsage(System.AttributeTargets.Method, AllowMultiple = false)]
         public sealed class OverrideAttribute : Attribute;
+
+        [System.AttributeUsage(System.AttributeTargets.Method, AllowMultiple = false)]
+        public sealed class VirtualAttribute : Attribute;
     }
 
     [System.AttributeUsage(System.AttributeTargets.Method, AllowMultiple = false)]

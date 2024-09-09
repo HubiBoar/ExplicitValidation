@@ -10,6 +10,9 @@ namespace Definit.Results.Generator;
 [Generator]
 public class MethodGenerator : IIncrementalGenerator
 {
+    private const string ResultType = "Definit.Results.NewApproach.IResult";
+    private const string TaskType = "System.Threading.Tasks.Task<";
+
     private record struct TypeInfo
     (
         TypeDeclarationSyntax Parent,
@@ -70,17 +73,34 @@ public class MethodGenerator : IIncrementalGenerator
 
         foreach(var method in type.Methods)
         {
-            builder.AppendLine().Append($$"""
-            keyword: {{method.Keyword}}
-            displayString: {{method.Symbol.ToDisplayString()}}
-            params: {{string.Join(", ", method.Symbol.Parameters.Select(x => x.ToDisplayString()))}}
-            typeParams: {{string.Join(", ", method.Symbol.TypeParameters.Select(x => x.ToDisplayString()))}}
-            typeArgs: {{string.Join(", ", method.Symbol.TypeArguments.Select(x => x.ToDisplayString()))}}
-            parts: {{string.Join(", ", method.Symbol.ToDisplayParts().Select(x => x.Symbol?.ToDisplayString()))}}
-            return: {{method.Symbol.ReturnType.ToDisplayString()}}
-            name: {{method.Symbol.Name}}
-            modifiers: {{string.Join(", ", method.Syntax.Modifiers.Select(x => x.Value?.ToString()))}}
-            modifiers: {{string.Join(", ", method.Syntax.Modifiers.Select(x => x.Value?.ToString()))}}
+            var returnType = GetResultType(method.Symbol)!.Value;
+            var returnError = returnType.Type.TypeArguments.Last();
+            var isAsync = returnType.IsTask;
+            var returnValue = $"{returnType.Type.ToDisplayString()}.Value";
+
+            var decStatic = method.Symbol.IsStatic ? " static": "";
+            var decAsync = isAsync ? " async" : ""; 
+            var decReturn = isAsync ? $"{TaskType}{returnValue}>" : returnValue;
+            var decName = method.Symbol.Name.Remove(0, 1);
+            var decParameters = string.Join(", ", method.Symbol.Parameters.Select(x => x.ToDisplayString()));
+            var declaration = $"{method.Keyword}{decStatic}{decAsync} {decReturn} {decName}({decParameters})";
+
+            var awaitCall = isAsync ? "await " : "";
+            var methodCall = $"{awaitCall}{method.Symbol.Name}({string.Join(", ", method.Symbol.Parameters.Select(x => x.Name))})";
+            var errorCall = returnError.ToDisplayString();
+
+            builder.AppendLine().AppendLine($$"""
+            {{declaration}}
+            {
+                try
+                {
+                    return new {{returnValue}}({{methodCall}});
+                }
+                catch(Exception exception)
+                {
+                    return new {{returnValue}}({{errorCall}}.Create(exception)); 
+                }
+            }
             """);
         }
 
@@ -94,7 +114,9 @@ public class MethodGenerator : IIncrementalGenerator
         ("Definit.Results.NewApproach.GenerateMethod.PublicAttribute", "public"),
         ("Definit.Results.NewApproach.GenerateMethod.PrivateAttribute", "private"),
         ("Definit.Results.NewApproach.GenerateMethod.Public.OverrideAttribute", "public override"),
-        ("Definit.Results.NewApproach.GenerateMethod.Private.OverrideAttribute", "private override")
+        ("Definit.Results.NewApproach.GenerateMethod.Private.OverrideAttribute", "private override"),
+        ("Definit.Results.NewApproach.GenerateMethod.Public.VirtualAttribute", "public virual"),
+        ("Definit.Results.NewApproach.GenerateMethod.Private.VirtualAttribute", "private virual")
     ];
 
     private static bool ShouldTransform(SyntaxNode node)
@@ -116,13 +138,6 @@ public class MethodGenerator : IIncrementalGenerator
 
         var methodSyntax = (MethodDeclarationSyntax)context.Node;
 
-        var methodSymbol = (context.SemanticModel.GetDeclaredSymbol(methodSyntax) as IMethodSymbol)!;
-
-        if(methodSymbol.Name.StartsWith("_") == false)
-        {
-            return null;
-        }
-
         foreach (AttributeSyntax attributeSyntax in methodSyntax.AttributeLists.SelectMany(x => x.Attributes))
         {
             var attributeSymbol = (context.SemanticModel.GetSymbolInfo(attributeSyntax).Symbol as IMethodSymbol)!;
@@ -133,12 +148,60 @@ public class MethodGenerator : IIncrementalGenerator
             if (attributes.Length == 1)
             {
                 var attribute = attributes[0];
-                
+
+                var methodSymbol = (context.SemanticModel.GetDeclaredSymbol(methodSyntax) as IMethodSymbol)!;
+            
+                if(methodSymbol.Name.StartsWith("_") == false)
+                {
+                    return null;
+                }
+
+                if(GetResultType(methodSymbol) is null)
+                {
+                   return null;
+                }
+
                 return (typeSyntax, new MethodInfo(attribute.Keyword, methodSyntax, methodSymbol));
             }
         }
 
+
         return null;
     }  
+
+    private static (INamedTypeSymbol Type, bool IsTask)? GetResultType(IMethodSymbol symbol)
+    {
+        if(symbol.ReturnType is INamedTypeSymbol returnType is false)
+        {
+            return null;
+        }
+
+        if(IsResult(returnType))
+        {
+            return (returnType, false);
+        }
+        
+        if(returnType.ToDisplayString().StartsWith(TaskType) is false)
+        {
+            return null;
+        }
+
+        if(returnType.TypeArguments.First() is INamedTypeSymbol genericReturn is false)
+        {
+            return null;
+        }
+
+        if(IsResult(genericReturn))
+        {
+            return (genericReturn, true);
+        }
+
+        return null;
+
+        static bool IsResult(ITypeSymbol type)
+        {
+            return type.AllInterfaces.Any(x => x.ToDisplayString().StartsWith(ResultType));
+        }
+    }
 }
 

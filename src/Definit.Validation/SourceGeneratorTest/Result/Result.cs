@@ -1,15 +1,15 @@
 namespace Definit.Results.NewApproach;
 
-public static partial class Test
+public partial class Test
 {
-    [GenerateMethod.Private]
-    private static string _PrivateRun(string t)
+    [GenerateMethod.Private.Override]
+    private string _PrivateRun(string t)
     {
         return t;
     }
 
     [GenerateMethod.Public]
-    private static string _PublicRun(string t)
+    private static async Task<string> _PublicRun(string t)
     {
         return t;
     }
@@ -35,19 +35,23 @@ public sealed class GenerateResultAttribute : Attribute
 
 public static class GenerateMethod
 {
-    [System.AttributeUsage
-    (
-        System.AttributeTargets.Method,
-        AllowMultiple = false
-    )]
-    public sealed class PublicAttribute : Attribute {}
+    public static class Public
+    {
+        [System.AttributeUsage(System.AttributeTargets.Method, AllowMultiple = false)]
+        public sealed class OverrideAttribute : Attribute;
+    }
 
-    [System.AttributeUsage
-    (
-        System.AttributeTargets.Method,
-        AllowMultiple = false
-    )]
-    public sealed class PrivateAttribute : Attribute {}
+    [System.AttributeUsage(System.AttributeTargets.Method, AllowMultiple = false)]
+    public sealed class PublicAttribute : Attribute;
+    
+    public static class Private
+    {
+        [System.AttributeUsage(System.AttributeTargets.Method, AllowMultiple = false)]
+        public sealed class OverrideAttribute : Attribute;
+    }
+
+    [System.AttributeUsage(System.AttributeTargets.Method, AllowMultiple = false)]
+    public sealed class PrivateAttribute : Attribute;
 }
 
 public static class Result

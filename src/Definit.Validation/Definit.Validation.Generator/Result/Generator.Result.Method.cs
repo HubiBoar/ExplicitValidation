@@ -80,7 +80,7 @@ public class MethodGenerator : IIncrementalGenerator
             return: {{method.Symbol.ReturnType.ToDisplayString()}}
             name: {{method.Symbol.Name}}
             modifiers: {{string.Join(", ", method.Syntax.Modifiers.Select(x => x.Value?.ToString()))}}
-            modifiers: {{string.Join(", ", method.Syntax.Modifiers.Select(x => x.ToFullString()))}}
+            modifiers: {{string.Join(", ", method.Syntax.Modifiers.Select(x => x.Value?.ToString()))}}
             """);
         }
 
@@ -92,7 +92,9 @@ public class MethodGenerator : IIncrementalGenerator
     private static readonly (string Attribute, string Keyword)[] Attributes = 
     [
         ("Definit.Results.NewApproach.GenerateMethod.PublicAttribute", "public"),
-        ("Definit.Results.NewApproach.GenerateMethod.PrivateAttribute", "private")
+        ("Definit.Results.NewApproach.GenerateMethod.PrivateAttribute", "private"),
+        ("Definit.Results.NewApproach.GenerateMethod.Public.OverrideAttribute", "public override"),
+        ("Definit.Results.NewApproach.GenerateMethod.Private.OverrideAttribute", "private override")
     ];
 
     private static bool ShouldTransform(SyntaxNode node)

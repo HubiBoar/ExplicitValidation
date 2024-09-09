@@ -35,7 +35,7 @@ public class EitherGenerator : IIncrementalGenerator
     {
         foreach(var type in typeList.Select(x => GetType(x.Syntax, x.Symbol)))
         {
-            var name = type.ClassName.Replace("<", ".").Replace(">", "").Replace(", ", "_").Replace(" ", "_").Replace(",", "_");
+            var name = type.ClassName.Replace("<", "_").Replace(">", "").Replace(", ", "_").Replace(" ", "_").Replace(",", "_");
             context.AddSource($"{name}.g.cs", type.Code);
         }
     }
@@ -54,11 +54,11 @@ public class EitherGenerator : IIncrementalGenerator
             "System.Diagnostics.CodeAnalysis"
         );
 
-        var either = symbol.AllInterfaces
+        var interf = symbol.AllInterfaces
             .Single(x => x.ToDisplayString()
             .StartsWith("Definit.Results.NewApproach.IEither"));
 
-        var genericArgs = either.TypeArguments.Select(x => x.ToDisplayString()).ToArray();
+        var genericArgs = interf.TypeArguments.Select(x => x.ToDisplayString()).ToArray();
 
         var name = typeInfo.Name;
         var fullName = typeInfo.FullName;
@@ -75,6 +75,7 @@ public class EitherGenerator : IIncrementalGenerator
 
         var deconstructorOut = string.Join(", ", genericArgs.Select((x, i) => $"out Null<{x}>? t{i}"));
         var deconstructorAsignment = string.Join(", ", genericArgs.Select((x, i) => $"t{i}"));
+        var deconstructor = $"public void Deconstruct({deconstructorOut}) => ({deconstructorAsignment}) = Value;";
 
         var operators = string.Join("\n\n", genericArgs.Select(x => $$"""
         public static implicit operator {{name}}([DisallowNull] {{x}} value) => new (value); 
@@ -90,7 +91,7 @@ public class EitherGenerator : IIncrementalGenerator
                                                                                                                                                   
         {{constructors}}
                                                                                                                                                   
-        public void Deconstruct({{deconstructorOut}}) => ({{deconstructorAsignment}}) = Value;                                                          
+        {{deconstructor}}
                                                                                                                                                   
         public static implicit operator {{name}}([DisallowNull] Result.NullError value) => throw new Exception("{{fullName}}"); 
 

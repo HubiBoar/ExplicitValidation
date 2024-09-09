@@ -15,7 +15,7 @@ namespace Definit.Results.NewApproach
 		public Either([DisallowNull] T0 value) => Value = (value, null);
 		public Either([DisallowNull] T1 value) => Value = (null, value);
 		                                                                                                                                          
-		public void Deconstruct(out Null<T0>? t0, out Null<T1>? t1) => (t0, t1) = Value;                                                          
+		public void Deconstruct(out Null<T0>? t0, out Null<T1>? t1) => (t0, t1) = Value;
 		                                                                                                                                          
 		public static implicit operator Either<T0, T1>([DisallowNull] Result.NullError value) => throw new Exception("Definit.Results.NewApproach.Either<T0, T1>"); 
 		

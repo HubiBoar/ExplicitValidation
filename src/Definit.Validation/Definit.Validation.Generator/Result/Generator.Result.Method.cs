@@ -122,6 +122,7 @@ public class MethodGenerator : IIncrementalGenerator
     private static bool ShouldTransform(SyntaxNode node)
     {
         return node is MethodDeclarationSyntax method
+            && method.Modifiers.Any(x => x.IsKind(SyntaxKind.PrivateKeyword))
             && method.AttributeLists.Count > 0 
             && node.Parent is not null
             && node.Parent is TypeDeclarationSyntax type

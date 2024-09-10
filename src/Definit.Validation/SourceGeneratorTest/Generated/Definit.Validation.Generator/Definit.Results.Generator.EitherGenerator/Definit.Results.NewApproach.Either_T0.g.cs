@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Definit.Results.NewApproach
 {
-	readonly partial struct Either<T0> where T0 : notnull
+	readonly partial struct Either<T0> 
 	{
 		public (Null<T0>?, Null<string>?) Value { get; }                                                                                              
 		                                                                                                                                          

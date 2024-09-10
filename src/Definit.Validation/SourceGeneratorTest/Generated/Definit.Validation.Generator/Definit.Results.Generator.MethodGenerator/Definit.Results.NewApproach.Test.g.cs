@@ -6,6 +6,7 @@ namespace Definit.Results.NewApproach
 {
 	partial class Test 
 	{
+		
 		private Definit.Results.NewApproach.Result<string, Definit.Results.NewApproach.Test.NotFound>.Value PrivateRun(string t)
 		{
 		    try
@@ -29,7 +30,6 @@ namespace Definit.Results.NewApproach
 		        return new Definit.Results.NewApproach.Result<string, Definit.Results.NewApproach.Test.NotFound>.Value(Definit.Results.NewApproach.Test.NotFound.Create(exception)); 
 		    }
 		}
-		
 		
 	}
 }

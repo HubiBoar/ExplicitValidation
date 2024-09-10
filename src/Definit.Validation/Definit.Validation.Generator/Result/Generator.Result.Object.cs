@@ -58,7 +58,11 @@ public class ObjectGenerator : IIncrementalGenerator
         var typeMethods = type
             .GetMembers()
             .OfType<IMethodSymbol>()
-            .Where(x => x.IsStatic == false && x.IsExtern == false && x.Name != ".ctor")
+            .Where(x => 
+                x.IsStatic == false 
+                && x.IsExtern == false 
+                && x.MethodKind == MethodKind.Ordinary
+                && x.DeclaredAccessibility == Accessibility.Public)
             .Select(x => GenerateMethod(x, $"Wrapper"))
             .Where(x => x is not null)
             .ToArray();
@@ -98,7 +102,7 @@ public class ObjectGenerator : IIncrementalGenerator
 
     private static string? GenerateMethod(IMethodSymbol method, string typeName)
     {
-        var (returnType, taskPrefix, isResult) = GetReturnType(method); 
+        var (returnType, nullable, taskPrefix, isResult) = GetReturnType(method); 
 
         const string wrapper = "_wrapper";
 
@@ -112,13 +116,29 @@ public class ObjectGenerator : IIncrementalGenerator
 
         var awaitCall = isAsync ? "await " : "";
         var methodCall = $"{awaitCall}{wrapper}.Value.{method.Name}({string.Join(", ", method.Parameters.Select(x => x.Name))})";
-
         var returnCall = method.ReturnsVoid ? 
-        $"{methodCall}; return new {returnType}(Result.Success);"
+        $"""
+                {methodCall};
+                return new {returnType}.Value(new {returnType}(Result.Success));
+        """
         :
-        $"return new {returnType}({methodCall});";
+        nullable ?
+        $$"""
+                var _call_result = {{methodCall}};
 
-        var returnDeclaration = isAsync ? $"async {taskPrefix}<{returnType}>" : returnType;
+                if(_call_result is null)
+                {
+                    return new {{returnType}}.Value(new {{returnType}}(Result.Null));
+                }
+
+                return new {{returnType}}.Value(new {{returnType}}(_call_result));
+        """
+        :
+        $"""
+                return new {returnType}.Value(new {returnType}({methodCall}));
+        """;
+
+        var returnDeclaration = isAsync ? $"async {taskPrefix}<{returnType}.Value>" : $"{returnType}.Value";
 
         return $$"""
 
@@ -126,44 +146,60 @@ public class ObjectGenerator : IIncrementalGenerator
         {
             try
             {
-                {{returnCall}}
+        {{returnCall}}
             }
             catch (Exception exception)
             {
-                return new {{returnType}}(Error.Create(exception)); 
+                return new {{returnType}}.Value(new {{returnType}}(Error.Create(exception)));
             }
         }
         """;
     }
 
-    private static (string ReturnType, string? TaskPrefix, bool IsResult) GetReturnType(IMethodSymbol method)
+    private static (string ReturnType, bool nullable, string? TaskPrefix, bool IsResult) GetReturnType(IMethodSymbol method)
     {
+        bool nullable = false;
         if(method.ReturnsVoid)
         {
-            return ($"Result<Success, Error>", null, false);
+            return ($"Result<Success, Error>", nullable, null, false);
         }
 
         var returnName = method.ReturnType.ToDisplayString(); 
         var isTask = returnName.StartsWith(TaskType);
         var isValueTask = returnName.StartsWith(ValueTaskType);
-        
+
         var typeSymbol = (method.ReturnType as INamedTypeSymbol)!;
 
         if(isTask is false && isValueTask is false)
         {
-            return ($"Result<{returnName}, Error>", null, IsResult(typeSymbol));
+            if(typeSymbol.NullableAnnotation is NullableAnnotation.Annotated)
+            {
+                returnName = typeSymbol.WithNullableAnnotation(NullableAnnotation.NotAnnotated).ToDisplayString();
+                returnName = $"{returnName}, Null";
+                nullable = true;
+            }
+
+            return ($"Result<{returnName}, Error>", nullable, null, IsResult(typeSymbol));
         }
 
         var taskPrefix = isTask ? "Task" : "ValueTask";
 
         if(typeSymbol.IsGenericType == false)
         {
-            return ($"Result<Success, Error>", taskPrefix, false);
+            return ($"Result<Success, Error>", nullable, taskPrefix, false);
         }
 
         var taskSymbol = (typeSymbol.TypeArguments.Single() as INamedTypeSymbol)!;
 
-        return ($"Result<{taskSymbol.ToDisplayString()}, Error>", taskPrefix, IsResult(taskSymbol));
+        returnName = taskSymbol.ToDisplayString();
+
+        if(taskSymbol.NullableAnnotation is NullableAnnotation.Annotated)
+        {
+            returnName = taskSymbol.WithNullableAnnotation(NullableAnnotation.NotAnnotated).ToDisplayString();
+            returnName = $"{returnName}, Null";
+            nullable = true;
+        }
+        return ($"Result<{returnName}, Error>", nullable, taskPrefix, IsResult(taskSymbol));
 
         static bool IsResult(ITypeSymbol type)
         {

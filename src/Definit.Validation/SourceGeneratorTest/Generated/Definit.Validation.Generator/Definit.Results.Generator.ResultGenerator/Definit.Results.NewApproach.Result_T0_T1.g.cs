@@ -34,13 +34,13 @@ namespace Definit.Results.NewApproach
 		    _value = value;
 		}
 		                                                                                                                                          
-		public static implicit operator Result<T0, T1>([DisallowNull] Result.NullError value) => throw new Exception("Definit.Results.NewApproach.Result<T0, T1>"); 
+		public static implicit operator Result<T0, T1>([DisallowNull] ResultMatchError value) => throw new ResultMatchException<Definit.Results.NewApproach.Result<T0, T1>>(); 
 		
-		public static implicit operator Result<T0, T1>([DisallowNull] T0 value) => new (value); 
+		public static implicit operator Result<T0, T1>([DisallowNull] T0 value) => new (value!); 
 		public static implicit operator Result<T0, T1>([DisallowNull] Null<T0> value) => new (value); 
 		public static implicit operator Result<T0, T1>([DisallowNull] Null<T0>? value) => new (value!.Value); 
 		
-		public static implicit operator Result<T0, T1>([DisallowNull] T1 value) => new (value); 
+		public static implicit operator Result<T0, T1>([DisallowNull] T1 value) => new (value!); 
 		public static implicit operator Result<T0, T1>([DisallowNull] Null<T1> value) => new (value); 
 		public static implicit operator Result<T0, T1>([DisallowNull] Null<T1>? value) => new (value!.Value); 
 	}

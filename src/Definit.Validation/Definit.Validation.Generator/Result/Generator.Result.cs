@@ -75,7 +75,7 @@ public class ResultGenerator : IIncrementalGenerator
         var deconstructor = $"public void Deconstruct({deconstructorOut}) => ({deconstructorAsignment}) = Result;";
 
         var operators = string.Join("\n\n", genericArgs.Select(x => $$"""
-        public static implicit operator {{name}}([DisallowNull] {{x}} value) => new (value); 
+        public static implicit operator {{name}}([DisallowNull] {{x}} value) => new (value!); 
         public static implicit operator {{name}}([DisallowNull] Null<{{x}}> value) => new (value); 
         public static implicit operator {{name}}([DisallowNull] Null<{{x}}>? value) => new (value!.Value); 
         """));
@@ -108,7 +108,7 @@ public class ResultGenerator : IIncrementalGenerator
             _value = value;
         }
                                                                                                                                                   
-        public static implicit operator {{name}}([DisallowNull] Result.NullError value) => throw new Exception("{{fullName}}"); 
+        public static implicit operator {{name}}([DisallowNull] ResultMatchError value) => throw new ResultMatchException<{{fullName}}>(); 
 
         {{operators}}
         """);

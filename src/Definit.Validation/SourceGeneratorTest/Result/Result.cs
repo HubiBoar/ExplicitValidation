@@ -60,18 +60,17 @@ public static class GenerateMethod
     public sealed class PrivateAttribute : Attribute;
 }
 
-public readonly struct Success
-{
-    public static readonly Success Instance = new(); 
-}
+public readonly struct Success;
+public readonly struct ResultMatchError;
+public readonly struct Null;
+
+public sealed class ResultMatchException<T>() : Exception;
 
 public static class Result
 {
-    public static readonly Success Success = Success.Instance;
-
-    public sealed record NullError();
-
-    public static readonly NullError Null = new (); 
+    public static readonly Success Success = new ();
+    public static readonly Null Null = new (); 
+    public static readonly ResultMatchError MatchError = new (); 
 }
 
 public readonly struct Null<T>
@@ -83,20 +82,6 @@ public readonly struct Null<T>
     public static implicit operator Null<T>(T value) => new() { Value = value };
 }
 
-public interface IEither<T0, T1>
-    where T0: notnull
-    where T1: notnull
-{
-    public (Null<T0>?, Null<T1>?) Value { get; }
-
-    public void Deconstruct(out Null<T0>? t0, out Null<T1>? t1) => (t0, t1) = Value;
-}
-
-public interface IResult<T0, T1>
-    where T0 : notnull
-    where T1 : notnull, IError<T1>
-{
-}
 
 public readonly struct Error : IError<Error>
 {
@@ -119,22 +104,89 @@ public interface IError<TSelf>
     public abstract static TSelf Create(Exception exception); 
 }
 
-[GenerateResult]
-public partial struct Result<T0, T1> : IResult<T0, T1>
+
+public interface IEither<T0, T1>
+    where T0: notnull
+    where T1: notnull
+{
+    public (Null<T0>?, Null<T1>?) Value { get; }
+}
+
+public interface IEither<T0, T1, T2>
+    where T0: notnull
+    where T1: notnull
+    where T2: notnull
+{
+    public (Null<T0>?, Null<T1>?, Null<T2>?) Value { get; }
+}
+
+public interface IEither<T0, T1, T2, T3>
+    where T0: notnull
+    where T1: notnull
+    where T2: notnull
+    where T3: notnull
+{
+    public (Null<T0>?, Null<T1>?, Null<T2>?, Null<T3>?) Value { get; }
+}
+
+public interface IResult<T0, T1>
     where T0 : notnull
     where T1 : notnull, IError<T1>
 {
 }
 
-[GenerateEither]
-public partial struct Either<T0> : IEither<T0, string>
+public interface IResult<T0, T1, T2>
     where T0 : notnull
+    where T1 : notnull
+    where T2 : notnull, IError<T2>
+{
+}
+
+public interface IResult<T0, T1, T2, T3>
+    where T0 : notnull
+    where T1 : notnull
+    where T2 : notnull
+    where T3 : notnull, IError<T3>
 {
 }
 
 [GenerateEither]
+public partial struct Either<T0> : IEither<T0, string>
+    where T0 : notnull;
+
+[GenerateEither]
 public partial struct Either<T0, T1> : IEither<T0, T1>
     where T0 : notnull
+    where T1 : notnull;
+
+[GenerateEither]
+public partial struct Either<T0, T1, T2> : IEither<T0, T1, T2>
+    where T0 : notnull
     where T1 : notnull
-{
-}
+    where T2 : notnull;
+
+[GenerateEither]
+public partial struct Either<T0, T1, T2, T3> : IEither<T0, T1, T2, T3>
+    where T0 : notnull
+    where T1 : notnull
+    where T2 : notnull
+    where T3 : notnull;
+
+
+[GenerateResult]
+public partial struct Result<T0, T1> : IResult<T0, T1>
+    where T0 : notnull
+    where T1 : notnull, IError<T1>;
+
+[GenerateResult]
+public partial struct Result<T0, T1, T2> : IResult<T0, T1, T2>
+    where T0 : notnull
+    where T1 : notnull
+    where T2 : notnull, IError<T2>;
+
+[GenerateResult]
+public partial struct Result<T0, T1, T2, T3> : IResult<T0, T1, T2, T3>
+    where T0 : notnull
+    where T1 : notnull
+    where T2 : notnull
+    where T3 : notnull, IError<T3>;

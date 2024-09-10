@@ -100,6 +100,8 @@ public class ObjectGenerator : IIncrementalGenerator
     {
         var (returnType, taskPrefix, isResult) = GetReturnType(method); 
 
+        const string wrapper = "_wrapper";
+
         if(isResult)
         {
             return null;
@@ -109,27 +111,24 @@ public class ObjectGenerator : IIncrementalGenerator
         var parameters = method.Parameters.Length > 0 ? $", {string.Join(", ", method.Parameters.Select(x => x.ToDisplayString()))}" : "";
 
         var awaitCall = isAsync ? "await " : "";
-        var methodCall = $"{awaitCall}_value.Value.{method.Name}({string.Join(", ", method.Parameters.Select(x => x.Name))})";
+        var methodCall = $"{awaitCall}{wrapper}.Value.{method.Name}({string.Join(", ", method.Parameters.Select(x => x.Name))})";
 
-        var returnCall = method.ReturnsVoid ? $$"""
-            {{methodCall}};
-
-            return new {{returnType}}(Result.Success);
-        """
+        var returnCall = method.ReturnsVoid ? 
+        $"{methodCall}; return new {returnType}(Result.Success);"
         :
-        $"  return new {returnType}({methodCall});";
+        $"return new {returnType}({methodCall});";
 
         var returnDeclaration = isAsync ? $"async {taskPrefix}<{returnType}>" : returnType;
 
         return $$"""
 
-        public static {{returnDeclaration}} {{method.Name}}(this {{typeName}} _value{{parameters}})
+        public static {{returnDeclaration}} {{method.Name}}(this {{typeName}} {{wrapper}}{{parameters}})
         {
             try
             {
-            {{returnCall}}
+                {{returnCall}}
             }
-            catch(Exception exception)
+            catch (Exception exception)
             {
                 return new {{returnType}}(Error.Create(exception)); 
             }

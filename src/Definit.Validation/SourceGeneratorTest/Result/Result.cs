@@ -75,6 +75,7 @@ public static class Result
 }
 
 public readonly struct Null<T>
+    where T : notnull
 {
     public required T Value { get; init; }
 
@@ -83,6 +84,8 @@ public readonly struct Null<T>
 }
 
 public interface IEither<T0, T1>
+    where T0: notnull
+    where T1: notnull
 {
     public (Null<T0>?, Null<T1>?) Value { get; }
 
@@ -90,6 +93,7 @@ public interface IEither<T0, T1>
 }
 
 public interface IResult<T0, T1>
+    where T0 : notnull
     where T1 : notnull, IError<T1>
 {
 }
@@ -117,16 +121,20 @@ public interface IError<TSelf>
 
 [GenerateResult]
 public partial struct Result<T0, T1> : IResult<T0, T1>
+    where T0 : notnull
     where T1 : notnull, IError<T1>
 {
 }
 
 [GenerateEither]
 public partial struct Either<T0> : IEither<T0, string>
+    where T0 : notnull
 {
 }
 
 [GenerateEither]
 public partial struct Either<T0, T1> : IEither<T0, T1>
+    where T0 : notnull
+    where T1 : notnull
 {
 }

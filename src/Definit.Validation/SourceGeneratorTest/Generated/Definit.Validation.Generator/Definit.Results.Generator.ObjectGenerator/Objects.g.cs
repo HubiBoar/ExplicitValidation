@@ -16,205 +16,205 @@ public static class StringReader__Auto__Extensions
         return new Wrapper() { Value = value };
     }
     
-	public static Result<Success, Error> Close(this Wrapper _value)
+	public static Result<Success, Error> Close(this Wrapper _wrapper)
 	{
 	    try
 	    {
-	        return new Result<Success, Error>(_value.Value.Close());
+	        _wrapper.Value.Close(); return new Result<Success, Error>(Result.Success);
 	    }
-	    catch(Exception exception)
+	    catch (Exception exception)
 	    {
 	        return new Result<Success, Error>(Error.Create(exception)); 
 	    }
 	}
 	
-	public static Result<Success, Error> Dispose(this Wrapper _value, bool disposing)
+	public static Result<Success, Error> Dispose(this Wrapper _wrapper, bool disposing)
 	{
 	    try
 	    {
-	        return new Result<Success, Error>(_value.Value.Dispose(disposing));
+	        _wrapper.Value.Dispose(disposing); return new Result<Success, Error>(Result.Success);
 	    }
-	    catch(Exception exception)
+	    catch (Exception exception)
 	    {
 	        return new Result<Success, Error>(Error.Create(exception)); 
 	    }
 	}
 	
-	public static Result<int, Error> Peek(this Wrapper _value)
+	public static Result<int, Error> Peek(this Wrapper _wrapper)
 	{
 	    try
 	    {
-	        return new Result<int, Error>(_value.Value.Peek());
+	        return new Result<int, Error>(_wrapper.Value.Peek());
 	    }
-	    catch(Exception exception)
+	    catch (Exception exception)
 	    {
 	        return new Result<int, Error>(Error.Create(exception)); 
 	    }
 	}
 	
-	public static Result<int, Error> Read(this Wrapper _value)
+	public static Result<int, Error> Read(this Wrapper _wrapper)
 	{
 	    try
 	    {
-	        return new Result<int, Error>(_value.Value.Read());
+	        return new Result<int, Error>(_wrapper.Value.Read());
 	    }
-	    catch(Exception exception)
+	    catch (Exception exception)
 	    {
 	        return new Result<int, Error>(Error.Create(exception)); 
 	    }
 	}
 	
-	public static Result<int, Error> Read(this Wrapper _value, char[] buffer, int index, int count)
+	public static Result<int, Error> Read(this Wrapper _wrapper, char[] buffer, int index, int count)
 	{
 	    try
 	    {
-	        return new Result<int, Error>(_value.Value.Read(buffer, index, count));
+	        return new Result<int, Error>(_wrapper.Value.Read(buffer, index, count));
 	    }
-	    catch(Exception exception)
+	    catch (Exception exception)
 	    {
 	        return new Result<int, Error>(Error.Create(exception)); 
 	    }
 	}
 	
-	public static Result<int, Error> Read(this Wrapper _value, System.Span<char> buffer)
+	public static Result<int, Error> Read(this Wrapper _wrapper, System.Span<char> buffer)
 	{
 	    try
 	    {
-	        return new Result<int, Error>(_value.Value.Read(buffer));
+	        return new Result<int, Error>(_wrapper.Value.Read(buffer));
 	    }
-	    catch(Exception exception)
+	    catch (Exception exception)
 	    {
 	        return new Result<int, Error>(Error.Create(exception)); 
 	    }
 	}
 	
-	public static async Task<Result<int, Error>> ReadAsync(this Wrapper _value, char[] buffer, int index, int count)
+	public static async Task<Result<int, Error>> ReadAsync(this Wrapper _wrapper, char[] buffer, int index, int count)
 	{
 	    try
 	    {
-	        return new Result<int, Error>(await _value.Value.ReadAsync(buffer, index, count));
+	        return new Result<int, Error>(await _wrapper.Value.ReadAsync(buffer, index, count));
 	    }
-	    catch(Exception exception)
+	    catch (Exception exception)
 	    {
 	        return new Result<int, Error>(Error.Create(exception)); 
 	    }
 	}
 	
-	public static async ValueTask<Result<int, Error>> ReadAsync(this Wrapper _value, System.Memory<char> buffer, System.Threading.CancellationToken cancellationToken)
+	public static async ValueTask<Result<int, Error>> ReadAsync(this Wrapper _wrapper, System.Memory<char> buffer, System.Threading.CancellationToken cancellationToken)
 	{
 	    try
 	    {
-	        return new Result<int, Error>(await _value.Value.ReadAsync(buffer, cancellationToken));
+	        return new Result<int, Error>(await _wrapper.Value.ReadAsync(buffer, cancellationToken));
 	    }
-	    catch(Exception exception)
+	    catch (Exception exception)
 	    {
 	        return new Result<int, Error>(Error.Create(exception)); 
 	    }
 	}
 	
-	public static Result<int, Error> ReadBlock(this Wrapper _value, System.Span<char> buffer)
+	public static Result<int, Error> ReadBlock(this Wrapper _wrapper, System.Span<char> buffer)
 	{
 	    try
 	    {
-	        return new Result<int, Error>(_value.Value.ReadBlock(buffer));
+	        return new Result<int, Error>(_wrapper.Value.ReadBlock(buffer));
 	    }
-	    catch(Exception exception)
+	    catch (Exception exception)
 	    {
 	        return new Result<int, Error>(Error.Create(exception)); 
 	    }
 	}
 	
-	public static async Task<Result<int, Error>> ReadBlockAsync(this Wrapper _value, char[] buffer, int index, int count)
+	public static async Task<Result<int, Error>> ReadBlockAsync(this Wrapper _wrapper, char[] buffer, int index, int count)
 	{
 	    try
 	    {
-	        return new Result<int, Error>(await _value.Value.ReadBlockAsync(buffer, index, count));
+	        return new Result<int, Error>(await _wrapper.Value.ReadBlockAsync(buffer, index, count));
 	    }
-	    catch(Exception exception)
+	    catch (Exception exception)
 	    {
 	        return new Result<int, Error>(Error.Create(exception)); 
 	    }
 	}
 	
-	public static async ValueTask<Result<int, Error>> ReadBlockAsync(this Wrapper _value, System.Memory<char> buffer, System.Threading.CancellationToken cancellationToken)
+	public static async ValueTask<Result<int, Error>> ReadBlockAsync(this Wrapper _wrapper, System.Memory<char> buffer, System.Threading.CancellationToken cancellationToken)
 	{
 	    try
 	    {
-	        return new Result<int, Error>(await _value.Value.ReadBlockAsync(buffer, cancellationToken));
+	        return new Result<int, Error>(await _wrapper.Value.ReadBlockAsync(buffer, cancellationToken));
 	    }
-	    catch(Exception exception)
+	    catch (Exception exception)
 	    {
 	        return new Result<int, Error>(Error.Create(exception)); 
 	    }
 	}
 	
-	public static Result<string?, Error> ReadLine(this Wrapper _value)
+	public static Result<string?, Error> ReadLine(this Wrapper _wrapper)
 	{
 	    try
 	    {
-	        return new Result<string?, Error>(_value.Value.ReadLine());
+	        return new Result<string?, Error>(_wrapper.Value.ReadLine());
 	    }
-	    catch(Exception exception)
+	    catch (Exception exception)
 	    {
 	        return new Result<string?, Error>(Error.Create(exception)); 
 	    }
 	}
 	
-	public static async Task<Result<string?, Error>> ReadLineAsync(this Wrapper _value)
+	public static async Task<Result<string?, Error>> ReadLineAsync(this Wrapper _wrapper)
 	{
 	    try
 	    {
-	        return new Result<string?, Error>(await _value.Value.ReadLineAsync());
+	        return new Result<string?, Error>(await _wrapper.Value.ReadLineAsync());
 	    }
-	    catch(Exception exception)
+	    catch (Exception exception)
 	    {
 	        return new Result<string?, Error>(Error.Create(exception)); 
 	    }
 	}
 	
-	public static async ValueTask<Result<string?, Error>> ReadLineAsync(this Wrapper _value, System.Threading.CancellationToken cancellationToken)
+	public static async ValueTask<Result<string?, Error>> ReadLineAsync(this Wrapper _wrapper, System.Threading.CancellationToken cancellationToken)
 	{
 	    try
 	    {
-	        return new Result<string?, Error>(await _value.Value.ReadLineAsync(cancellationToken));
+	        return new Result<string?, Error>(await _wrapper.Value.ReadLineAsync(cancellationToken));
 	    }
-	    catch(Exception exception)
+	    catch (Exception exception)
 	    {
 	        return new Result<string?, Error>(Error.Create(exception)); 
 	    }
 	}
 	
-	public static Result<string, Error> ReadToEnd(this Wrapper _value)
+	public static Result<string, Error> ReadToEnd(this Wrapper _wrapper)
 	{
 	    try
 	    {
-	        return new Result<string, Error>(_value.Value.ReadToEnd());
+	        return new Result<string, Error>(_wrapper.Value.ReadToEnd());
 	    }
-	    catch(Exception exception)
+	    catch (Exception exception)
 	    {
 	        return new Result<string, Error>(Error.Create(exception)); 
 	    }
 	}
 	
-	public static async Task<Result<string, Error>> ReadToEndAsync(this Wrapper _value)
+	public static async Task<Result<string, Error>> ReadToEndAsync(this Wrapper _wrapper)
 	{
 	    try
 	    {
-	        return new Result<string, Error>(await _value.Value.ReadToEndAsync());
+	        return new Result<string, Error>(await _wrapper.Value.ReadToEndAsync());
 	    }
-	    catch(Exception exception)
+	    catch (Exception exception)
 	    {
 	        return new Result<string, Error>(Error.Create(exception)); 
 	    }
 	}
 	
-	public static async Task<Result<string, Error>> ReadToEndAsync(this Wrapper _value, System.Threading.CancellationToken cancellationToken)
+	public static async Task<Result<string, Error>> ReadToEndAsync(this Wrapper _wrapper, System.Threading.CancellationToken cancellationToken)
 	{
 	    try
 	    {
-	        return new Result<string, Error>(await _value.Value.ReadToEndAsync(cancellationToken));
+	        return new Result<string, Error>(await _wrapper.Value.ReadToEndAsync(cancellationToken));
 	    }
-	    catch(Exception exception)
+	    catch (Exception exception)
 	    {
 	        return new Result<string, Error>(Error.Create(exception)); 
 	    }

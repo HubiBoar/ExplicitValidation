@@ -1,5 +1,7 @@
+using System.Text;
 using Definit.Results.NewApproach;
 
+[module: GenerateObject(typeof(StringBuilder))]
 [module: GenerateObject<StringReader>]
 
 namespace Definit.Results.NewApproach;
@@ -26,7 +28,23 @@ public partial class Test
 }
 
 [System.AttributeUsage(System.AttributeTargets.Module, AllowMultiple = false)]
-public sealed class GenerateObjectAttribute<T> : Attribute where T : class;
+public sealed class GenerateObjectAttribute : Attribute
+{
+    public bool AllowUnsafe { get; set; }
+
+    public Type Type { get; }
+
+    public GenerateObjectAttribute(Type type)
+    {
+        Type = type;
+    }
+}
+
+[System.AttributeUsage(System.AttributeTargets.Module, AllowMultiple = false)]
+public sealed class GenerateObjectAttribute<T> : Attribute
+{
+    public bool AllowUnsafe { get; set; }
+};
 
 [System.AttributeUsage(System.AttributeTargets.Struct, AllowMultiple = false)]
 public sealed class GenerateEitherAttribute : Attribute;

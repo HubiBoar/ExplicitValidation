@@ -89,7 +89,8 @@ public class MethodGenerator : IIncrementalGenerator
             var declaration = $"{method.Keyword}{decStatic}{decAsync} {decReturn} {decName}{decGeneric}({decParameters})";
 
             var awaitCall = isAsync ? "await " : "";
-            var methodCall = $"{awaitCall}{method.Symbol.Name}({string.Join(", ", method.Symbol.Parameters.Select(x => x.Name))})";
+            var parametersCall = method.Symbol.GetCallingParameters();
+            var methodCall = $"{awaitCall}{method.Symbol.Name}({parametersCall})";
             var errorCall = returnError.ToDisplayString();
 
             builder.AppendLine().AppendLine($$"""
@@ -211,29 +212,71 @@ public class MethodGenerator : IIncrementalGenerator
 
 public static class GeneratorExtensions
 {
+    public static string GetCallingParameters(this IMethodSymbol method)
+    {
+        var parametersCall = method.Parameters.Select(x => GetParam(x)).ToArray();
+
+        return string.Join(", ", parametersCall);
+
+        static string GetParam(IParameterSymbol p)
+        {
+            return p.RefKind switch
+            {
+                RefKind.Ref => $"ref {p.Name}", 
+                RefKind.In => $"in {p.Name}", 
+                RefKind.Out => $"out {p.Name}",  
+                RefKind.RefReadOnlyParameter => $"ref readonly {p.Name}", 
+                _ => p.Name
+            };
+        }
+    }
+
+    public static bool IsUnsafe(this IMethodSymbol method)
+    {
+        return method.Parameters.Select(x => x.Type).Any(x => x.TypeKind == TypeKind.Pointer);
+    }
+
     public static string GetMethodGenericArgs(this IMethodSymbol method)
     {
         var isGeneric = method.IsGenericMethod;
-        var genericParams = isGeneric ? string.Join(", ", method.TypeArguments.Select(x => x.ToDisplayString())) : "";
-        return isGeneric ? $"<{genericParams}>" : "";
+
+        if(isGeneric is false)
+        {
+            return string.Empty;
+        }
+
+        var genericParams = string.Join(", ", method.TypeArguments.Select(x => x.ToDisplayString()));
+
+        return $"<{genericParams}>";
     }
 
     public static string GetMethodGenericConstraints(this IMethodSymbol method)
     {
         var isGeneric = method.IsGenericMethod;
+
+        if(isGeneric is false)
+        {
+            return string.Empty;
+        }
+
+        var parameters = method
+            .TypeArguments
+            .OfType<ITypeParameterSymbol>()
+            .Where(x => x.ConstraintTypes.Length > 0)
+            .ToArray();
+
+        if(parameters.Length == 0)
+        {
+            return string.Empty;
+        }
+
         return
-            isGeneric 
-            ? 
             "\n\t" + string
-                .Join("\n\t", method
-                    .TypeArguments
-                    .OfType<ITypeParameterSymbol>()
+                .Join("\n\t", parameters
                     .Select(x => "where " + x.ToDisplayString() + " : " + string
                         .Join(", ", x
                             .ConstraintTypes
                             .Select(y => y
-                                .ToDisplayString()))))
-            :
-            "";
+                                .ToDisplayString()))));
     }
 }

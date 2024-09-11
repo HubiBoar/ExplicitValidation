@@ -14,7 +14,6 @@ public static class StringReader__Auto__Extensions
     public readonly struct Wrapper
     {
         public required System.IO.StringReader Value { get; init; }
-
         
 		public Result<Success, Error>.Value Close()
 		{

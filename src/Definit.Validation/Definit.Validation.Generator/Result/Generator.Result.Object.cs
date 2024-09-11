@@ -1,9 +1,6 @@
 using System.Collections.Immutable;
 using System.Text;
-using Definit.Validation.Generator;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Definit.Results.Generator;
 
@@ -19,10 +16,8 @@ public class ObjectGenerator : IIncrementalGenerator
     {
         var provider = context.SyntaxProvider.ForAttributeWithMetadataName
         (
-            "Definit.Results.NewApproach.GenerateObjectAttribute`1",
+            "Definit.Results.NewApproach.GenerateObjectAttribute",
             predicate: (c, _) => true,
-                // c is TypeDeclarationSyntax type
-                // && type.Modifiers.Any(m => m.IsKind(SyntaxKind.PartialKeyword)),
 
             transform: (n, _) => n
         );
@@ -39,20 +34,15 @@ public class ObjectGenerator : IIncrementalGenerator
         ImmutableArray<GeneratorAttributeSyntaxContext> typeList
     )
     {
-        foreach(var type in typeList.Select(x => GetType(x)))
+        foreach(var type in typeList.Select(x => GetType(compilation, x)))
         {
             var name = type.ClassName.Replace("<", "_").Replace(">", "").Replace(", ", "_").Replace(" ", "_").Replace(",", "_");
             context.AddSource($"{name}.g.cs", type.Code);
         }
     }
 
-    private static (string Code, string ClassName) GetType
-    (
-        GeneratorAttributeSyntaxContext context
-    )
+    public static (string Code, string ClassName) Generate(ITypeSymbol type, bool allowUnsafe)
     {
-        var type = context.Attributes.Single().AttributeClass!.TypeArguments.Single();
-
         var methods = new StringBuilder();
 
         var typeMethods = type
@@ -63,7 +53,7 @@ public class ObjectGenerator : IIncrementalGenerator
                 && x.IsExtern == false 
                 && x.MethodKind == MethodKind.Ordinary
                 && x.DeclaredAccessibility == Accessibility.Public)
-            .Select(x => GenerateMethod(x, $"Wrapper"))
+            .Select(x => GenerateMethod(x, $"Wrapper", allowUnsafe))
             .Where(x => x is not null)
             .ToArray();
 
@@ -91,21 +81,39 @@ public class ObjectGenerator : IIncrementalGenerator
             public readonly struct Wrapper
             {
                 public required {{type.ToDisplayString()}} Value { get; init; }
-
                 {{allMethods}}
             }
         }
         """;
-        return (code, "Objects");
-
-
+        return (code, type.Name);
     }
 
-    private static string? GenerateMethod(IMethodSymbol method, string typeName)
+    private static (string Code, string ClassName) GetType
+    (
+        Compilation compilation,
+        GeneratorAttributeSyntaxContext context
+    )
+    {
+        var typeInAttribute = context.Attributes.Single().ConstructorArguments.Single().Value!;
+        var value = context.Attributes.Single().NamedArguments.SingleOrDefault(x => x.Key == "AllowUnsafe").Value.Value;
+        bool allowUnsafe = value is null ? false : bool.Parse(value.ToString());
+        var type = compilation.GetTypeByMetadataName(typeInAttribute.ToString())!;
+
+        return Generate(type, allowUnsafe);
+    }
+
+    private static string? GenerateMethod(IMethodSymbol method, string typeName, bool allowUnsafe)
     {
         var (returnType, nullable, taskPrefix, isResult) = GetReturnType(method); 
 
         if(isResult)
+        {
+            return null;
+        }
+
+        var isUnsafe = method.IsUnsafe();
+
+        if(allowUnsafe == false && isUnsafe)
         {
             return null;
         }
@@ -116,8 +124,9 @@ public class ObjectGenerator : IIncrementalGenerator
         var decGeneric = method.GetMethodGenericArgs();
         var decGenericConstraints = method.GetMethodGenericConstraints();
 
+        var parametersCall = method.GetCallingParameters();
         var awaitCall = isAsync ? "await " : "";
-        var methodCall = $"{awaitCall}this.Value.{method.Name}({string.Join(", ", method.Parameters.Select(x => x.Name))})";
+        var methodCall = $"{awaitCall}this.Value.{method.Name}({string.Join(", ", parametersCall)})";
         var returnCall = method.ReturnsVoid ? 
         $"""
                 {methodCall};
@@ -142,9 +151,12 @@ public class ObjectGenerator : IIncrementalGenerator
 
         var returnDeclaration = isAsync ? $"async {taskPrefix}<{returnType}.Value>" : $"{returnType}.Value";
 
+        var decNew = method.Name == "ToString" && method.Parameters.Length == 0 ? "new " : "";
+        var decUnsafe = isUnsafe ? "unsafe " : "";
+
         return $$"""
 
-        public {{returnDeclaration}} {{method.Name}}{{decGeneric}}({{parameters}}){{decGenericConstraints}}
+        public {{decUnsafe}}{{decNew}}{{returnDeclaration}} {{method.Name}}{{decGeneric}}({{parameters}}){{decGenericConstraints}}
         {
             try
             {
@@ -208,5 +220,6 @@ public class ObjectGenerator : IIncrementalGenerator
             return type.AllInterfaces.Any(x => x.ToDisplayString().StartsWith(ResultType));
         }
     }
+
 }
 

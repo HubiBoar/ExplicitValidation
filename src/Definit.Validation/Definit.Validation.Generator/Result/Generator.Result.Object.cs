@@ -34,16 +34,42 @@ public class ObjectGenerator : IIncrementalGenerator
         ImmutableArray<GeneratorAttributeSyntaxContext> typeList
     )
     {
-        foreach(var type in typeList.Select(x => GetType(compilation, x)))
+        foreach(var type in typeList
+            .SelectMany(x => x.Attributes
+                .Where(y => y.AttributeClass is not null && y.AttributeClass!
+                    .ToDisplayString()
+                    .StartsWith("Definit.Results.NewApproach.GenerateObjectAttribute")) 
+                .Select(x => GetType(compilation, x))))
+
         {
             var name = type.ClassName.Replace("<", "_").Replace(">", "").Replace(", ", "_").Replace(" ", "_").Replace(",", "_");
             context.AddSource($"{name}.g.cs", type.Code);
         }
     }
 
-    public static (string Code, string ClassName) Generate(ITypeSymbol type, bool allowUnsafe)
+    public static (string Code, string ClassName) Generate(INamedTypeSymbol type, bool allowUnsafe)
     {
         var methods = new StringBuilder();
+        
+        if(type.IsUnboundGenericType)
+        {
+            var typeMethod = type
+                .GetMembers()
+                .Select(x => x.ToDisplayString());
+
+            var c = string.Join("\n//", typeMethod);
+            return ("//UnboundGeneric\n//" + c, type.Name);
+        }
+
+        if(type.IsGenericType)
+        {
+            var typeMethod = type
+                .GetMembers()
+                .Select(x => x.ToDisplayString());
+
+            var c = string.Join("\n//", typeMethod);
+            return ("//Generic\n//" + c, type.Name);
+        }
 
         var typeMethods = type
             .GetMembers()
@@ -91,13 +117,12 @@ public class ObjectGenerator : IIncrementalGenerator
     private static (string Code, string ClassName) GetType
     (
         Compilation compilation,
-        GeneratorAttributeSyntaxContext context
+        AttributeData attribute
     )
     {
-        var typeInAttribute = context.Attributes.Single().ConstructorArguments.Single().Value!;
-        var value = context.Attributes.Single().NamedArguments.SingleOrDefault(x => x.Key == "AllowUnsafe").Value.Value;
+        var type = (INamedTypeSymbol)attribute.ConstructorArguments.Single().Value!;
+        var value = attribute.NamedArguments.SingleOrDefault(x => x.Key == "AllowUnsafe").Value.Value;
         bool allowUnsafe = value is null ? false : bool.Parse(value.ToString());
-        var type = compilation.GetTypeByMetadataName(typeInAttribute.ToString())!;
 
         return Generate(type, allowUnsafe);
     }

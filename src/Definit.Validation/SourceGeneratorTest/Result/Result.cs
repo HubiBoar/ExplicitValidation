@@ -3,6 +3,8 @@ using Definit.Results.NewApproach;
 
 [module: GenerateObject(typeof(StringBuilder))]
 [module: GenerateObject<StringReader>]
+[module: GenerateObject(typeof(List<>))]
+[module: GenerateObject<List<string>>]
 
 namespace Definit.Results.NewApproach;
 
@@ -27,7 +29,7 @@ public partial class Test
     }
 }
 
-[System.AttributeUsage(System.AttributeTargets.Module, AllowMultiple = false)]
+[System.AttributeUsage(System.AttributeTargets.Module, AllowMultiple = true)]
 public sealed class GenerateObjectAttribute : Attribute
 {
     public bool AllowUnsafe { get; set; }
@@ -40,7 +42,7 @@ public sealed class GenerateObjectAttribute : Attribute
     }
 }
 
-[System.AttributeUsage(System.AttributeTargets.Module, AllowMultiple = false)]
+[System.AttributeUsage(System.AttributeTargets.Module, AllowMultiple = true)]
 public sealed class GenerateObjectAttribute<T> : Attribute
 {
     public bool AllowUnsafe { get; set; }

@@ -34,7 +34,12 @@ public class ObjectGenericGenerator : IIncrementalGenerator
         ImmutableArray<GeneratorAttributeSyntaxContext> typeList
     )
     {
-        foreach(var type in typeList.Select(x => GetType(x)))
+        foreach(var type in typeList
+            .SelectMany(x => x.Attributes
+                .Where(y => y.AttributeClass is not null && y.AttributeClass!
+                    .ToDisplayString()
+                    .StartsWith("Definit.Results.NewApproach.GenerateObjectAttribute<")) 
+                .Select(GetType)))
         {
             var name = type.ClassName.Replace("<", "_").Replace(">", "").Replace(", ", "_").Replace(" ", "_").Replace(",", "_");
             context.AddSource($"{name}.g.cs", type.Code);
@@ -43,14 +48,14 @@ public class ObjectGenericGenerator : IIncrementalGenerator
 
     private static (string Code, string ClassName) GetType
     (
-        GeneratorAttributeSyntaxContext context
+        AttributeData attribute
     )
     {
-        var type = context.Attributes.Single().AttributeClass!.TypeArguments.Single();
-        var value = context.Attributes.Single().NamedArguments.SingleOrDefault(x => x.Key == "AllowUnsafe").Value.Value;
+        var type = attribute.AttributeClass!.TypeArguments.Single() as INamedTypeSymbol;
+        var value = attribute.NamedArguments.SingleOrDefault(x => x.Key == "AllowUnsafe").Value.Value;
         bool allowUnsafe = value is null ? false : bool.Parse(value.ToString());
         
-        return ObjectGenerator.Generate(type, allowUnsafe);
+        return ObjectGenerator.Generate(type!, allowUnsafe);
     }
 }
 

@@ -7,7 +7,7 @@ namespace Definit.Results.NewApproach
 	partial class Test 
 	{
 		
-		private Definit.Results.NewApproach.Result<string, Definit.Results.NewApproach.Test.NotFound>.Value PrivateRun(string t) 
+		private Definit.Results.NewApproach.Result<string, Definit.Results.NewApproach.Test.NotFound>.Value PrivateRun(string t)
 		{
 		    try
 		    {
@@ -19,7 +19,7 @@ namespace Definit.Results.NewApproach
 		    }
 		}
 		
-		public static async System.Threading.Tasks.Task<Definit.Results.NewApproach.Result<T, Definit.Results.NewApproach.Test.NotFound>.Value> PublicRun<T>(T t) 
+		public static async System.Threading.Tasks.Task<Definit.Results.NewApproach.Result<T, Definit.Results.NewApproach.Test.NotFound>.Value> PublicRun<T>(T t)
 			where T : Definit.Results.NewApproach.IError<T>
 		{
 		    try

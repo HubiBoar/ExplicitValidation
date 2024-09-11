@@ -72,7 +72,7 @@ public class ObjectGenerator : IIncrementalGenerator
             methods.AppendLine(method);
         }
 
-        var allMethods = string.Join("\n\t", methods.ToString().Split('\n'));
+        var allMethods = string.Join("\n\t\t", methods.ToString().Split('\n'));
 
         var code = $$"""
         #nullable enable
@@ -83,16 +83,17 @@ public class ObjectGenerator : IIncrementalGenerator
 
         public static class {{type.Name}}__Auto__Extensions
         {
-            public readonly struct Wrapper
-            {
-                public required {{type.ToDisplayString()}} Value { get; init; }
-            }
-
             public static Wrapper Results(this {{type.ToDisplayString()}} value)
             {
                 return new Wrapper() { Value = value };
             }
-            {{allMethods}}
+
+            public readonly struct Wrapper
+            {
+                public required {{type.ToDisplayString()}} Value { get; init; }
+
+                {{allMethods}}
+            }
         }
         """;
         return (code, "Objects");
@@ -104,18 +105,19 @@ public class ObjectGenerator : IIncrementalGenerator
     {
         var (returnType, nullable, taskPrefix, isResult) = GetReturnType(method); 
 
-        const string wrapper = "_wrapper";
-
         if(isResult)
         {
             return null;
         }
 
         var isAsync = taskPrefix is not null;
-        var parameters = method.Parameters.Length > 0 ? $", {string.Join(", ", method.Parameters.Select(x => x.ToDisplayString()))}" : "";
+        var parameters = string.Join(", ", method.Parameters.Select(x => x.ToDisplayString()));
+
+        var decGeneric = method.GetMethodGenericArgs();
+        var decGenericConstraints = method.GetMethodGenericConstraints();
 
         var awaitCall = isAsync ? "await " : "";
-        var methodCall = $"{awaitCall}{wrapper}.Value.{method.Name}({string.Join(", ", method.Parameters.Select(x => x.Name))})";
+        var methodCall = $"{awaitCall}this.Value.{method.Name}({string.Join(", ", method.Parameters.Select(x => x.Name))})";
         var returnCall = method.ReturnsVoid ? 
         $"""
                 {methodCall};
@@ -142,7 +144,7 @@ public class ObjectGenerator : IIncrementalGenerator
 
         return $$"""
 
-        public static {{returnDeclaration}} {{method.Name}}(this {{typeName}} {{wrapper}}{{parameters}})
+        public {{returnDeclaration}} {{method.Name}}{{decGeneric}}({{parameters}}){{decGenericConstraints}}
         {
             try
             {

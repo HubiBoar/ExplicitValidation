@@ -18,9 +18,10 @@ public partial class Test
     }
 
     [GenerateMethod.Public]
-    private static Task<Result<string, NotFound>> _PublicRun(string t)
+    private static Task<Result<T, NotFound>> _PublicRun<T>(T t)
+        where T : IError<T>
     {
-        return Task.FromResult<Result<string, NotFound>>(t);
+        return Task.FromResult<Result<T, NotFound>>(t);
     }
 }
 

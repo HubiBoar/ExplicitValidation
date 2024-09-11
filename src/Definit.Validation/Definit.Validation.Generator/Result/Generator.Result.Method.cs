@@ -82,15 +82,34 @@ public class MethodGenerator : IIncrementalGenerator
             var decAsync = isAsync ? " async" : ""; 
             var decReturn = isAsync ? $"{TaskType}{returnValue}>" : returnValue;
             var decName = method.Symbol.Name.Remove(0, 1);
+            var isGeneric = method.Symbol.IsGenericMethod;
+            var genericParams = isGeneric ? string.Join(", ", method.Symbol.TypeArguments.Select(x => x.ToDisplayString())) : "";
+            var decGeneric = isGeneric ? $"<{genericParams}>" : "";
+            var decGenericConstraints =
+                isGeneric 
+                ? 
+                "\n\t" + string
+                    .Join("\n\t", method
+                        .Symbol
+                        .TypeArguments
+                        .OfType<ITypeParameterSymbol>()
+                        .Select(x => "where " + x.ToDisplayString() + " : " + string
+                            .Join(", ", x
+                                .ConstraintTypes
+                                .Select(y => y
+                                    .ToDisplayString()))))
+                :
+                "";
+
             var decParameters = string.Join(", ", method.Symbol.Parameters.Select(x => x.ToDisplayString()));
-            var declaration = $"{method.Keyword}{decStatic}{decAsync} {decReturn} {decName}({decParameters})";
+            var declaration = $"{method.Keyword}{decStatic}{decAsync} {decReturn} {decName}{decGeneric}({decParameters})";
 
             var awaitCall = isAsync ? "await " : "";
             var methodCall = $"{awaitCall}{method.Symbol.Name}({string.Join(", ", method.Symbol.Parameters.Select(x => x.Name))})";
             var errorCall = returnError.ToDisplayString();
 
             builder.AppendLine().AppendLine($$"""
-            {{declaration}}
+            {{declaration}}{{decGenericConstraints}}
             {
                 try
                 {

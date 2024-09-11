@@ -264,7 +264,6 @@ public static class GeneratorExtensions
 
     public static string GetGenericConstraints(this IEnumerable<ITypeSymbol> typeArguments)
     {
-        
         var parameters = 
             typeArguments
             .OfType<ITypeParameterSymbol>()

@@ -94,6 +94,7 @@ public class ObjectGenerator : IIncrementalGenerator
         #nullable enable
 
         using Definit.Results.NewApproach;
+        using System.Diagnostics.CodeAnalysis;
 
         namespace {{type.ContainingNamespace.ToDisplayString()}};
 
@@ -131,7 +132,7 @@ public class ObjectGenerator : IIncrementalGenerator
     {
         try
         {
-            var (returnType, nullable, taskPrefix, isResult) = GetReturnType(method); 
+            var (returnType, nullable, notNull, taskPrefix, isResult) = GetReturnType(method); 
 
             if(isResult)
             {
@@ -154,6 +155,7 @@ public class ObjectGenerator : IIncrementalGenerator
             var parametersCall = method.GetCallingParameters();
             var awaitCall = isAsync ? "await " : "";
             var methodCall = $"{awaitCall}this.Value.{method.Name}({string.Join(", ", parametersCall)})";
+            var callResult = notNull is not null ? $$"""new {{notNull}}() { Value = _call_result }""" : "_call_result";  
             var returnCall = method.ReturnsVoid ? 
             $"""
                     {methodCall};
@@ -169,7 +171,7 @@ public class ObjectGenerator : IIncrementalGenerator
                         return new {{returnType}}.Value(new {{returnType}}(Result.Null));
                     }
 
-                    return new {{returnType}}.Value(new {{returnType}}(_call_result));
+                    return new {{returnType}}.Value(new {{returnType}}({{callResult}}));
             """
             :
             $"""
@@ -198,54 +200,60 @@ public class ObjectGenerator : IIncrementalGenerator
         }
         catch (Exception exception)
         {
-            return $"//{method.ReturnType.ToDisplayString()} :: {method.ToDisplayString()}\n// " + string.Join("\n// ", exception.ToString().Split('\n'));
+            return $"// EXCEPTION\n// {method.ReturnType.ToDisplayString()} :: {method.ToDisplayString()}\n// " + string.Join("\n// ", exception.ToString().Split('\n'));
         }
     }
 
-    private static (string ReturnType, bool nullable, string? TaskPrefix, bool IsResult) GetReturnType(IMethodSymbol method)
+    private static (string ReturnType, bool nullable, string? notNullOnReturn, string? TaskPrefix, bool IsResult) GetReturnType(IMethodSymbol method)
     {
-        bool nullable = false;
         if(method.ReturnsVoid)
         {
-            return ($"Result<Success, Error>", nullable, null, false);
+            return ($"Result<Success, Error>", false, null, null, false);
         }
 
         var returnName = method.ReturnType.ToDisplayString(); 
         var isTask = returnName.StartsWith(TaskType);
         var isValueTask = returnName.StartsWith(ValueTaskType);
 
-        var typeSymbol = (method.ReturnType as INamedTypeSymbol)!;
-
         if(isTask is false && isValueTask is false)
         {
-            if(typeSymbol.NullableAnnotation is NullableAnnotation.Annotated)
+            if(method.ReturnType.NullableAnnotation is NullableAnnotation.Annotated)
             {
-                returnName = typeSymbol.WithNullableAnnotation(NullableAnnotation.NotAnnotated).ToDisplayString();
-                returnName = $"{returnName}, Null";
-                nullable = true;
+                returnName = method.ReturnType.WithNullableAnnotation(NullableAnnotation.NotAnnotated).ToDisplayString();
+                if(method.ReturnType is INamedTypeSymbol == false)
+                {
+                    return ($"Result<NotNull<{returnName}>, Null, Error>", true, $"NotNull<{returnName}>", null, IsResult(method.ReturnType));
+                }
+                return ($"Result<{returnName}, Null, Error>", true, null, null, IsResult(method.ReturnType));
             }
 
-            return ($"Result<{returnName}, Error>", nullable, null, IsResult(typeSymbol));
+            return ($"Result<{returnName}, Error>", false, null, null, IsResult(method.ReturnType));
         }
 
         var taskPrefix = isTask ? "Task" : "ValueTask";
 
+        var typeSymbol = (method.ReturnType as INamedTypeSymbol)!;  
+
         if(typeSymbol.IsGenericType == false)
         {
-            return ($"Result<Success, Error>", nullable, taskPrefix, false);
+            return ($"Result<Success, Error>", false, null, taskPrefix, false);
         }
 
-        var taskSymbol = (typeSymbol.TypeArguments.Single() as INamedTypeSymbol)!;
+        var taskSymbol = typeSymbol.TypeArguments.Single();
 
         returnName = taskSymbol.ToDisplayString();
 
         if(taskSymbol.NullableAnnotation is NullableAnnotation.Annotated)
         {
             returnName = taskSymbol.WithNullableAnnotation(NullableAnnotation.NotAnnotated).ToDisplayString();
-            returnName = $"{returnName}, Null";
-            nullable = true;
+            if(method.ReturnType is INamedTypeSymbol == false)
+            {
+                return ($"Result<NotNull<{returnName}>, Null, Error>", true, $"NotNull<{returnName}>", taskPrefix, IsResult(method.ReturnType));
+            }
+            return ($"Result<{returnName}, Null, Error>", true, null, taskPrefix, IsResult(taskSymbol));
         }
-        return ($"Result<{returnName}, Error>", nullable, taskPrefix, IsResult(taskSymbol));
+
+        return ($"Result<{returnName}, Error>", false, null, taskPrefix, IsResult(taskSymbol));
 
         static bool IsResult(ITypeSymbol type)
         {

@@ -1,6 +1,7 @@
 ﻿#nullable enable
 
 using Definit.Results.NewApproach;
+using System.Diagnostics.CodeAnalysis;
 
 namespace System.Collections.Generic;
 
@@ -188,10 +189,25 @@ public static class List_T__Auto__Extensions
 		        return new Result<bool, Error>.Value(new Result<bool, Error>(Error.Create(exception)));
 		    }
 		}
-		//T? :: System.Collections.Generic.List<T>.Find(System.Predicate<T>)
-		// System.NullReferenceException: Object reference not set to an instance of an object.
-		//    at Definit.Results.Generator.ObjectGenerator.GetReturnType(IMethodSymbol method)
-		//    at Definit.Results.Generator.ObjectGenerator.GenerateMethod(IMethodSymbol method, Boolean allowUnsafe)
+		
+		public Result<NotNull<T>, Null, Error>.Value Find(System.Predicate<T> match)
+		{
+		    try
+		    {
+		        var _call_result = this.Value.Find(match);
+		
+		        if(_call_result is null)
+		        {
+		            return new Result<NotNull<T>, Null, Error>.Value(new Result<NotNull<T>, Null, Error>(Result.Null));
+		        }
+		
+		        return new Result<NotNull<T>, Null, Error>.Value(new Result<NotNull<T>, Null, Error>(new NotNull<T>() { Value = _call_result }));
+		    }
+		    catch (Exception exception)
+		    {
+		        return new Result<NotNull<T>, Null, Error>.Value(new Result<NotNull<T>, Null, Error>(Error.Create(exception)));
+		    }
+		}
 		
 		public Result<System.Collections.Generic.List<T>, Error>.Value FindAll(System.Predicate<T> match)
 		{
@@ -240,10 +256,25 @@ public static class List_T__Auto__Extensions
 		        return new Result<int, Error>.Value(new Result<int, Error>(Error.Create(exception)));
 		    }
 		}
-		//T? :: System.Collections.Generic.List<T>.FindLast(System.Predicate<T>)
-		// System.NullReferenceException: Object reference not set to an instance of an object.
-		//    at Definit.Results.Generator.ObjectGenerator.GetReturnType(IMethodSymbol method)
-		//    at Definit.Results.Generator.ObjectGenerator.GenerateMethod(IMethodSymbol method, Boolean allowUnsafe)
+		
+		public Result<NotNull<T>, Null, Error>.Value FindLast(System.Predicate<T> match)
+		{
+		    try
+		    {
+		        var _call_result = this.Value.FindLast(match);
+		
+		        if(_call_result is null)
+		        {
+		            return new Result<NotNull<T>, Null, Error>.Value(new Result<NotNull<T>, Null, Error>(Result.Null));
+		        }
+		
+		        return new Result<NotNull<T>, Null, Error>.Value(new Result<NotNull<T>, Null, Error>(new NotNull<T>() { Value = _call_result }));
+		    }
+		    catch (Exception exception)
+		    {
+		        return new Result<NotNull<T>, Null, Error>.Value(new Result<NotNull<T>, Null, Error>(Error.Create(exception)));
+		    }
+		}
 		
 		public Result<int, Error>.Value FindLastIndex(int startIndex, int count, System.Predicate<T> match)
 		{
@@ -555,10 +586,18 @@ public static class List_T__Auto__Extensions
 		        return new Result<Success, Error>.Value(new Result<Success, Error>(Error.Create(exception)));
 		    }
 		}
-		//T[] :: System.Collections.Generic.List<T>.ToArray()
-		// System.NullReferenceException: Object reference not set to an instance of an object.
-		//    at Definit.Results.Generator.ObjectGenerator.GetReturnType(IMethodSymbol method)
-		//    at Definit.Results.Generator.ObjectGenerator.GenerateMethod(IMethodSymbol method, Boolean allowUnsafe)
+		
+		public Result<T[], Error>.Value ToArray()
+		{
+		    try
+		    {
+		        return new Result<T[], Error>.Value(new Result<T[], Error>(this.Value.ToArray()));
+		    }
+		    catch (Exception exception)
+		    {
+		        return new Result<T[], Error>.Value(new Result<T[], Error>(Error.Create(exception)));
+		    }
+		}
 		
 		public Result<Success, Error>.Value TrimExcess()
 		{

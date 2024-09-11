@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using Definit.Results.NewApproach;
 
@@ -7,6 +8,14 @@ using Definit.Results.NewApproach;
 [module: GenerateObject<List<string>>]
 
 namespace Definit.Results.NewApproach;
+
+public sealed class ListExample<T>
+{
+    public Result<NotNull<T>, Null, Error> Get()
+    {
+        return new NotNull<T>() { Value = (T)default! };
+    }
+}
 
 public partial class Test
 {
@@ -92,6 +101,15 @@ public static class Result
     public static readonly Success Success = new ();
     public static readonly Null Null = new (); 
     public static readonly ResultMatchError MatchError = new (); 
+}
+
+public readonly struct NotNull<T>
+{
+    [NotNull]
+    public required T Value { get; init; }
+
+    [return: NotNull]
+    public static implicit operator T(NotNull<T> value) => value.Value;
 }
 
 public readonly struct Null<T>

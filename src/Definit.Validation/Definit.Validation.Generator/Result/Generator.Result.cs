@@ -1,4 +1,3 @@
-
 using System.Collections.Immutable;
 using Definit.Validation.Generator;
 using Microsoft.CodeAnalysis;

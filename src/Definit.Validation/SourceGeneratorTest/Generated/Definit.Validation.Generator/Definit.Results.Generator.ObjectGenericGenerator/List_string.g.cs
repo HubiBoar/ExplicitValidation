@@ -1,6 +1,7 @@
 ﻿#nullable enable
 
 using Definit.Results.NewApproach;
+using System.Diagnostics.CodeAnalysis;
 
 namespace System.Collections.Generic;
 
@@ -585,10 +586,18 @@ public static class List_string__Auto__Extensions
 		        return new Result<Success, Error>.Value(new Result<Success, Error>(Error.Create(exception)));
 		    }
 		}
-		//string[] :: System.Collections.Generic.List<string>.ToArray()
-		// System.NullReferenceException: Object reference not set to an instance of an object.
-		//    at Definit.Results.Generator.ObjectGenerator.GetReturnType(IMethodSymbol method)
-		//    at Definit.Results.Generator.ObjectGenerator.GenerateMethod(IMethodSymbol method, Boolean allowUnsafe)
+		
+		public Result<string[], Error>.Value ToArray()
+		{
+		    try
+		    {
+		        return new Result<string[], Error>.Value(new Result<string[], Error>(this.Value.ToArray()));
+		    }
+		    catch (Exception exception)
+		    {
+		        return new Result<string[], Error>.Value(new Result<string[], Error>(Error.Create(exception)));
+		    }
+		}
 		
 		public Result<Success, Error>.Value TrimExcess()
 		{

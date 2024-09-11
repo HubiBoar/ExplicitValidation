@@ -51,24 +51,24 @@ public class ObjectGenerator : IIncrementalGenerator
     {
         var methods = new StringBuilder();
         
+        var typeName = type.Name;
+        var wrapperName = $"Wrapper";
+        var wrapperGenericArgs = string.Empty;
+        var wrapperGenericConstraints = string.Empty;
+
         if(type.IsUnboundGenericType)
         {
-            var typeMethod = type
-                .GetMembers()
-                .Select(x => x.ToDisplayString());
-
-            var c = string.Join("\n//", typeMethod);
-            return ("//UnboundGeneric\n//" + c, type.Name);
+            type = type.ConstructedFrom;
+            wrapperGenericArgs = "<" + string.Join(", ", type.TypeArguments.Select(x => x.ToDisplayString())) + ">";
+            wrapperName = $"{wrapperName}{wrapperGenericArgs}";
+            wrapperGenericConstraints = type.TypeArguments.GetGenericConstraints();
         }
 
         if(type.IsGenericType)
         {
-            var typeMethod = type
-                .GetMembers()
-                .Select(x => x.ToDisplayString());
+            var types = string.Join("_", type.TypeArguments.Select(x => x.ToDisplayString()));
 
-            var c = string.Join("\n//", typeMethod);
-            return ("//Generic\n//" + c, type.Name);
+            typeName = $"{typeName}_{types}";
         }
 
         var typeMethods = type
@@ -79,7 +79,7 @@ public class ObjectGenerator : IIncrementalGenerator
                 && x.IsExtern == false 
                 && x.MethodKind == MethodKind.Ordinary
                 && x.DeclaredAccessibility == Accessibility.Public)
-            .Select(x => GenerateMethod(x, $"Wrapper", allowUnsafe))
+            .Select(x => GenerateMethod(x, allowUnsafe))
             .Where(x => x is not null)
             .ToArray();
 
@@ -97,21 +97,21 @@ public class ObjectGenerator : IIncrementalGenerator
 
         namespace {{type.ContainingNamespace.ToDisplayString()}};
 
-        public static class {{type.Name}}__Auto__Extensions
+        public static class {{typeName}}__Auto__Extensions
         {
-            public static Wrapper Results(this {{type.ToDisplayString()}} value)
+            public static {{wrapperName}} Results{{wrapperGenericArgs}}(this {{type.ToDisplayString()}} value){{wrapperGenericConstraints}}
             {
-                return new Wrapper() { Value = value };
+                return new {{wrapperName}}() { Value = value };
             }
 
-            public readonly struct Wrapper
+            public readonly struct {{wrapperName}}{{wrapperGenericConstraints}}
             {
                 public required {{type.ToDisplayString()}} Value { get; init; }
                 {{allMethods}}
             }
         }
         """;
-        return (code, type.Name);
+        return (code, typeName);
     }
 
     private static (string Code, string ClassName) GetType
@@ -127,72 +127,79 @@ public class ObjectGenerator : IIncrementalGenerator
         return Generate(type, allowUnsafe);
     }
 
-    private static string? GenerateMethod(IMethodSymbol method, string typeName, bool allowUnsafe)
+    private static string? GenerateMethod(IMethodSymbol method, bool allowUnsafe)
     {
-        var (returnType, nullable, taskPrefix, isResult) = GetReturnType(method); 
-
-        if(isResult)
+        try
         {
-            return null;
-        }
+            var (returnType, nullable, taskPrefix, isResult) = GetReturnType(method); 
 
-        var isUnsafe = method.IsUnsafe();
+            if(isResult)
+            {
+                return null;
+            }
 
-        if(allowUnsafe == false && isUnsafe)
-        {
-            return null;
-        }
+            var isUnsafe = method.IsUnsafe();
 
-        var isAsync = taskPrefix is not null;
-        var parameters = string.Join(", ", method.Parameters.Select(x => x.ToDisplayString()));
+            if(allowUnsafe == false && isUnsafe)
+            {
+                return null;
+            }
 
-        var decGeneric = method.GetMethodGenericArgs();
-        var decGenericConstraints = method.GetMethodGenericConstraints();
+            var isAsync = taskPrefix is not null;
+            var parameters = string.Join(", ", method.Parameters.Select(x => x.ToDisplayString()));
 
-        var parametersCall = method.GetCallingParameters();
-        var awaitCall = isAsync ? "await " : "";
-        var methodCall = $"{awaitCall}this.Value.{method.Name}({string.Join(", ", parametersCall)})";
-        var returnCall = method.ReturnsVoid ? 
-        $"""
-                {methodCall};
-                return new {returnType}.Value(new {returnType}(Result.Success));
-        """
-        :
-        nullable ?
-        $$"""
-                var _call_result = {{methodCall}};
+            var decGeneric = method.GetMethodGenericArgs();
+            var decGenericConstraints = method.GetMethodGenericConstraints();
 
-                if(_call_result is null)
+            var parametersCall = method.GetCallingParameters();
+            var awaitCall = isAsync ? "await " : "";
+            var methodCall = $"{awaitCall}this.Value.{method.Name}({string.Join(", ", parametersCall)})";
+            var returnCall = method.ReturnsVoid ? 
+            $"""
+                    {methodCall};
+                    return new {returnType}.Value(new {returnType}(Result.Success));
+            """
+            :
+            nullable ?
+            $$"""
+                    var _call_result = {{methodCall}};
+
+                    if(_call_result is null)
+                    {
+                        return new {{returnType}}.Value(new {{returnType}}(Result.Null));
+                    }
+
+                    return new {{returnType}}.Value(new {{returnType}}(_call_result));
+            """
+            :
+            $"""
+                    return new {returnType}.Value(new {returnType}({methodCall}));
+            """;
+
+            var returnDeclaration = isAsync ? $"async {taskPrefix}<{returnType}.Value>" : $"{returnType}.Value";
+
+            var decNew = method.Name == "ToString" && method.Parameters.Length == 0 ? "new " : "";
+            var decUnsafe = isUnsafe ? "unsafe " : "";
+
+            return $$"""
+
+            public {{decUnsafe}}{{decNew}}{{returnDeclaration}} {{method.Name}}{{decGeneric}}({{parameters}}){{decGenericConstraints}}
+            {
+                try
                 {
-                    return new {{returnType}}.Value(new {{returnType}}(Result.Null));
+            {{returnCall}}
                 }
-
-                return new {{returnType}}.Value(new {{returnType}}(_call_result));
-        """
-        :
-        $"""
-                return new {returnType}.Value(new {returnType}({methodCall}));
-        """;
-
-        var returnDeclaration = isAsync ? $"async {taskPrefix}<{returnType}.Value>" : $"{returnType}.Value";
-
-        var decNew = method.Name == "ToString" && method.Parameters.Length == 0 ? "new " : "";
-        var decUnsafe = isUnsafe ? "unsafe " : "";
-
-        return $$"""
-
-        public {{decUnsafe}}{{decNew}}{{returnDeclaration}} {{method.Name}}{{decGeneric}}({{parameters}}){{decGenericConstraints}}
-        {
-            try
-            {
-        {{returnCall}}
+                catch (Exception exception)
+                {
+                    return new {{returnType}}.Value(new {{returnType}}(Error.Create(exception)));
+                }
             }
-            catch (Exception exception)
-            {
-                return new {{returnType}}.Value(new {{returnType}}(Error.Create(exception)));
-            }
+            """;
         }
-        """;
+        catch (Exception exception)
+        {
+            return $"//{method.ReturnType.ToDisplayString()} :: {method.ToDisplayString()}\n// " + string.Join("\n// ", exception.ToString().Split('\n'));
+        }
     }
 
     private static (string ReturnType, bool nullable, string? TaskPrefix, bool IsResult) GetReturnType(IMethodSymbol method)

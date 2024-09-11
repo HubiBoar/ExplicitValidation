@@ -259,8 +259,14 @@ public static class GeneratorExtensions
             return string.Empty;
         }
 
-        var parameters = method
-            .TypeArguments
+        return method.TypeArguments.GetGenericConstraints();
+    }
+
+    public static string GetGenericConstraints(this IEnumerable<ITypeSymbol> typeArguments)
+    {
+        
+        var parameters = 
+            typeArguments
             .OfType<ITypeParameterSymbol>()
             .Where(x => x.ConstraintTypes.Length > 0)
             .ToArray();

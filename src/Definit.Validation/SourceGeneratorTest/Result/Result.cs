@@ -62,11 +62,10 @@ public partial class Test
         return t;
     });
 
-    public static Task<Result<T, NotFound>> PublicRun<T>(T t)
-        where T : notnull
+    public static Task<Result<T, NotFound>> PublicRun<T>(T t) where T : notnull => Result<T, NotFound>.Try(async () =>
     {
-        return Task.FromResult<Result<T, NotFound>>(t);
-    }
+        return t;
+    });
 }
 
 [System.AttributeUsage(System.AttributeTargets.Struct, AllowMultiple = false)]
@@ -124,19 +123,27 @@ public static class Result
         where T0: struct
         where T1: struct, IError<T1>
     {
-        value = ret.Value.Value;
+        (t0, t1) = ret.Either.Value;
     }
 
     public static void Deconstruct<T>(this Either<T, Exception> ret, out Out<T>? t0, out Out<Null>? tNull, out Out<Exception>? t1)
         where T: class
     {
-        value = ret.Value.Value;
+        t0 = null;
+        tNull = null;
+        t1 = null;
+        (var result, t1) = ret.Value;
+
+        if(result is not null)
+        {
+            (t0, tNull) = Null.IsNull(result.Value.Value).Value;
+        }
     }
 
     public static void Deconstruct<T>(this Either<T, Exception> ret, out Out<T>? t0, out Out<Exception>? t1)
         where T: struct
     {
-        value = ret.Value.Value;
+        (t0, t1) = ret.Value;
     }
 
     public static Either<Success, Exception> Try(Action func) 
@@ -283,6 +290,19 @@ readonly partial struct Result<T0, TError>
         try
         {
             return new () { Either = func().Either };
+        }
+        catch (Exception ex)
+        {
+            TError.Matches(ex, out var value);
+            return new () { Either = value };
+        }
+    }
+
+    public static async Task<Result<T0, TError>> Try(Func<Task<Builder>> func)
+    {
+        try
+        {
+            return new () { Either = (await func()).Either };
         }
         catch (Exception ex)
         {

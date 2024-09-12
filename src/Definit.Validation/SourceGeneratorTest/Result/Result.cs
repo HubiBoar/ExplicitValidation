@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using static Definit.Results.NewApproach.Result;
+using static Definit.Results.NewApproach.Result.Normal;
 
 namespace Definit.Results.NewApproach;
 
@@ -41,18 +42,18 @@ public partial class Test
 
     }
 
-    private Result<int, NotFound> PrivateRun(int t) => Result<int, NotFound>.Try(() => 
+    private Result<int, NotFound> PrivateRun(int t) 
     {
         return 5;
-    });
+    }
 
-    private Result<string, NotFound> PrivateRun(string t) => Result<string, NotFound>.Try(() =>
+    private Result<string, NotFound> PrivateRun(string t)
     {
-        var (i, error) = Try(GetInt);
-        (var str, var isNull, error) = Try(GetString);
+        var (i, error) = TryCatch(GetInt);
+        (var str, var isNull, error) = TryCatch(GetString);
 
-        (str, isNull, var notFound) = PrivateRun("run");
-        (i, var notFound2) = PrivateRun(1);
+        (str, isNull, var notFound) = Result.Try(() => PrivateRun("run"));
+        (i, var notFound2) = Result.Try(() => PrivateRun(1));
 
         if(str is not null)
         {
@@ -60,12 +61,13 @@ public partial class Test
         }
 
         return t;
-    });
+    }
 
-    public static Task<Result<T, NotFound>> PublicRun<T>(T t) where T : notnull => Result<T, NotFound>.Try(async () =>
+    public static Task<Result<T, NotFound>> PublicRun<T>(T t)
+        where T : notnull
     {
-        return t;
-    });
+        return Task.FromResult<Result<T, NotFound>>(t);
+    }
 }
 
 [System.AttributeUsage(System.AttributeTargets.Struct, AllowMultiple = false)]
@@ -104,29 +106,65 @@ public static class Result
     public static readonly Null Null = new (); 
     public static readonly ResultMatchError MatchError = new (); 
 
-    public static void Deconstruct<T0, T1>(this Result<T0, T1> ret, out Out<T0>? t0, out Out<Null>? tNull, out Out<T1>? t1)
+    public static void Deconstruct<T0, T1>
+    (
+        this Try<Result<T0, T1>> ret,
+        out Out<T0>? t0, 
+        out Out<Null>? tNull, 
+        out Out<T1>? t1
+    )
         where T0: class
         where T1: struct, IError<T1>
     {
         t0 = null;
         tNull = null;
         t1 = null;
-        (var result, t1) = ret.Either.Value;
-
-        if(result is not null)
+        var (result, exception) = ret.Result;
+        
+        if(exception is not null)
         {
-            (t0, tNull) = Null.IsNull(result.Value.Value).Value;
+            T1.Matches(exception, out var error);
+            t1 = error;
+            return;
+        }
+        
+        var (t_0, t_1) = result!.Value.Value.Either.Value;
+        if(t_0 is not null)
+        {
+            (t0, tNull) = Null.IsNull(t_0.Value.Value).Value;
         }
     }
 
-    public static void Deconstruct<T0, T1>(this Result<T0, T1> ret, out Out<T0>? t0, out Out<T1>? t1)
+    public static void Deconstruct<T0, T1>
+    (
+        this Try<Result<T0, T1>> ret,
+        out Out<T0>? t0,
+        out Out<T1>? t1
+    )
         where T0: struct
         where T1: struct, IError<T1>
     {
-        (t0, t1) = ret.Either.Value;
+        t0 = null;
+        t1 = null;
+        var (result, exception) = ret.Result;
+        
+        if(exception is not null)
+        {
+            T1.Matches(exception, out var error);
+            t1 = error;
+            return;
+        }
+        
+        (t0, t1) = result!.Value.Value.Either.Value;
     }
 
-    public static void Deconstruct<T>(this Either<T, Exception> ret, out Out<T>? t0, out Out<Null>? tNull, out Out<Exception>? t1)
+    public static void Deconstruct<T>
+    (
+        this Either<T, Exception> ret,
+        out Out<T>? t0,
+        out Out<Null>? tNull, 
+        out Out<Exception>? t1
+    )
         where T: class
     {
         t0 = null;
@@ -140,13 +178,31 @@ public static class Result
         }
     }
 
-    public static void Deconstruct<T>(this Either<T, Exception> ret, out Out<T>? t0, out Out<Exception>? t1)
+    public static void Deconstruct<T>
+    (
+        this Either<T, Exception> ret,
+        out Out<T>? t0,
+        out Out<Exception>? t1
+    )
         where T: struct
     {
         (t0, t1) = ret.Value;
     }
 
-    public static Either<Success, Exception> Try(Action func) 
+    public static Try<T> Try<T>(Func<T> func)
+        where T : IResult
+    {
+        try
+        {
+            return new Try<T>() { Result = func() };
+        }
+        catch (Exception exception)
+        {
+            return new Try<T>() { Result = exception };
+        }
+    }
+    
+    public static Either<Success, Exception> TryCatch(Action func) 
     {
         try
         {
@@ -159,7 +215,7 @@ public static class Result
         }
     }
 
-    public static Either<T, Exception> Try<T>(Func<T> func)
+    public static Either<T, Exception> TryCatch<T>(Func<T> func)
         where T : notnull
     {
         try
@@ -278,49 +334,26 @@ readonly partial struct Either<T0, T1, T2>
     public static implicit operator Either<T0, T1, T2>([DisallowNull] Either<T2, T1, T0> value) => new (value);
 }
 
+public interface IResult;
+
+public readonly partial struct Try<T> 
+    where T : IResult
+{
+    public required Either<T, Exception> Result { get; init; }
+}
+
 //AutoGenerated
-readonly partial struct Result<T0, TError> 
+readonly partial struct Result<T0, TError> : IResult 
     where T0 : notnull
     where TError : struct, IError<TError>
 {
     public required Either<T0, TError> Either { get; init; }
 
-    public static Result<T0, TError> Try(Func<Builder> func)
-    {
-        try
-        {
-            return new () { Either = func().Either };
-        }
-        catch (Exception ex)
-        {
-            TError.Matches(ex, out var value);
-            return new () { Either = value };
-        }
-    }
-
-    public static async Task<Result<T0, TError>> Try(Func<Task<Builder>> func)
-    {
-        try
-        {
-            return new () { Either = (await func()).Either };
-        }
-        catch (Exception ex)
-        {
-            TError.Matches(ex, out var value);
-            return new () { Either = value };
-        }
-    }
-
-    public readonly struct Builder
-    {
-        public required Either<T0, TError> Either { internal get; init; }
-
-        public static implicit operator Builder(T0 value) => new () { Either = value };
-        public static implicit operator Builder(TError value) => new () { Either = value };
-    }
+    public static implicit operator Result<T0, TError>(T0 value) => new () { Either = value };
+    public static implicit operator Result<T0, TError>(TError value) => new () { Either = value };
 }
 
-readonly partial struct Result<T0, TError0, TError1> 
+readonly partial struct Result<T0, TError0, TError1> : IResult 
     where T0 : notnull
     where TError0 : struct, IError<TError0>
     where TError1 : struct, IError<TError1>

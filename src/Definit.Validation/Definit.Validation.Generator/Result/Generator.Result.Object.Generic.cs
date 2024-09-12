@@ -39,15 +39,15 @@ public class ObjectGenericGenerator : IIncrementalGenerator
                 .Where(y => y.AttributeClass is not null && y.AttributeClass!
                     .ToDisplayString()
                     .StartsWith("Definit.Results.NewApproach.GenerateObjectAttribute<")) 
-                .Select(GetType)))
+                .Select(x => GetType(context, x))))
         {
-            var name = type.ClassName.Replace("<", "_").Replace(">", "").Replace(", ", "_").Replace(" ", "_").Replace(",", "_");
-            context.AddSource($"{name}.g.cs", type.Code);
+            context.AddSource($"{type.ClassName}.g.cs", type.Code);
         }
     }
 
     private static (string Code, string ClassName) GetType
     (
+        SourceProductionContext context,
         AttributeData attribute
     )
     {
@@ -55,7 +55,7 @@ public class ObjectGenericGenerator : IIncrementalGenerator
         var value = attribute.NamedArguments.SingleOrDefault(x => x.Key == "AllowUnsafe").Value.Value;
         bool allowUnsafe = value is null ? false : bool.Parse(value.ToString());
         
-        return ObjectGenerator.Generate(type!, allowUnsafe);
+        return ObjectGenerator.Generate(context, type!, allowUnsafe);
     }
 }
 

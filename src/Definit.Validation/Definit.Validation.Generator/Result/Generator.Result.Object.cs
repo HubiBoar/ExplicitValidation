@@ -39,15 +39,19 @@ public class ObjectGenerator : IIncrementalGenerator
                 .Where(y => y.AttributeClass is not null && y.AttributeClass!
                     .ToDisplayString()
                     .StartsWith("Definit.Results.NewApproach.GenerateObjectAttribute")) 
-                .Select(x => GetType(compilation, x))))
+                .Select(x => GetType(context, compilation, x))))
 
         {
-            var name = type.ClassName.Replace("<", "_").Replace(">", "").Replace(", ", "_").Replace(" ", "_").Replace(",", "_");
-            context.AddSource($"{name}.g.cs", type.Code);
+            context.AddSource($"{type.ClassName}.g.cs", type.Code);
         }
     }
 
-    public static (string Code, string ClassName) Generate(INamedTypeSymbol type, bool allowUnsafe)
+    public static (string Code, string ClassName) Generate
+    (
+        SourceProductionContext context,
+        INamedTypeSymbol type, 
+        bool allowUnsafe
+    )
     {
         var methods = new StringBuilder();
         
@@ -79,7 +83,7 @@ public class ObjectGenerator : IIncrementalGenerator
                 && x.IsExtern == false 
                 && x.MethodKind == MethodKind.Ordinary
                 && x.DeclaredAccessibility == Accessibility.Public)
-            .Select(x => GenerateMethod(x, allowUnsafe))
+            .Select(x => GenerateMethod(context, x, type.ToDisplayString(), allowUnsafe))
             .Where(x => x is not null)
             .ToArray();
 
@@ -112,11 +116,21 @@ public class ObjectGenerator : IIncrementalGenerator
             }
         }
         """;
-        return (code, typeName);
+
+        var name = type
+            .ToDisplayString()
+            .Replace("<", "_")
+            .Replace(">", "")
+            .Replace(", ", "_")
+            .Replace(" ", "_")
+            .Replace(",", "_");
+
+        return (code, name);
     }
 
     private static (string Code, string ClassName) GetType
     (
+        SourceProductionContext context,
         Compilation compilation,
         AttributeData attribute
     )
@@ -125,10 +139,16 @@ public class ObjectGenerator : IIncrementalGenerator
         var value = attribute.NamedArguments.SingleOrDefault(x => x.Key == "AllowUnsafe").Value.Value;
         bool allowUnsafe = value is null ? false : bool.Parse(value.ToString());
 
-        return Generate(type, allowUnsafe);
+        return Generate(context, type, allowUnsafe);
     }
 
-    private static string? GenerateMethod(IMethodSymbol method, bool allowUnsafe)
+    private static string? GenerateMethod
+    (
+        SourceProductionContext context,
+        IMethodSymbol method,
+        string typeName, 
+        bool allowUnsafe
+    )
     {
         try
         {
@@ -200,7 +220,19 @@ public class ObjectGenerator : IIncrementalGenerator
         }
         catch (Exception exception)
         {
-            return $"// EXCEPTION\n// {method.ReturnType.ToDisplayString()} :: {method.ToDisplayString()}\n// " + string.Join("\n// ", exception.ToString().Split('\n'));
+            var description = $"{method.ReturnType.ToDisplayString()} {method.ToDisplayString()} {exception.ToString()}";
+            var desc = new DiagnosticDescriptor
+            (
+                "ROG0001",
+                "Exception on method creation",
+                description,
+                "Error",
+                DiagnosticSeverity.Error,
+                true
+            );
+            
+            context.ReportDiagnostic(Diagnostic.Create(desc, Location.None));
+            return $"// EXCEPTION\n// {string.Join("\n// ", description.Split('\n'))}";
         }
     }
 

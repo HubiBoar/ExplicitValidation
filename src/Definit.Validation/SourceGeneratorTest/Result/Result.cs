@@ -24,9 +24,21 @@ public partial class Test
         public static NotFound Create(Exception exception) => new NotFound();
     }
 
+    private static int Get()
+    {
+        return default!;
+    }
+
     [GenerateMethod.Private]
     private Result<string, NotFound> _PrivateRun(string t)
     {
+        var (notNull, isNull, error) = Result.Try(Get);
+
+        if(notNull is not null)
+        {
+            int i = notNull.Value.Value;
+        }
+
         return t;
     }
 
@@ -101,6 +113,38 @@ public static class Result
     public static readonly Success Success = new ();
     public static readonly Null Null = new (); 
     public static readonly ResultMatchError MatchError = new (); 
+
+    public static Result<Success, Error>.Value Try(Action func) 
+    {
+        try
+        {
+            func();
+            return new Result<Success, Error>.Value(Success);
+        }
+        catch (Exception exception)
+        {
+            return new Result<Success, Error>.Value(Error.Create(exception));
+        }
+    }
+
+    public static Result<NotNull<T>, Null, Error>.Value Try<T>(Func<T> func)
+    {
+        try
+        {
+            var (notNull, isNull) = NotNull<T>.Create(func());
+
+            if(notNull is not null)
+            {
+                return new Result<NotNull<T>, Null, Error>.Value(notNull);
+            }
+
+            return new Result<NotNull<T>, Null, Error>.Value(isNull!);
+        }
+        catch (Exception exception)
+        {
+            return new Result<NotNull<T>, Null, Error>.Value(Error.Create(exception));
+        }
+    }
 }
 
 public readonly struct NotNull<T>
@@ -110,6 +154,16 @@ public readonly struct NotNull<T>
 
     [return: NotNull]
     public static implicit operator T(NotNull<T> value) => value.Value;
+
+    public static Either<NotNull<T>, Null> Create([MaybeNull] T? t)
+    {
+        if(t is null)
+        {
+            return Result.Null;
+        }
+        
+        return new NotNull<T> { Value = t };
+    }
 }
 
 public readonly struct Null<T>

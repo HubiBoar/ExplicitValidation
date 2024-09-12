@@ -55,6 +55,16 @@ public partial class Test
         (str, isNull, var notFound) = Result.Try(() => PrivateRun("run"));
         (i, var notFound2) = Result.Try(() => PrivateRun(1));
 
+        if(notFound is not null)
+        {
+            return notFound!.Value;
+        }
+
+        if(i is not null)
+        {
+            return i.Value.ToString();
+        }
+        
         if(str is not null)
         {
             Run(str);        
@@ -109,9 +119,9 @@ public static class Result
     public static void Deconstruct<T0, T1>
     (
         this Try<Result<T0, T1>> ret,
-        out Out<T0>? t0, 
-        out Out<Null>? tNull, 
-        out Out<T1>? t1
+        out T0? t0, 
+        out Null? tNull, 
+        out T1? t1
     )
         where T0: class
         where T1: struct, IError<T1>
@@ -128,7 +138,7 @@ public static class Result
             return;
         }
         
-        var (t_0, t_1) = result!.Value.Value.Either.Value;
+        var (t_0, t_1) = result!.Value.Either.Value;
         if(t_0 is not null)
         {
             (t0, tNull) = Null.IsNull(t_0.Value.Value).Value;
@@ -138,8 +148,8 @@ public static class Result
     public static void Deconstruct<T0, T1>
     (
         this Try<Result<T0, T1>> ret,
-        out Out<T0>? t0,
-        out Out<T1>? t1
+        out T0? t0,
+        out T1? t1
     )
         where T0: struct
         where T1: struct, IError<T1>
@@ -155,15 +165,15 @@ public static class Result
             return;
         }
         
-        (t0, t1) = result!.Value.Value.Either.Value;
+        (t0, t1) = result!.Value.Either.Value;
     }
 
     public static void Deconstruct<T>
     (
         this Either<T, Exception> ret,
-        out Out<T>? t0,
-        out Out<Null>? tNull, 
-        out Out<Exception>? t1
+        out T? t0,
+        out Null? tNull, 
+        out Exception? t1
     )
         where T: class
     {
@@ -181,8 +191,8 @@ public static class Result
     public static void Deconstruct<T>
     (
         this Either<T, Exception> ret,
-        out Out<T>? t0,
-        out Out<Exception>? t1
+        out T? t0,
+        out Exception? t1
     )
         where T: struct
     {

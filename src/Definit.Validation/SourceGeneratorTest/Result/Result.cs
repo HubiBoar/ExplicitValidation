@@ -9,22 +9,17 @@ using Definit.Results.NewApproach;
 
 namespace Definit.Results.NewApproach;
 
-public sealed class ListExample<T>
-{
-    public Result<NotNull<T>, Null, Error> Get()
-    {
-        return new NotNull<T>() { Value = (T)default! };
-    }
-}
-
 public partial class Test
 {
-    public readonly struct NotFound() : IError<NotFound>
+    public readonly record struct NotFound(Either<KeyNotFoundException, Exception> Exception)
+        : IError<NotFound, KeyNotFoundException>;
+
+    private static int Get(string str)
     {
-        public static NotFound Create(Exception exception) => new NotFound();
+        return default!;
     }
 
-    private static int Get()
+    private static string GetString()
     {
         return default!;
     }
@@ -32,11 +27,17 @@ public partial class Test
     [GenerateMethod.Private]
     private Result<string, NotFound> _PrivateRun(string t)
     {
-        var (notNull, isNull, error) = Result.Try(Get);
+        var ((str, isNull), error) = Result.Try(GetString);
 
-        if(notNull is not null)
+        if(str is null)
         {
-            int i = notNull.Value.Value;
+            return new NotFound();
+        }
+
+        (var i, error) = Result.Try(() => Get(str));
+        if(i is not null)
+        {
+            return i.Value.ToString();
         }
 
         return t;
@@ -68,6 +69,12 @@ public sealed class GenerateObjectAttribute<T> : Attribute
 {
     public bool AllowUnsafe { get; set; }
 };
+
+[System.AttributeUsage(System.AttributeTargets.Interface, AllowMultiple = false)]
+internal sealed class GenerateEitherBaseAttribute : Attribute;
+
+[System.AttributeUsage(System.AttributeTargets.Interface, AllowMultiple = false)]
+internal sealed class GenerateResultBaseAttribute : Attribute;
 
 [System.AttributeUsage(System.AttributeTargets.Struct, AllowMultiple = false)]
 public sealed class GenerateEitherAttribute : Attribute;
@@ -114,172 +121,265 @@ public static class Result
     public static readonly Null Null = new (); 
     public static readonly ResultMatchError MatchError = new (); 
 
-    public static Result<Success, Error>.Value Try(Action func) 
+    public static (bool Matches, Either<T, Exception> Either) Matches<T>(this Exception exception)
+        where T : Exception
+    {
+        if(exception is T match)
+        {
+            return (true, match);
+        }
+        
+        return (false, exception);
+    }
+
+    public static void Deconstruct<T>(this IsNull<T>? isNull, out T? t, out Null? nul)
+        where T : class
+    {
+        t = null;
+        nul = null;
+
+        if(isNull is not null)
+        {
+            (t, nul) = isNull.Value;
+        }
+    }
+
+    public static IsNull<T>? IsNull<T>(this Or<T>? value)
+        where T : class
+    {
+        if(value is null)
+        {
+            return null;
+        }
+
+        return NewApproach.IsNull<T>.Create(value.Value.Value);
+    }
+
+    public static IsNull<T> IsNull<T>([MaybeNull] this T? t)
+        where T : class
+    {
+        return NewApproach.IsNull<T>.Create(t);
+    }
+
+    public static T ToReturn<TResult, T>(TResult result)
+        where T : struct, IEitherBase 
+        where TResult : IResultBase<T>
+    {
+        return result.Value;
+    }
+
+    public static T ToReturn<TResult, T>(Exception exception)
+        where T : struct, IEitherBase 
+        where TResult : IResultBase<T>
+    {
+        return TResult.FromException(exception);
+    }
+
+    public static Either<Success, Error> Try(Action func) 
     {
         try
         {
             func();
-            return new Result<Success, Error>.Value(Success);
+            return ToReturn<Result<Success, Error>, Either<Success, Error>>(Success);
         }
         catch (Exception exception)
         {
-            return new Result<Success, Error>.Value(Error.Create(exception));
+            return ToReturn<Result<Success, Error>, Either<Success, Error>>(exception);
         }
     }
 
-    public static Result<NotNull<T>, Null, Error>.Value Try<T>(Func<T> func)
+    public static Either<T, Error> Try<T>(Func<T> func)
+        where T : notnull
     {
         try
         {
-            var (notNull, isNull) = NotNull<T>.Create(func());
-
-            if(notNull is not null)
-            {
-                return new Result<NotNull<T>, Null, Error>.Value(notNull);
-            }
-
-            return new Result<NotNull<T>, Null, Error>.Value(isNull!);
+            return ToReturn<Result<T, Error>, Either<T, Error>>(func());
         }
         catch (Exception exception)
         {
-            return new Result<NotNull<T>, Null, Error>.Value(Error.Create(exception));
+            return ToReturn<Result<T, Error>, Either<T, Error>>(exception);
         }
     }
 }
 
-public readonly struct NotNull<T>
+public readonly record struct Error<T>(Either<T, Exception> Exception) : IError<Error<T>, T>
+    where T : Exception;
+
+public readonly record struct Error(Exception Exception) : IError<Error>
 {
-    [NotNull]
-    public required T Value { get; init; }
-
-    [return: NotNull]
-    public static implicit operator T(NotNull<T> value) => value.Value;
-
-    public static Either<NotNull<T>, Null> Create([MaybeNull] T? t)
-    {
-        if(t is null)
-        {
-            return Result.Null;
-        }
-        
-        return new NotNull<T> { Value = t };
-    }
+    public static (bool Matches, Error Error) Matches(Exception exception) => (true, new Error(exception)); 
 }
 
-public readonly struct Null<T>
+public readonly struct Or<T>
     where T : notnull
 {
     public required T Value { get; init; }
 
-    public static implicit operator T(Null<T> value) => value.Value;
-    public static implicit operator Null<T>(T value) => new() { Value = value };
+    public static implicit operator T(Or<T> value) => value.Value;
+    public static implicit operator Or<T>(T value) => new() { Value = value };
 }
 
-
-public readonly struct Error : IError<Error>
+public interface IError<TSelf, TException> : IError<TSelf>
+    where TSelf : struct, IError<TSelf, TException>
+    where TException : notnull, Exception
 {
-    public required Exception Exception { get; init; }
+    public Either<TException, Exception> Exception { get; init; }
 
-    public static Error Create(Exception exception)
+    static (bool Matches, TSelf Error) IError<TSelf>.Matches(Exception exception)
     {
-        return new ()
-        {
-            Exception = exception
-        };
+        var (matches, error) = exception.Matches<TException>();
+        return (matches, new TSelf() { Exception = error }); 
     }
-
-    public static implicit operator Error(Exception exception) => new Error() { Exception = exception };
 }
 
 public interface IError<TSelf>
     where TSelf : notnull, IError<TSelf>
 {
-    public abstract static TSelf Create(Exception exception); 
+    public abstract static (bool Matches, TSelf Error) Matches(Exception exception); 
 }
 
+public interface IEitherBase;
 
-public interface IEither<T0, T1>
-    where T0: notnull
-    where T1: notnull
+public interface IEitherBase<TValue> : IEitherBase
+    where TValue : struct
 {
-    public (Null<T0>?, Null<T1>?) Value { get; }
+    public TValue Value { get; }
 }
 
-public interface IEither<T0, T1, T2>
-    where T0: notnull
-    where T1: notnull
-    where T2: notnull
+public interface IResultBase<TValue>
+    where TValue : struct, IEitherBase
 {
-    public (Null<T0>?, Null<T1>?, Null<T2>?) Value { get; }
+    internal TValue Value { get; }
+
+    internal static abstract TValue FromException(Exception exception);
 }
 
-public interface IEither<T0, T1, T2, T3>
-    where T0: notnull
-    where T1: notnull
-    where T2: notnull
-    where T3: notnull
-{
-    public (Null<T0>?, Null<T1>?, Null<T2>?, Null<T3>?) Value { get; }
-}
+[GenerateEitherBase]
+public partial interface IEither<T0, T1>;
 
-public interface IResult<T0, T1>
-    where T0 : notnull
-    where T1 : notnull, IError<T1>
-{
-}
+[GenerateResultBase]
+public partial interface IResult<T0, T1>;
 
-public interface IResult<T0, T1, T2>
-    where T0 : notnull
-    where T1 : notnull
-    where T2 : notnull, IError<T2>
-{
-}
-
-public interface IResult<T0, T1, T2, T3>
-    where T0 : notnull
-    where T1 : notnull
-    where T2 : notnull
-    where T3 : notnull, IError<T3>
-{
-}
-
-[GenerateEither]
-public partial struct Either<T0> : IEither<T0, string>
-    where T0 : notnull;
-
-[GenerateEither]
-public partial struct Either<T0, T1> : IEither<T0, T1>
+//AutoGenerated
+public partial interface IEither<T0, T1> : IEitherBase<(Or<T0>?, Or<T1>?)>
     where T0 : notnull
     where T1 : notnull;
 
-[GenerateEither]
-public partial struct Either<T0, T1, T2> : IEither<T0, T1, T2>
+public readonly struct Either<T0, T1> : IEither<T0, T1>
     where T0 : notnull
     where T1 : notnull
-    where T2 : notnull;
+{
+    public (Or<T0>?, Or<T1>?) Value { get; }
 
-[GenerateEither]
-public partial struct Either<T0, T1, T2, T3> : IEither<T0, T1, T2, T3>
+    [Obsolete("Dont use parameterless constructor", true)]
+    public Either() {}
+
+    public Either(T0 value) => Value = (value, null);
+    public Either(T1 value) => Value = (null, value);
+    public Either(Either<T1, T0> value) => Value = (value.Value.Item2, value.Value.Item1);
+
+    public static implicit operator Either<T0, T1>(T0 value) => new (value);
+    public static implicit operator Either<T0, T1>(T1 value) => new (value);
+    public static implicit operator Either<T0, T1>(Either<T1, T0> value) => new (value);
+}
+
+public readonly record struct NotNull<T>
+    where T : class
+{
+    public T Value { get; }
+
+    [Obsolete("Dont use parameterless constructor", true)]
+    public NotNull()
+    {
+        throw new NullReferenceException();
+    }
+
+    private NotNull(T value)
+    {
+        Value = value;
+    }
+
+    public static implicit operator T(NotNull<T> value) => value.Value;
+
+    public static IsNull<T> IsNull([MaybeNull] T? value)
+    {
+        return value is null ? new IsNull<T>() { Value = Result.Null } : new IsNull<T>() { Value = new NotNull<T>(value) };
+    }
+}
+public readonly record struct IsNull<T>
+    where T : class
+{
+    public required Either<NotNull<T>, Null> Value { get; init; }
+
+    public void Deconstruct(out T? t, out Null? nul)
+    {
+        (var t_0, nul) = Value.Value;
+        t = t_0?.Value;
+    }
+
+    public static IsNull<T> Create([MaybeNull] T? value)
+    {
+        return NotNull<T>.IsNull(value); 
+    }
+}
+
+public static partial class EitherExtensions
+{
+    public static void Deconstruct<T0, T1>(this Either<T0, T1> result, out T0? t0, out T1? t1)
+        where T0 : struct
+        where T1 : struct 
+    {
+        (t0, t1) = result.Value;
+    }
+    
+    public static void Deconstruct<T0, T1>(this Either<T0, T1> result, out IsNull<T0>? t0, out IsNull<T1>? t1)
+        where T0 : class
+        where T1 : class 
+    {
+        var (t_0, t_1) = result.Value;
+         
+        t0 = t_0.IsNull(); 
+        t1 = t_1.IsNull(); 
+    }
+
+    public static void Deconstruct<T0, T1>(this Either<T0, T1> result, out T0? t0, out IsNull<T1>? t1)
+        where T0 : struct
+        where T1 : class 
+    {
+        (t0, var t_1) = result.Value;
+        t1 = t_1.IsNull(); 
+    }
+
+    public static void Deconstruct<T0, T1>(this Either<T0, T1> result, out IsNull<T0>? t0, out T1? t1)
+        where T0 : class
+        where T1 : struct
+    {
+        (var t_0, t1) = result.Value;
+        t0 = t_0.IsNull(); 
+    }
+}
+
+//AutoGenerated
+public partial interface IResult<T0, T1>  : IResultBase<Either<T0, T1>>
     where T0 : notnull
-    where T1 : notnull
-    where T2 : notnull
-    where T3 : notnull;
+    where T1 : notnull;
 
-
-[GenerateResult]
-public partial struct Result<T0, T1> : IResult<T0, T1>
+public readonly struct Result<T0, T1> : IResult<T0, T1> 
     where T0 : notnull
-    where T1 : notnull, IError<T1>;
+    where T1 : struct, IError<T1>
+{
+    public required Either<T0, T1> Either { private get; init; }
 
-[GenerateResult]
-public partial struct Result<T0, T1, T2> : IResult<T0, T1, T2>
-    where T0 : notnull
-    where T1 : notnull
-    where T2 : notnull, IError<T2>;
+    Either<T0, T1> IResultBase<Either<T0, T1>>.Value => Either;
 
-[GenerateResult]
-public partial struct Result<T0, T1, T2, T3> : IResult<T0, T1, T2, T3>
-    where T0 : notnull
-    where T1 : notnull
-    where T2 : notnull
-    where T3 : notnull, IError<T3>;
+    static Either<T0, T1> IResultBase<Either<T0, T1>>.FromException(Exception exception)
+    {
+        return T1.Matches(exception).Error;
+    }
+
+    public static implicit operator Result<T0, T1>(T0 value) => new () { Either = value };
+    public static implicit operator Result<T0, T1>(T1 value) => new () { Either = value };
+
+    public static implicit operator Result<T0, T1>(Either<T0, T1> value) => new () { Either = value };
+    public static implicit operator Result<T0, T1>(Either<T1, T0> value) => new () { Either = value };
+}

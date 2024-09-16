@@ -79,7 +79,7 @@ public class EitherBaseGenerator : IIncrementalGenerator
 
             var deconstructors = new StringBuilder();
 
-            for(int nullCount = 0; nullCount < generic.Length; nullCount ++)
+            for(int nullCount = 0; nullCount < generic.Length + 1; nullCount ++)
             {
                 var top = nullCount <= 1 ? 0 : nullCount - 1;  
                 for(int index = 0; index < generic.Length - top; index ++)

@@ -69,5 +69,20 @@ public static partial class EitherExtensions
         t0 = t_0;
 		t1 = t_1.IsNull();
     }
+
+    public static void Deconstruct<T0, T1>
+    (
+        this Either<T0, T1> result,
+        out IsNull<T0>? t0,
+		out IsNull<T1>? t1
+    )
+        where T0 : class
+		where T1 : class
+    {
+        var (t_0, t_1) = result.Value;
+
+        t0 = t_0.IsNull();
+		t1 = t_1.IsNull();
+    }
  
 }

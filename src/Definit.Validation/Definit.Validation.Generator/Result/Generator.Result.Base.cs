@@ -50,14 +50,24 @@ public class ResultBaseGenerator : IIncrementalGenerator
                 .ToDisplayString() == "Definit.Results.NewApproach.GenerateResult.BaseAttribute")
             .ConstructorArguments
             .Single()
+            .Value!
             .ToString());
 
-        return Enumerable.Range(0, count).Select(i =>
+        if(count <= 2)
+        {
+            return ImmutableArray<(string Code, string ClassName)>.Empty;
+        }
+
+        return Enumerable.Range(2, count).Select(i =>
         {
             var generic = Enumerable.Range(0, i).Select(x => $"T{x}").ToArray();
             var genericArgs = string.Join(", ", generic);;
 
-            var genericConstraints = string.Join("\n\t", generic.Select((x, i) => i == 0 ? $"where {x} : notnull" : $"where {x} : struct, IError<{x}>"));
+            var genericConstraints = string.Join("\n\t",
+                generic.Select((x, i) => i == 0 ? $"where {x} : notnull" : $"where {x} : struct, IError<{x}>"));
+
+            var operators = string.Join("\n\t", generic
+                .Select(x => $"public static implicit operator Result<{genericArgs}>({x} value) => new (value);"));
 
             var code = new StringBuilder($$"""
             namespace Definit.Results.NewApproach;
@@ -83,8 +93,7 @@ public class ResultBaseGenerator : IIncrementalGenerator
                     return T1.Matches(exception).Error;
                 }
 
-                public static implicit operator Result<{{genericArgs}}>(T0 value) => new (value); 
-                public static implicit operator Result<{{genericArgs}}>(T1 value) => new (value);
+                {{operators}}
 
                 public static implicit operator Result<{{genericArgs}}>(Either<{{genericArgs}}> value) => new (value);
                 // TODO Either Mapping

@@ -1,8 +1,5 @@
 namespace Definit.Results.NewApproach;
 
-[System.AttributeUsage(System.AttributeTargets.Struct, AllowMultiple = false)]
-public sealed class GenerateResultAttribute : Attribute;
-
 public static partial class GenerateResult
 {
     [System.AttributeUsage(System.AttributeTargets.Module, AllowMultiple = true)]

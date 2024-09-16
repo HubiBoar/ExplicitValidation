@@ -50,49 +50,122 @@ public class EitherBaseGenerator : IIncrementalGenerator
                 .ToDisplayString() == "Definit.Results.NewApproach.GenerateEither.BaseAttribute")
             .ConstructorArguments
             .Single()
+            .Value!
             .ToString());
 
-        return Enumerable.Range(0, count).Select(i =>
+        if(count <= 2)
         {
-            var generic = Enumerable.Range(0, i).Select(x => $"T{x}").ToArray();
-            var genericArgs = string.Join(", ", generic);;
+            return ImmutableArray<(string Code, string ClassName)>.Empty;
+        }
 
-            var genericConstraints = string.Join("\n\t", generic.Select((x, i) => i == 0 ? $"where {x} : notnull" : $"where {x} : struct, IError<{x}>"));
+        return Enumerable.Range(2, count).Select(i =>
+        {
+            var generic = Enumerable.Range(0, i).Select(x => (Type: $"T{x}", Name: $"t{x}", Ret: $"t_{x}")).ToArray();
+            var genericArgs = string.Join(", ", generic.Select(x => x.Type));
+            var genericOrArgs = string.Join(", ", generic.Select(x => $"Or<{x.Type}>?"));
+
+            var genericConstraints = string.Join("\n\t", generic.Select(x => $"where {x.Type} : notnull"));
+
+            var constructors = string.Join("\n\t", generic.Select((x, i) => 
+            {
+                var arguments = generic.Select(_ => "null").ToArray();
+                arguments[i] = "value";
+                var call = string.Join(", ", arguments);
+                return $"public Either({x.Type} value) => Value = ({call});";
+            }));
+
+            var operators = string.Join("\n\t", generic
+                .Select(x => $"public static implicit operator Either<{genericArgs}>({x.Type} value) => new (value);"));
+
+            var deconstructors = new StringBuilder();
+
+            for(int nullCount = 0; nullCount < generic.Length; nullCount ++)
+            {
+                var top = nullCount <= 1 ? 0 : nullCount - 1;  
+                for(int index = 0; index < generic.Length - top; index ++)
+                {
+                    var topIndex = nullCount + index;
+                    var arguments = generic.Select((x, i) =>
+                        (Type: x.Type, Name: x.Name, Ret : x.Ret, IsNull : i >= index && i < topIndex))
+                    .ToImmutableArray(); 
+        
+                    deconstructors.AppendLine(CreateDeconstruct(arguments));
+
+                    if(nullCount == 0)
+                    {
+                        break;
+                    }
+                }
+            }
 
             var code = new StringBuilder($$"""
             namespace Definit.Results.NewApproach;
 
-            public interface IResult<{{genericArgs}}> : IResultBase<Either<{{genericArgs}}>>
+            public interface IEither<{{genericArgs}}> : IEitherBase<({{genericOrArgs}})>
                 {{genericConstraints}};
 
-            public readonly struct Result<{{genericArgs}}> : IResult<{{genericArgs}}> 
+            public readonly struct Either<{{genericArgs}}> : IEither<{{genericArgs}}> 
                 {{genericConstraints}}
             {
-                private Either<{{genericArgs}}> Either { get; }
+                public ({{genericOrArgs}}) Value { get; }
 
                 [Obsolete(DefaultConstructorException.Attribute, true)]
-                public Result() => throw new DefaultConstructorException();
+                public Either() => throw new DefaultConstructorException();
 
-                public Result(Either<{{genericArgs}}> value) => Either = value;
+                {{constructors}}
 
-                Either<{{genericArgs}}> IResultBase<Either<{{genericArgs}}>>.Value => Either;
+                {{operators}}
 
-                static Either<{{genericArgs}}> IResultBase<Either<{{genericArgs}}>>.FromException(Exception exception)
-                {
-                    return T1.Matches(exception).Error;
-                }
+                // public static implicit operator Either<{{genericArgs}}>(Either<T1, T0> value) => new (value);
+            }
 
-                public static implicit operator Result<{{genericArgs}}>(T0 value) => new (value); 
-                public static implicit operator Result<{{genericArgs}}>(T1 value) => new (value);
-
-                public static implicit operator Result<{{genericArgs}}>(Either<{{genericArgs}}> value) => new (value);
-                // public static implicit operator Result<{{genericArgs}}>(Either<T1, T0> value) => new (value);
+            public static partial class EitherExtensions
+            {
+            {{deconstructors}} 
             }
             """);
 
-            return (code.ToString(), $"Definit.Results.NewApproach.Result_{i}");
+            return (code.ToString(), $"Definit.Results.NewApproach.Either_{i}");
         })
         .ToImmutableArray();
     }
-}
 
+    private static string CreateDeconstruct(ImmutableArray<(string Type, string Name, string Ret, bool IsNull)> arguments)
+    {
+        var genericArgs = string.Join(", ", arguments.Select(x => x.Type));
+        var outArgs = string.Join(",\n\t\t", arguments.Select(x => 
+            x.IsNull
+            ?
+            $"out IsNull<{x.Type}>? {x.Name}"
+            :
+            $"out {x.Type}? {x.Name}"
+            ));
+
+        var constraints = string.Join("\n\t\t", arguments.Select(x =>
+            x.IsNull
+            ?
+            $"where {x.Type} : class"
+            :
+            $"where {x.Type} : struct"));
+
+        var values = string.Join("\n\t\t", arguments
+            .Select(x => x.IsNull ? $"{x.Name} = {x.Ret}.IsNull();" : $"{x.Name} = {x.Ret};"));
+
+        var returns = string.Join(", ", arguments.Select(x => x.Ret));
+
+        return $$"""
+
+            public static void Deconstruct<{{genericArgs}}>
+            (
+                this Either<{{genericArgs}}> result,
+                {{outArgs}}
+            )
+                {{constraints}}
+            {
+                var ({{returns}}) = result.Value;
+
+                {{values}}
+            }
+        """;
+    }
+}

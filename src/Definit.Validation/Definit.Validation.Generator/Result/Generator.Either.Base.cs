@@ -74,8 +74,23 @@ public class EitherBaseGenerator : IIncrementalGenerator
                 return $"public Either({x.Type} value) => Value = ({call});";
             }));
 
-            var operators = string.Join("\n\t", generic
-                .Select(x => $"public static implicit operator Either<{genericArgs}>({x.Type} value) => new (value);"));
+            var operators = string.Join("\n\t", GetAllPermutations(generic.Select(x => x.Type).ToArray()).Select(x =>
+            {
+                if(x.Count == 1)
+                {
+                    return $"public static implicit operator Either<{genericArgs}>({x[0]} value) => new (value);";
+                }
+
+                var arg = string.Join(", ", x);
+
+                if(arg == genericArgs)
+                {
+                    return null;
+                }
+
+                return $"public static implicit operator Either<{genericArgs}>(Either<{arg}> value) => new (value);";
+            })
+            .Where(x => string.IsNullOrEmpty(x) is false));
 
             var deconstructors = string.Join("\n", 
                 GenerateAllStates(generic.Length)
@@ -103,9 +118,9 @@ public class EitherBaseGenerator : IIncrementalGenerator
 
                 {{constructors}}
 
-                {{operators}}
+                public static implicit operator Either<{{genericArgs}}>(EitherMatchError error) => throw new EitherMatchException<Either<{{genericArgs}}>>();
 
-                // public static implicit operator Either<{{genericArgs}}>(Either<T1, T0> value) => new (value);
+                {{operators}}
             }
 
             public static partial class EitherExtensions
@@ -175,6 +190,72 @@ public class EitherBaseGenerator : IIncrementalGenerator
 
                 {{values}}
             }
-        """;
+        """; 
+    }
+
+    private static List<List<T>> GetAllPermutations<T>(T[] numbers)
+    {
+        List<List<T>> result = [];
+
+        for (int i = 1; i <= numbers.Length; i++)
+        {
+            CombineAndPermute(numbers, [], 0, i, result);
+        }
+
+        return result;
+
+        static void CombineAndPermute
+        (
+            T[] numbers,
+            List<T> currentCombination, 
+            int start,
+            int k,
+            List<List<T>> result
+        )
+        {
+            if (currentCombination.Count == k)
+            {
+                result.AddRange(GetPermutations(currentCombination));
+                return;
+            }
+
+            for (int i = start; i < numbers.Length; i++)
+            {
+                currentCombination.Add(numbers[i]);  
+                CombineAndPermute(numbers, currentCombination, i + 1, k, result);  
+                currentCombination.RemoveAt(currentCombination.Count - 1);  
+            }
+        }
+
+        static List<List<T>> GetPermutations(List<T> combination)
+        {
+            List<List<T>> result = [];
+            PermuteRecursive(combination, 0, combination.Count - 1, result);
+            return result;
+        }
+
+        static void PermuteRecursive(List<T> combination, int l, int r, List<List<T>> result)
+        {
+            if (l == r)
+            {
+                result.Add(new List<T>(combination));
+            }
+            else
+            {
+                for (int i = l; i <= r; i++)
+                {
+                    Swap(combination, l, i);
+                    PermuteRecursive(combination, l + 1, r, result);
+                    Swap(combination, l, i);  
+                }
+            }
+        }
+
+        static void Swap(List<T> list, int i, int j)
+        {
+            T temp = list[i];
+            list[i] = list[j];
+            list[j] = temp;
+        }
     }
 }

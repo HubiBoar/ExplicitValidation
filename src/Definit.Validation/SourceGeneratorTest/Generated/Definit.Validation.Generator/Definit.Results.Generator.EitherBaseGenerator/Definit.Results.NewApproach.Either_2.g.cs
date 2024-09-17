@@ -16,10 +16,11 @@ public readonly struct Either<T0, T1> : IEither<T0, T1>
     public Either(T0 value) => Value = (value, null);
 	public Either(T1 value) => Value = (null, value);
 
+    public static implicit operator Either<T0, T1>(EitherMatchError error) => throw new EitherMatchException<Either<T0, T1>>();
+
     public static implicit operator Either<T0, T1>(T0 value) => new (value);
 	public static implicit operator Either<T0, T1>(T1 value) => new (value);
-
-    // public static implicit operator Either<T0, T1>(Either<T1, T0> value) => new (value);
+	public static implicit operator Either<T0, T1>(Either<T1, T0> value) => new (value);
 }
 
 public static partial class EitherExtensions

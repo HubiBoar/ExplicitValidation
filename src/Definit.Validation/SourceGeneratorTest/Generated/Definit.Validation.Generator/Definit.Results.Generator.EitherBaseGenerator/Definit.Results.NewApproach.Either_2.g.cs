@@ -15,6 +15,7 @@ public readonly struct Either<T0, T1> : IEither<T0, T1>
 
     public Either(T0 value) => Value = (value, null);
 	public Either(T1 value) => Value = (null, value);
+	public Either(Either<T1, T0> value) => Value = (value.Value.Item2, value.Value.Item1);
 
     public static implicit operator Either<T0, T1>(EitherMatchError error) => throw new EitherMatchException<Either<T0, T1>>();
 

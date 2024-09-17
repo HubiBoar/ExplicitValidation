@@ -66,31 +66,38 @@ public class EitherBaseGenerator : IIncrementalGenerator
 
             var genericConstraints = string.Join("\n\t", generic.Select(x => $"where {x.Type} : notnull"));
 
-            var constructors = string.Join("\n\t", generic.Select((x, i) => 
+            var genericPermutations = GetAllPermutations(
+                generic
+                    .Select((x, i) => (Type: x.Type, Name: x.Name, Index: i))
+                    .ToArray())
+                .Select(x => (Args: string.Join(", ", x.Select(x => x.Type)), Values: x))
+                .Where(x => x.Args != genericArgs && x.Values.Count > 0)
+                .Select(x => (Name: x.Values.Count == 1 ? x.Args : $"Either<{x.Args}>", Args: x.Args, Values: x.Values))
+                .ToArray();
+
+            var constructors = string.Join("\n\t", genericPermutations.Select(x => 
             {
                 var arguments = generic.Select(_ => "null").ToArray();
-                arguments[i] = "value";
+
+                if(x.Values.Count == 1)
+                {
+                    arguments[x.Values[0].Index] = "value";
+                }
+                else
+                {
+                    for(int i = 0; i < x.Values.Count; i ++)
+                    {
+                        var y = x.Values[i];
+                        arguments[y.Index] = $"value.Value.Item{i+1}"; 
+                    }
+                }
+
                 var call = string.Join(", ", arguments);
-                return $"public Either({x.Type} value) => Value = ({call});";
+                return $"public Either({x.Name} value) => Value = ({call});";
             }));
 
-            var operators = string.Join("\n\t", GetAllPermutations(generic.Select(x => x.Type).ToArray()).Select(x =>
-            {
-                if(x.Count == 1)
-                {
-                    return $"public static implicit operator Either<{genericArgs}>({x[0]} value) => new (value);";
-                }
-
-                var arg = string.Join(", ", x);
-
-                if(arg == genericArgs)
-                {
-                    return null;
-                }
-
-                return $"public static implicit operator Either<{genericArgs}>(Either<{arg}> value) => new (value);";
-            })
-            .Where(x => string.IsNullOrEmpty(x) is false));
+            var operators = string.Join("\n\t", genericPermutations
+                .Select(x => $"public static implicit operator Either<{genericArgs}>({x.Name} value) => new (value);"));
 
             var deconstructors = string.Join("\n", 
                 GenerateAllStates(generic.Length)

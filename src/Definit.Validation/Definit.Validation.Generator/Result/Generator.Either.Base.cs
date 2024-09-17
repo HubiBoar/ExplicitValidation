@@ -45,7 +45,7 @@ public class EitherBaseGenerator : IIncrementalGenerator
 
             for(int i = 0; i < chunks.Length; i++)
             {
-                context.AddSource($"{name}_Chunk_{i}.g.cs", string.Join("\n", chunks[i]));
+                context.AddSource($"{name}/Chunk_{i}.g.cs", string.Join("\n", chunks[i]));
             }
         }
     }

@@ -1,5 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace Definit.Results.NewApproach;
 
 public interface IError<TSelf, TException> : IError<TSelf>

@@ -34,7 +34,19 @@ public class EitherBaseGenerator : IIncrementalGenerator
         foreach(var type in typeList.SelectMany(x => GetType(x)))
         {
             var name = type.ClassName.Replace("<", "_").Replace(">", "").Replace(", ", "_").Replace(" ", "_").Replace(",", "_");
-            context.AddSource($"{name}.g.cs", type.Code);
+        
+            var chunks = type.Code.Split('\n').Chunk(1000);
+
+            if(chunks.Length == 1)
+            {
+                context.AddSource($"{name}.g.cs", type.Code);
+                continue;
+            }
+
+            for(int i = 0; i < chunks.Length; i++)
+            {
+                context.AddSource($"{name}_Chunk_{i}.g.cs", string.Join("\n", chunks[i]));
+            }
         }
     }
 

@@ -83,6 +83,5 @@ public static partial class EitherExtensions
 
         t0 = t_0.IsNull();
 		t1 = t_1.IsNull();
-    }
- 
+    } 
 }

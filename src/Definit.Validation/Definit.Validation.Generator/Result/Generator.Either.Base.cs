@@ -77,26 +77,15 @@ public class EitherBaseGenerator : IIncrementalGenerator
             var operators = string.Join("\n\t", generic
                 .Select(x => $"public static implicit operator Either<{genericArgs}>({x.Type} value) => new (value);"));
 
-            var deconstructors = new StringBuilder();
-
-            for(int nullCount = 0; nullCount < generic.Length + 1; nullCount ++)
-            {
-                var top = nullCount <= 1 ? 0 : nullCount - 1;  
-                for(int index = 0; index < generic.Length - top; index ++)
+            var deconstructors = string.Join("\n", 
+                GenerateAllStates(generic.Length)
+                .Select(state =>
                 {
-                    var topIndex = nullCount + index;
-                    var arguments = generic.Select((x, i) =>
-                        (Type: x.Type, Name: x.Name, Ret : x.Ret, IsNull : i >= index && i < topIndex))
+                    var arguments = generic.Select((x, i) => (Type: x.Type, Name: x.Name, Ret : x.Ret, IsNull : state[i]))
                     .ToImmutableArray(); 
-        
-                    deconstructors.AppendLine(CreateDeconstruct(arguments));
 
-                    if(nullCount == 0)
-                    {
-                        break;
-                    }
-                }
-            }
+                    return CreateDeconstruct(arguments);
+                }));
 
             var code = new StringBuilder($$"""
             namespace Definit.Results.NewApproach;
@@ -128,6 +117,26 @@ public class EitherBaseGenerator : IIncrementalGenerator
             return (code.ToString(), $"Definit.Results.NewApproach.Either_{i}");
         })
         .ToImmutableArray();
+    }
+
+    private static bool[][] GenerateAllStates(int size)
+    {
+        int totalStates = (int)Math.Pow(2, size); 
+        bool[][] result = new bool[totalStates][];
+
+        for (int i = 0; i < totalStates; i++)
+        {
+            bool[] currentState = new bool[size];
+            
+            for (int bit = 0; bit < size; bit++)
+            {
+                currentState[bit] = (i & (1 << bit)) != 0;
+            }
+
+            result[i] = currentState;
+        }
+
+        return result;
     }
 
     private static string CreateDeconstruct(ImmutableArray<(string Type, string Name, string Ret, bool IsNull)> arguments)

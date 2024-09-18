@@ -16,6 +16,10 @@ public partial struct ResultExample<T> : IResult<T, NotFound>
 public partial struct ResultExample2<T> : IResult<Either<T, string>, NotFound>
     where T : notnull;
 
+//[GenerateEither]
+//public partial struct EitherExample2<T> : IEither<Either<T, string>, Either<int, string>>
+//    where T : notnull;
+
 public readonly record struct NotFound(Either<KeyNotFoundException, Exception> Exception)
     : IError<NotFound, KeyNotFoundException>;
 
@@ -24,6 +28,11 @@ public partial class Examples
     private static int Get(string str)
     {
         ErrorHelper.Matches<NotFound>(new Exception());
+        return default!;
+    }
+
+    private static ResultExample2<string> GetResultExample2()
+    {
         return default!;
     }
 
@@ -45,6 +54,16 @@ public partial class Examples
     [GenerateResult.Method.Private]
     private Result<string, NotFound> _PrivateRun(string t)
     {
+        var result = GetResultExample2();
+
+        var (((str, strNotNull), (str2, str2NotNull)), notFound) = ResultHelper
+            .ToReturn<ResultExample2<string>, Either<Either<string, string>, NotFound>>(result);
+
+        if(str is null)
+        {
+
+        }
+
         //var ((str, isNull), error) = Result.Try(GetString);
 
         //((str, isNull), var i) = GetEither();

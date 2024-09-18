@@ -196,6 +196,9 @@ public class EitherBaseGenerator : IIncrementalGenerator
         var values = string.Join("\n\t\t", arguments
             .Select(x => x.IsNull ? $"{x.Name} = {x.Ret}.IsNull();" : $"{x.Name} = {x.Ret};"));
 
+        var nullValues = string.Join("\n\t\t\t", arguments
+            .Select(x => $"{x.Name} = null;"));
+
         var returns = string.Join(", ", arguments.Select(x => x.Ret));
 
         return $$"""
@@ -208,6 +211,24 @@ public class EitherBaseGenerator : IIncrementalGenerator
                 {{constraints}}
             {
                 var ({{returns}}) = result.Value;
+
+                {{values}}
+            }
+
+            public static void Deconstruct<{{genericArgs}}>
+            (
+                this Either<{{genericArgs}}>? result,
+                {{outArgs}}
+            )
+                {{constraints}}
+            {
+                if(result is null)
+                {
+                    {{nullValues}}
+                    return;
+                }
+
+                var ({{returns}}) = result.Value.Value;
 
                 {{values}}
             }

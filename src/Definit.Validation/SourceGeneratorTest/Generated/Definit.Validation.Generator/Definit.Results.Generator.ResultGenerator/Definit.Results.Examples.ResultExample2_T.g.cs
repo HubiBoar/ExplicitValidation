@@ -31,4 +31,5 @@ namespace Definit.Results.Examples
 		public static implicit operator ResultExample2<T>(T value) => new (value);
 		public static implicit operator ResultExample2<T>(string value) => new (value);
 	}
+
 }

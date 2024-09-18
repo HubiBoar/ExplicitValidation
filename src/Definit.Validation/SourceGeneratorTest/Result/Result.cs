@@ -1,6 +1,6 @@
 using Definit.Results.NewApproach;
 
-// [assembly: GenerateResult.Base(5)]
+// [assembly: GenerateResult.Base(6)]
 
 namespace Definit.Results.NewApproach;
 

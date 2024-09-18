@@ -58,7 +58,7 @@ public class ResultBaseGenerator : IIncrementalGenerator
             return ImmutableArray<(string Code, string ClassName)>.Empty;
         }
 
-        return Enumerable.Range(2, count).Select(i =>
+        return Enumerable.Range(2, count - 1).Select(i =>
         {
             var generic = Enumerable.Range(0, i).Select(x => $"T{x}").ToArray();
             var genericArgs = string.Join(", ", generic);;

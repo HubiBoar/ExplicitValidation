@@ -61,62 +61,82 @@ public class ResultBaseGenerator : IIncrementalGenerator
         return Enumerable.Range(2, count - 1).Select(i =>
         {
             var generic = Enumerable.Range(0, i).Select(x => $"T{x}").ToArray();
-            var genericArgs = string.Join(", ", generic);;
 
             var genericConstraints = string.Join("\n\t",
                 generic.Select((x, i) => i == 0 ? $"where {x} : notnull" : $"where {x} : struct, IError<{x}>"));
+           
+            var genericArgs = string.Join(", ", generic);
+            var result = $"Result<{genericArgs}>";
+            var (interior, either) = ResultInterior(generic, "Result", result); 
 
-            var operators = string.Join("\n\t", generic
-                .Select(x => $"public static implicit operator Result<{genericArgs}>({x} value) => new (value);"));
-
-            var errorHandling = string.Join("\n\n", generic.Skip(1).Select((x, i) => 
-            {
-                var index = i+1;
-                if(index == generic.Length -1)
-                {
-                    return $"       return {x}.Matches(exception).Error;";
-                }
-
-                return $$"""
-                        var {{x}}_match = {{x}}.Matches(exception);
-
-                        if({{x}}_match.Matches)
-                        {
-                            return {{x}}_match.Error;
-                        }
-                """;
-            }));
-
+            interior = string.Join("\n\t", interior.Split('\n'));
             var code = $$"""
+            using System.Diagnostics.CodeAnalysis;
+
             namespace Definit.Results.NewApproach;
 
-            public interface IResult<{{genericArgs}}> : IResultBase<Either<{{genericArgs}}>>
+            public interface I{{result}} : IResultBase<{{either}}>
                 {{genericConstraints}};
 
-            public readonly struct Result<{{genericArgs}}> : IResult<{{genericArgs}}> 
+            public readonly struct {{result}} : I{{result}} 
                 {{genericConstraints}}
             {
-                private Either<{{genericArgs}}> Either { get; }
-
-                [Obsolete(DefaultConstructorException.Attribute, true)]
-                public Result() => throw new DefaultConstructorException();
-
-                public Result(Either<{{genericArgs}}> value) => Either = value;
-
-                Either<{{genericArgs}}> IResultBase<Either<{{genericArgs}}>>.Value => Either;
-
-                static Either<{{genericArgs}}> IResultBase<Either<{{genericArgs}}>>.FromException(Exception exception)
-                {
-            {{errorHandling}}
-                }
-
-                {{operators}}
+                {{interior}}
             }
             """;
 
             return (code, $"Definit.Results.NewApproach.Result_{i}");
         })
         .ToImmutableArray();
+    }
+
+    public static (string Interior, string Either) ResultInterior(string[] generic, string constructorName, string typeName)
+    {
+        var genericArgs = string.Join(", ", generic);
+
+        var either = $"Either<{genericArgs}>";
+
+        var operators = string.Join("\n", generic
+            .Select(x => $"public static implicit operator {typeName}([DisallowNull] {x} value) => new (value);"));
+
+        var errorHandling = string.Join("\n\n", generic.Skip(1).Select((x, i) => 
+        {
+            var index = i+1;
+            if(index == generic.Length -1)
+            {
+                return $"   return ErrorHelper.Matches<{x}>(exception).Error;";
+            }
+
+            return $$"""
+                var {{x}}_match = ErrorHelper.Matches<{{x}}>(exception);
+
+                if({{x}}_match.Matches)
+                {
+                    return {{x}}_match.Error;
+                }
+            """;
+        }));
+
+        var code = $$"""
+        private {{either}} Either { get; }
+
+        [Obsolete(DefaultConstructorException.Attribute, true)]
+        public {{constructorName}}() => throw new DefaultConstructorException();
+
+        public {{constructorName}}({{either}} value) => Either = value;
+
+        {{either}} IResultBase<{{either}}>.Value => Either;
+
+        static {{either}} IResultBase<{{either}}>.FromException(Exception exception)
+        {
+        {{errorHandling}}
+        }
+
+        public static implicit operator {{typeName}}([DisallowNull] EitherMatchError _) => throw new EitherMatchException<Either<{{genericArgs}}>>();
+        {{operators}}
+        """;
+
+        return (code, either);
     }
 }
 

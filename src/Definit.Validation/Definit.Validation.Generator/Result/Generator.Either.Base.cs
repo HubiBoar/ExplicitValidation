@@ -85,24 +85,26 @@ public class EitherBaseGenerator : IIncrementalGenerator
 
                     var argsString = string.Join(", ", args);
 
-                    return $"public Either({x.Type} value) => Value = ({argsString});";
+                    return $"public Either([DisallowNull] {x.Type} value) => Value = ({argsString});";
                 }));
 
+            var either = $"Either<{genericArgs}>";
             var operators = string.Join("\n\t", generic
-                .Select(x => $"public static implicit operator Either<{genericArgs}>({x.Type} value) => new (value);"));
+                .Select(x => $"public static implicit operator {either}([DisallowNull] {x.Type} value) => new (value);"));
 
             List<(string, string)> result = [];
 
             string fileName = $"Definit.Results.NewApproach.Either_{i}"; 
 
             var setupCode = $$"""
+            using System.Diagnostics.CodeAnalysis;
 
             namespace Definit.Results.NewApproach;
 
-            public interface IEither<{{genericArgs}}> : IEitherBase<({{genericOrArgs}})>
+            public interface I{{either}} : IEitherBase<({{genericOrArgs}})>
                 {{genericConstraints}};
 
-            public readonly partial struct Either<{{genericArgs}}> : IEither<{{genericArgs}}> 
+            public readonly struct {{either}} : IEither<{{genericArgs}}> 
                 {{genericConstraints}}
             {
                 public ({{genericOrArgs}}) Value { get; }
@@ -112,6 +114,7 @@ public class EitherBaseGenerator : IIncrementalGenerator
 
                 {{constructors}}
 
+                public static implicit operator {{either}}([DisallowNull] EitherMatchError _) => throw new EitherMatchException<Either<{{genericArgs}}>>();
                 {{operators}}
             }
             """;

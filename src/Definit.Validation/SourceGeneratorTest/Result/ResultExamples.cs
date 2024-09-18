@@ -1,20 +1,25 @@
 using System.Text;
 using Definit.Results.NewApproach;
 
-[module: GenerateResult.Object(typeof(StringBuilder))]
-[module: GenerateResult.Object<StringReader>]
-[module: GenerateResult.Object(typeof(List<>))]
-[module: GenerateResult.Object<List<string>>]
+[assembly: GenerateResult.Object(typeof(StringBuilder))]
+[assembly: GenerateResult.Object<StringReader>]
+[assembly: GenerateResult.Object(typeof(List<>))]
+[assembly: GenerateResult.Object<List<string>>]
 
-namespace Definit.Results.NewApproach;
+namespace Definit.Results.Examples;
+
+[GenerateResult]
+public partial struct ResultExample<T> : IResult<T, NotFound>
+    where T : notnull;
+
+public readonly record struct NotFound(Either<KeyNotFoundException, Exception> Exception)
+    : IError<NotFound, KeyNotFoundException>;
 
 public partial class Examples
 {
-    public readonly record struct NotFound(Either<KeyNotFoundException, Exception> Exception)
-        : IError<NotFound, KeyNotFoundException>;
-
     private static int Get(string str)
     {
+        ErrorHelper.Matches<NotFound>(new Exception());
         return default!;
     }
 

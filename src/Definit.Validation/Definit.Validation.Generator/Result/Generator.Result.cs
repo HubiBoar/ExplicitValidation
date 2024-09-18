@@ -9,8 +9,6 @@ namespace Definit.Results.Generator;
 [Generator]
 public class ResultGenerator : IIncrementalGenerator
 {
-    private const string ResultType = "Definit.Results.NewApproach.IResult";
-
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var provider = context.SyntaxProvider.ForAttributeWithMetadataName
@@ -53,12 +51,13 @@ public class ResultGenerator : IIncrementalGenerator
             name => $"readonly {name}",
             "Definit.Results",
             "Definit.Validation",
+            "Definit.Results.NewApproach",
             "System.Diagnostics.CodeAnalysis"
         );
-
         var interf = symbol.AllInterfaces
-            .Single(x => x.ToDisplayString()
-            .StartsWith(ResultType));
+            .Single(x => x
+                .ToDisplayString()
+                .StartsWith("Definit.Results.NewApproach.IResult<"));
 
         var genericArgs = interf.TypeArguments.Select(x => x.ToDisplayString()).ToArray();
 
@@ -66,50 +65,14 @@ public class ResultGenerator : IIncrementalGenerator
         var fullName = typeInfo.FullName;
         var constructorName = symbol.Name;
 
-        var tuple = $"({string.Join(", ", genericArgs.Select(x => $"Null<{x}>?"))})";
-        var either = $"Either<{string.Join(", ", genericArgs)}>";
-
-        var deconstructorOut = string.Join(", ", genericArgs.Select((x, i) => $"out Null<{x}>? t{i}"));
-        var deconstructorAsignment = string.Join(", ", genericArgs.Select((x, i) => $"t{i}"));
-        var deconstructor = $"public void Deconstruct({deconstructorOut}) => ({deconstructorAsignment}) = Result;";
-
-        var operators = string.Join("\n\n", genericArgs.Select(x => $$"""
-        public static implicit operator {{name}}([DisallowNull] {{x}} value) => new (value!); 
-        public static implicit operator {{name}}([DisallowNull] Null<{{x}}> value) => new (value); 
-        public static implicit operator {{name}}([DisallowNull] Null<{{x}}>? value) => new (value!.Value); 
-        """));
+        var (interior, either) = ResultBaseGenerator.ResultInterior(genericArgs, constructorName, name);
 
         code.AddBlock($$"""
-        public readonly struct Value : I{{either}}
-        {
-            public {{either}} Result { get; }
+        
+        // {{interf!.ToDisplayString()}}
+        
+        {{interior}}
 
-            {{tuple}} I{{either}}.Value => Result.Value;
-
-            [Obsolete("Must not be used without parameters", true)]                                                                                   
-            public Value() {}                                                                                                                        
-
-            public Value({{fullName}} result)
-            {
-                Result = result._value;
-            }
-
-            {{deconstructor}}                                                                                                                                          
-        }
-
-        private readonly {{either}} _value;                                                                                              
-                                                                                                                                                  
-        [Obsolete("Must not be used without parameters", true)]                                                                                   
-        public {{constructorName}}() {}                                                                                                                        
-                                                                                                                                                  
-        public {{constructorName}}({{either}} value)
-        {
-            _value = value;
-        }
-                                                                                                                                                  
-        public static implicit operator {{name}}([DisallowNull] ResultMatchError value) => throw new ResultMatchException<{{fullName}}>(); 
-
-        {{operators}}
         """);
 
         return (code.ToString(), typeInfo.FullName);

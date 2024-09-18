@@ -40,3 +40,12 @@ public static class ErrorExtensions
         return (false, exception);
     }
 }
+
+public static class ErrorHelper
+{
+    public static (bool Matches, T Error) Matches<T>(Exception exception)
+        where T : notnull, IError<T>
+    {
+        return T.Matches(exception);
+    }
+}

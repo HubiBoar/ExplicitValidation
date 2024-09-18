@@ -1,6 +1,6 @@
 using Definit.Results.NewApproach;
 
-[assembly: GenerateEither.Base(6)]
+// [assembly: GenerateEither.Base(6)]
 
 namespace Definit.Results.NewApproach;
 

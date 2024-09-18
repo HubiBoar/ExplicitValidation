@@ -2,7 +2,7 @@ namespace Definit.Results.NewApproach;
 
 public static partial class GenerateResult
 {
-    [System.AttributeUsage(System.AttributeTargets.Module, AllowMultiple = true)]
+    [System.AttributeUsage(System.AttributeTargets.Assembly, AllowMultiple = true)]
     public sealed class ObjectAttribute : Attribute
     {
         public bool AllowUnsafe { get; set; }
@@ -15,7 +15,7 @@ public static partial class GenerateResult
         }
     }
 
-    [System.AttributeUsage(System.AttributeTargets.Module, AllowMultiple = true)]
+    [System.AttributeUsage(System.AttributeTargets.Assembly, AllowMultiple = true)]
     public sealed class ObjectAttribute<T> : Attribute
     {
         public bool AllowUnsafe { get; set; }

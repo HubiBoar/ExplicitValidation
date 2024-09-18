@@ -9,6 +9,9 @@ namespace Definit.Results.Generator;
 [Generator]
 public class ResultGenerator : IIncrementalGenerator
 {
+    const string ResultName = "Definit.Results.NewApproach.IResult<";
+    const string EitherName = "Definit.Results.NewApproach.IEither<";
+
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var provider = context.SyntaxProvider.ForAttributeWithMetadataName
@@ -57,7 +60,7 @@ public class ResultGenerator : IIncrementalGenerator
         var interf = symbol.AllInterfaces
             .Single(x => x
                 .ToDisplayString()
-                .StartsWith("Definit.Results.NewApproach.IResult<"));
+                .StartsWith(ResultName));
 
         var genericArgs = interf.TypeArguments.Select(x => x.ToDisplayString()).ToArray();
 
@@ -67,12 +70,30 @@ public class ResultGenerator : IIncrementalGenerator
 
         var (interior, either) = ResultBaseGenerator.ResultInterior(genericArgs, constructorName, name);
 
+        var genericEitherArgs = interf
+            .TypeArguments
+            .OfType<INamedTypeSymbol>()
+            .Where(x => x
+                .AllInterfaces
+                .SingleOrDefault(x =>
+                {
+                    var name = x.ToDisplayString();
+                    return name.StartsWith(EitherName);
+                }) is not null)
+            .SelectMany(x => x!.TypeArguments.Select(y => (Arg: x.ToDisplayString(), Sub: y.ToDisplayString())));
+
+        var constructors = string.Join("\n", genericEitherArgs.Select(
+            x => $"public {constructorName}({x.Sub} value) => Either = new {x.Arg}(value);"));
+
+        var operators = string.Join("\n", genericEitherArgs.Select(
+            x => $"public static implicit operator {name}({x.Sub} value) => new (value);"));
+
         code.AddBlock($$"""
-        
-        // {{interf!.ToDisplayString()}}
-        
         {{interior}}
 
+        {{constructors}}
+
+        {{operators}}
         """);
 
         return (code.ToString(), typeInfo.FullName);

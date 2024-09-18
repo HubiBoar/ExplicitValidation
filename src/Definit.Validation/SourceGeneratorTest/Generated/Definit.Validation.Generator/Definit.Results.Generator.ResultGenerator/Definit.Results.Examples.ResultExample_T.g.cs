@@ -7,9 +7,6 @@ namespace Definit.Results.Examples
 {
 	readonly partial struct ResultExample<T> where T : notnull
 	{
-		
-		// Definit.Results.NewApproach.IResult<T, Definit.Results.Examples.NotFound>
-		
 		private Either<T, Definit.Results.Examples.NotFound> Either { get; }
 		
 		[Obsolete(DefaultConstructorException.Attribute, true)]
@@ -27,6 +24,9 @@ namespace Definit.Results.Examples
 		public static implicit operator ResultExample<T>([DisallowNull] EitherMatchError _) => throw new EitherMatchException<Either<T, Definit.Results.Examples.NotFound>>();
 		public static implicit operator ResultExample<T>([DisallowNull] T value) => new (value);
 		public static implicit operator ResultExample<T>([DisallowNull] Definit.Results.Examples.NotFound value) => new (value);
+		
+		
+		
 		
 	}
 }

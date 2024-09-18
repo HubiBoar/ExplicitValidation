@@ -12,6 +12,10 @@ namespace Definit.Results.Examples;
 public partial struct ResultExample<T> : IResult<T, NotFound>
     where T : notnull;
 
+[GenerateResult]
+public partial struct ResultExample2<T> : IResult<Either<T, string>, NotFound>
+    where T : notnull;
+
 public readonly record struct NotFound(Either<KeyNotFoundException, Exception> Exception)
     : IError<NotFound, KeyNotFoundException>;
 

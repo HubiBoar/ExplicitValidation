@@ -23,16 +23,25 @@ public readonly struct Result<T0, T1, T2, T3> : IResult<T0, T1, T2, T3>
 
     static Either<T0, T1, T2, T3> IResultBase<Either<T0, T1, T2, T3>>.FromException(Exception exception)
     {
-        //TODO error handling
-        return T1.Matches(exception).Error;
+        var T1_match = T1.Matches(exception);
+
+        if(T1_match.Matches)
+        {
+            return T1_match.Error;
+        }
+
+        var T2_match = T2.Matches(exception);
+
+        if(T2_match.Matches)
+        {
+            return T2_match.Error;
+        }
+
+       return T3.Matches(exception).Error;
     }
 
     public static implicit operator Result<T0, T1, T2, T3>(T0 value) => new (value);
 	public static implicit operator Result<T0, T1, T2, T3>(T1 value) => new (value);
 	public static implicit operator Result<T0, T1, T2, T3>(T2 value) => new (value);
 	public static implicit operator Result<T0, T1, T2, T3>(T3 value) => new (value);
-
-    public static implicit operator Result<T0, T1, T2, T3>(Either<T0, T1, T2, T3> value) => new (value);
-    // TODO Either Mapping
-    // public static implicit operator Result<T0, T1, T2, T3>(Either<T1, T0> value) => new (value);
 }

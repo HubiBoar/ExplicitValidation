@@ -66,56 +66,34 @@ public class EitherBaseGenerator : IIncrementalGenerator
 
             var genericConstraints = string.Join("\n\t", generic.Select(x => $"where {x.Type} : notnull"));
 
-            var genericPermutations = GetAllPermutations(
-                generic
-                    .Select((x, i) => (Type: x.Type, Name: x.Name, Index: i))
-                    .ToArray())
-                .Select(x => (Args: string.Join(", ", x.Select(x => x.Type)), Values: x))
-                .Where(x => x.Args != genericArgs && x.Values.Count > 0)
-                .Select(x => (Name: x.Values.Count == 1 ? x.Args : $"Either<{x.Args}>", Args: x.Args, Values: x.Values))
-                .ToArray();
-
-            var constructors = genericPermutations.Select(x => 
-            {
-                var arguments = generic.Select(_ => "null").ToArray();
-
-                if(x.Values.Count == 1)
-                {
-                    arguments[x.Values[0].Index] = "value";
-                }
-                else
-                {
-                    for(int i = 0; i < x.Values.Count; i ++)
-                    {
-                        var y = x.Values[i];
-                        arguments[y.Index] = $"value.Value.Item{i+1}"; 
-                    }
-                }
-
-                var call = string.Join(", ", arguments);
-                return $"public Either({x.Name} value) => Value = ({call});";
-            })
-            .ToArray();
-
-            var operators = genericPermutations
-                .Select(x => $"public static implicit operator Either<{genericArgs}>({x.Name} value) => new (value);")
-                .ToArray();
-
             var deconstructors = 
                 GenerateAllStates(generic.Length)
                 .Select(state =>
-                {
-                    var arguments = generic.Select((x, i) => (Type: x.Type, Name: x.Name, Ret : x.Ret, IsNull : state[i]))
-                    .ToImmutableArray(); 
-
-                    return CreateDeconstruct(arguments);
-                })
+                    CreateDeconstruct
+                    (
+                        generic
+                            .Select((x, i) => (Type: x.Type, Name: x.Name, Ret : x.Ret, IsNull : state[i]))
+                            .ToImmutableArray()
+                    )) 
                 .ToArray();
+
+            var constructors = string.Join("\n\t", generic
+                .Select((x, i) =>
+                {
+                    var args = Enumerable.Range(0, generic.Length).Select(_ => "null").ToArray();
+                    args[i] = "value";
+
+                    var argsString = string.Join(", ", args);
+
+                    return $"public Either({x.Type} value) => Value = ({argsString});";
+                }));
+
+            var operators = string.Join("\n\t", generic
+                .Select(x => $"public static implicit operator Either<{genericArgs}>({x.Type} value) => new (value);"));
 
             List<(string, string)> result = [];
 
             string fileName = $"Definit.Results.NewApproach.Either_{i}"; 
-            const int chunkSize = 500;
 
             var setupCode = $$"""
 
@@ -128,68 +106,17 @@ public class EitherBaseGenerator : IIncrementalGenerator
                 {{genericConstraints}}
             {
                 public ({{genericOrArgs}}) Value { get; }
+
+                [Obsolete(DefaultConstructorException.Attribute, true)]
+                public Either() => throw new DefaultConstructorException();
+
+                {{constructors}}
+
+                {{operators}}
             }
             """;
 
             result.Add((setupCode, $"{fileName}/{fileName}_Setup"));
-
-            var constructorsCode = $$"""
-            namespace Definit.Results.NewApproach;
-
-            public readonly partial struct Either<{{genericArgs}}> 
-            {
-                [Obsolete(DefaultConstructorException.Attribute, true)]
-                public Either() => throw new DefaultConstructorException();
-            }
-            """;
-            result.Add((constructorsCode, $"{fileName}/Constructors/{fileName}_Constructors"));
-
-            var index = 0;
-            foreach(var chunk in constructors.Chunk((int)(chunkSize / constructors.Average(x => x.Split('\n').Length))))
-            {
-                var code = $$"""
-                namespace Definit.Results.NewApproach;
-
-                public readonly partial struct Either<{{genericArgs}}> 
-                {
-                    {{string.Join("\n\t", chunk)}}
-                }
-                """;
-
-                result.Add((code, $"{fileName}/Constructors/{fileName}_Constructors_Chunk_{index}"));
-
-                index ++;
-            }
-            
-
-            var operatorsCode = $$"""
-            namespace Definit.Results.NewApproach;
-
-            public readonly partial struct Either<{{genericArgs}}> 
-            {
-                public static implicit operator Either<{{genericArgs}}>(EitherMatchError error) => throw new EitherMatchException<Either<{{genericArgs}}>>();
-            }
-
-            """;
-
-            result.Add((operatorsCode, $"{fileName}/Operators/{fileName}_Operators"));
-
-            index = 0;
-            foreach(var chunk in operators.Chunk((int)(chunkSize / operators.Average(x => x.Split('\n').Length))))
-            {
-                var code = $$"""
-                namespace Definit.Results.NewApproach;
-
-                public readonly partial struct Either<{{genericArgs}}> 
-                {
-                    {{string.Join("\n\t", chunk)}}
-                }
-                """;
-
-                result.Add((code, $"{fileName}/Operators/{fileName}_Operators_Chunk_{index}"));
-
-                index ++;
-            }
 
             var deconstructorsCode = $$"""
 
@@ -202,7 +129,8 @@ public class EitherBaseGenerator : IIncrementalGenerator
 
             result.Add((deconstructorsCode, $"{fileName}/Deconstructors/{fileName}_Deconstructors"));
 
-            index = 0;
+            var index = 0;
+            const int chunkSize = 500;
             foreach(var chunk in deconstructors.Chunk((int)(chunkSize / deconstructors.Average(x => x.Split('\n').Length))))
             {
                 var code = $$"""

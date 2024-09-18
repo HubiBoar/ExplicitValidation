@@ -69,7 +69,25 @@ public class ResultBaseGenerator : IIncrementalGenerator
             var operators = string.Join("\n\t", generic
                 .Select(x => $"public static implicit operator Result<{genericArgs}>({x} value) => new (value);"));
 
-            var code = new StringBuilder($$"""
+            var errorHandling = string.Join("\n\n", generic.Skip(1).Select((x, i) => 
+            {
+                var index = i+1;
+                if(index == generic.Length -1)
+                {
+                    return $"       return {x}.Matches(exception).Error;";
+                }
+
+                return $$"""
+                        var {{x}}_match = {{x}}.Matches(exception);
+
+                        if({{x}}_match.Matches)
+                        {
+                            return {{x}}_match.Error;
+                        }
+                """;
+            }));
+
+            var code = $$"""
             namespace Definit.Results.NewApproach;
 
             public interface IResult<{{genericArgs}}> : IResultBase<Either<{{genericArgs}}>>
@@ -89,19 +107,14 @@ public class ResultBaseGenerator : IIncrementalGenerator
 
                 static Either<{{genericArgs}}> IResultBase<Either<{{genericArgs}}>>.FromException(Exception exception)
                 {
-                    //TODO error handling
-                    return T1.Matches(exception).Error;
+            {{errorHandling}}
                 }
 
                 {{operators}}
-
-                public static implicit operator Result<{{genericArgs}}>(Either<{{genericArgs}}> value) => new (value);
-                // TODO Either Mapping
-                // public static implicit operator Result<{{genericArgs}}>(Either<T1, T0> value) => new (value);
             }
-            """);
+            """;
 
-            return (code.ToString(), $"Definit.Results.NewApproach.Result_{i}");
+            return (code, $"Definit.Results.NewApproach.Result_{i}");
         })
         .ToImmutableArray();
     }

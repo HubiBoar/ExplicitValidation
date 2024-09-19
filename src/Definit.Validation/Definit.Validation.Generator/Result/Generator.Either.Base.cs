@@ -58,7 +58,7 @@ public class EitherBaseGenerator : IIncrementalGenerator
             return ImmutableArray<(string Code, string ClassName)>.Empty;
         }
 
-        return Enumerable.Range(2, count - 1).SelectMany(i =>
+        return Enumerable.Range(2, count).SelectMany(i =>
         {
             var generic = Enumerable.Range(0, i).Select(x => (Type: $"T{x}", Name: $"t{x}", Ret: $"t_{x}")).ToArray();
             var genericArgs = string.Join(", ", generic.Select(x => x.Type));

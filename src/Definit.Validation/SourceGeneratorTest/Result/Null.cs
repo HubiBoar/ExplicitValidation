@@ -53,6 +53,7 @@ public readonly struct NotNull<T>
         : 
         new IsNull<T>(new NotNull<T>(value));
 }
+
 public readonly struct IsNull<T>
     where T : class
 {

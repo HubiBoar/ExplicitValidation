@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using System.Text;
 using Microsoft.CodeAnalysis;
 
 namespace Definit.Results.Generator;
@@ -7,7 +6,8 @@ namespace Definit.Results.Generator;
 [Generator]
 public class ResultBaseGenerator : IIncrementalGenerator
 {
-    private const string ResultType = "Definit.Results.NewApproach.IResult";
+    private const string SuccessType = "Definit.Results.NewApproach.Success";
+    private const string ErrorType = "Definit.Results.NewApproach.Error";
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
@@ -58,30 +58,46 @@ public class ResultBaseGenerator : IIncrementalGenerator
             return ImmutableArray<(string Code, string ClassName)>.Empty;
         }
 
-        return Enumerable.Range(2, count - 1).Select(i =>
+        return Enumerable.Range(0, count + 1).Select(i =>
         {
-            var generic = Enumerable.Range(0, i).Select(x => $"T{x}").ToArray();
+            var resultGenerics = i == 0 ? ["Success"] : Enumerable.Range(0, i).Select(x => $"T{x}").ToArray();
+            var genericArgs = string.Join(", ", resultGenerics);
 
-            var genericConstraints = string.Join("\n\t",
-                generic.Select((x, i) => i == 0 ? $"where {x} : notnull" : $"where {x} : struct, IError<{x}>"));
-           
-            var genericArgs = string.Join(", ", generic);
-            var result = $"Result<{genericArgs}>";
-            var (interior, either) = ResultInterior(generic, "Result", result); 
+            var genericConstraints = i == 0 ? "" : "\n\t" + string.Join("\n\t",
+                resultGenerics.Select(x => $"where {x} : notnull"));
 
-            interior = string.Join("\n\t", interior.Split('\n'));
+            var resultName = i == 0 ? "Result" : $"Result<{genericArgs}>";
+
+            var (interiorRaw, either) = ResultInterior(resultGenerics.Concat(["Err"]).ToArray(), "Result", resultName); 
+
+            var interior = string.Join("\n\t", interiorRaw.Split('\n'));
+
+            var errors = string.Join("\n\n\n\t", Enumerable.Range(1, count).Select(y =>
+            {
+                var errorGenerics = Enumerable.Range(0, y).Select(x => $"TE{x}").ToArray();
+                return string.Join("\n\t", GenerateErrorType(resultGenerics, errorGenerics).Split('\n'));
+            })
+            .ToArray());
+
             var code = $$"""
+            using Err = {{ErrorType}};
+            using Success = {{SuccessType}};
             using System.Diagnostics.CodeAnalysis;
 
             namespace Definit.Results.NewApproach;
 
-            public interface I{{result}} : IResultBase<{{either}}>
-                {{genericConstraints}};
-
-            public readonly struct {{result}} : I{{result}} 
-                {{genericConstraints}}
+            public readonly partial struct {{resultName}} : {{resultName}}.Base{{genericConstraints}}
             {
+                public interface Base : IResultBase<{{either}}>;
+                
                 {{interior}}
+
+
+
+
+                //ERRORS
+
+                {{errors}}
             }
             """;
 
@@ -90,19 +106,51 @@ public class ResultBaseGenerator : IIncrementalGenerator
         .ToImmutableArray();
     }
 
-    public static (string Interior, string Either) ResultInterior(string[] generic, string constructorName, string typeName)
+    private static string GenerateErrorType
+    (
+        string[] parentGenerics,
+        string[] errorGenerics
+    )
     {
-        var genericArgs = string.Join(", ", generic);
+        var genericConstraints = string.Join("\n\t",
+            errorGenerics.Select(x => $"where {x} : struct, IError<{x}>"));
+       
+        var errorGenericArgs = string.Join(", ", errorGenerics);
+        var parentGenericArgs = string.Join(", ", errorGenerics);
+        var genericName = $"Error<{errorGenericArgs}>";
+        var (interior, either) = ResultInterior(parentGenerics.Concat(errorGenerics).ToArray(), "Error", genericName); 
+
+        interior = string.Join("\n\t", interior.Split('\n'));
+
+        return $$"""
+        public readonly struct {{genericName}} : {{genericName}}.Base 
+            {{genericConstraints}}
+        {
+            public interface Base : IResultBase<{{either}}>;
+
+            {{interior}}
+        }
+        """;
+    }
+
+    public static (string Interior, string Either) ResultInterior
+    (
+        string[] eitherGenerics,
+        string constructorName,
+        string typeName
+    )
+    {
+        var genericArgs = string.Join(", ", eitherGenerics);
 
         var either = $"Either<{genericArgs}>";
 
-        var operators = string.Join("\n", generic
+        var operators = string.Join("\n", eitherGenerics
             .Select(x => $"public static implicit operator {typeName}([DisallowNull] {x} value) => new (value);"));
 
-        var errorHandling = string.Join("\n\n", generic.Skip(1).Select((x, i) => 
+        var errorHandling = string.Join("\n\n", eitherGenerics.Skip(1).Select((x, i) => 
         {
             var index = i+1;
-            if(index == generic.Length -1)
+            if(index == eitherGenerics.Length -1)
             {
                 return $"   return ErrorHelper.Matches<{x}>(exception).Error;";
             }

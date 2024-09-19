@@ -3,7 +3,7 @@ namespace Definit.Results.NewApproach;
 public readonly struct Success;
 public readonly struct Null;
 
-public static partial class Result
+public partial struct Result
 {
     public static readonly Success Success = new ();
     public static readonly Null Null = new (); 

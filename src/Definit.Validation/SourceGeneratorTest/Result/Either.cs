@@ -1,7 +1,3 @@
-using Definit.Results.NewApproach;
-
-// [assembly: GenerateEither.Base(6)]
-
 namespace Definit.Results.NewApproach;
 
 [System.AttributeUsage(System.AttributeTargets.Struct, AllowMultiple = false)]

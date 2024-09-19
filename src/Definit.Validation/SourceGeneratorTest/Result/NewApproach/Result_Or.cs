@@ -32,7 +32,7 @@ public readonly record struct Error(Exception Exception) : IError<Error>
     }
 }
 
-public interface IResult<TEither>
+public interface IResultBase<TEither>
     where TEither : struct, IEither
 {
     internal TEither Either { get; }
@@ -40,23 +40,23 @@ public interface IResult<TEither>
     internal static abstract TEither FromException(Exception exception);
 }
 
-public readonly struct Result : IResult<Either<Success, Error>>
+public readonly struct Result : IResultBase<Either<Success, Error>>
 {
-    Either<Success, Error> IResult<Either<Success, Error>>.Either => throw new NotImplementedException();
+    Either<Success, Error> IResultBase<Either<Success, Error>>.Either => throw new NotImplementedException();
 
-    static Either<Success, Error> IResult<Either<Success, Error>>.FromException(Exception exception)
+    static Either<Success, Error> IResultBase<Either<Success, Error>>.FromException(Exception exception)
     {
         throw new NotImplementedException();
     }
 
 
 
-    public readonly struct Or<TError> : IResult<Either<Success, TError>>
+    public readonly struct Or<TError> : IResultBase<Either<Success, TError>>
         where TError : struct, IError<TError>
     {
-        Either<Success, TError> IResult<Either<Success, TError>>.Either => throw new NotImplementedException();
+        Either<Success, TError> IResultBase<Either<Success, TError>>.Either => throw new NotImplementedException();
 
-        static Either<Success, TError> IResult<Either<Success, TError>>.FromException(Exception exception)
+        static Either<Success, TError> IResultBase<Either<Success, TError>>.FromException(Exception exception)
         {
             throw new NotImplementedException();
         }
@@ -64,87 +64,88 @@ public readonly struct Result : IResult<Either<Success, Error>>
 
 
 
-    public readonly struct Or<TError0, TError1> : IResult<Either<Success, TError0>>
+    public readonly struct Or<TError0, TError1> : IResultBase<Either<Success, TError0>>
         where TError0 : struct, IError<TError0>
         where TError1 : struct, IError<TError1>
     {
-        Either<Success, TError0> IResult<Either<Success, TError0>>.Either => throw new NotImplementedException();
+        Either<Success, TError0> IResultBase<Either<Success, TError0>>.Either => throw new NotImplementedException();
 
-        static Either<Success, TError0> IResult<Either<Success, TError0>>.FromException(Exception exception)
+        static Either<Success, TError0> IResultBase<Either<Success, TError0>>.FromException(Exception exception)
         {
             throw new NotImplementedException();
         }
     }
 }
 
-public readonly struct Result<T> : IResult<Either<T, Error>>
+public readonly struct Result<T> : IResultBase<Either<T, Error>>
     where T : notnull
 {
-    Either<T, Error> IResult<Either<T, Error>>.Either => throw new NotImplementedException();
+    Either<T, Error> IResultBase<Either<T, Error>>.Either => throw new NotImplementedException();
 
-    static Either<T, Error> IResult<Either<T, Error>>.FromException(Exception exception)
+    static Either<T, Error> IResultBase<Either<T, Error>>.FromException(Exception exception)
     {
         throw new NotImplementedException();
     }
 
 
-    public readonly struct Error<TError> : IResult<Either<T, TError>>
+    public readonly struct Error<TError> : IResultBase<Either<T, TError>>
         where TError : struct, IError<TError>
     {
-        Either<T, TError> IResult<Either<T, TError>>.Either => throw new NotImplementedException();
+        Either<T, TError> IResultBase<Either<T, TError>>.Either => throw new NotImplementedException();
 
-        static Either<T, TError> IResult<Either<T, TError>>.FromException(Exception exception)
+        static Either<T, TError> IResultBase<Either<T, TError>>.FromException(Exception exception)
         {
             throw new NotImplementedException();
         }
     }
 
 
-
-    public readonly struct Error<TError0, TError1> : IResult<Either<T, TError0, TError1>>
+    public readonly struct Error<TError0, TError1> : Error<TError0, TError1>.Base
         where TError0 : struct, IError<TError0>
         where TError1 : struct, IError<TError1>
     {
-        Either<T, TError0, TError1> IResult<Either<T, TError0, TError1>>.Either => throw new NotImplementedException();
+        public interface Base : IResultBase<Either<T, TError0, TError1>>;
 
-        static Either<T, TError0, TError1> IResult<Either<T, TError0, TError1>>.FromException(Exception exception)
+        Either<T, TError0, TError1> IResultBase<Either<T, TError0, TError1>>.Either => throw new NotImplementedException();
+
+        static Either<T, TError0, TError1> IResultBase<Either<T, TError0, TError1>>.FromException(Exception exception)
         {
             throw new NotImplementedException();
         }
     }
 }
 
-public readonly struct Result<T0, T1> : IResult<Either<T0, T1, Error>>
+public readonly struct Result<T0, T1> : IResultBase<Either<T0, T1, Error>>
     where T0 : notnull
     where T1 : notnull
 {
-    Either<T0, T1, Error> IResult<Either<T0, T1, Error>>.Either => throw new NotImplementedException();
+    Either<T0, T1, Error> IResultBase<Either<T0, T1, Error>>.Either => throw new NotImplementedException();
 
-    static Either<T0, T1, Error> IResult<Either<T0, T1, Error>>.FromException(Exception exception)
+    static Either<T0, T1, Error> IResultBase<Either<T0, T1, Error>>.FromException(Exception exception)
     {
         throw new NotImplementedException();
     }
 
 
-    public readonly struct Error<TError> : IResult<Either<T0, T1, TError>>
+    public readonly struct Error<TError> : IResultBase<Either<T0, T1, TError>>
         where TError : struct, IError<TError>
     {
-        Either<T0, T1, TError> IResult<Either<T0, T1, TError>>.Either => throw new NotImplementedException();
+        Either<T0, T1, TError> IResultBase<Either<T0, T1, TError>>.Either => throw new NotImplementedException();
 
-        static Either<T0, T1, TError> IResult<Either<T0, T1, TError>>.FromException(Exception exception)
+        static Either<T0, T1, TError> IResultBase<Either<T0, T1, TError>>.FromException(Exception exception)
         {
             throw new NotImplementedException();
         }
     }
 
 
-    public readonly struct Error<TError0, TError1> : IResult<Either<T0, T1, TError0, TError1>>
+    public readonly struct Error<TError0, TError1> : IResultBase<Either<T0, T1, TError0, TError1>>
         where TError0 : struct, IError<TError0>
         where TError1 : struct, IError<TError1>
     {
-        Either<T0, T1, TError0, TError1> IResult<Either<T0, T1, TError0, TError1>>.Either => throw new NotImplementedException();
+        Either<T0, T1, TError0, TError1> IResultBase<Either<T0, T1, TError0, TError1>>.Either => throw new NotImplementedException();
 
-        static Either<T0, T1, TError0, TError1> IResult<Either<T0, T1, TError0, TError1>>.FromException(Exception exception)
+        static Either<T0, T1, TError0, TError1> IResultBase<Either<T0, T1, TError0, TError1>>.FromException(Exception exception)
         {
             throw new NotImplementedException();
         }
@@ -208,14 +209,14 @@ public static class Extensions
     }
 
     public static TEither GetEither<TResult, TEither>(this TResult result)
-        where TResult : struct, IResult<TEither>
+        where TResult : struct, IResultBase<TEither>
         where TEither : struct, IEither
     {
         return result.Either;
     }
 
     public static TEither FromException<TResult, TEither>(Exception exception)
-        where TResult : struct, IResult<TEither>
+        where TResult : struct, IResultBase<TEither>
         where TEither : struct, IEither
     {
         return TResult.FromException(exception);

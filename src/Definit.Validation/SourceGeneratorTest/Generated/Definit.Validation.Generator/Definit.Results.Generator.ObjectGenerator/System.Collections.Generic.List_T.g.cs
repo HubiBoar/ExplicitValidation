@@ -190,15 +190,15 @@ public static class List_T__Auto__Extensions
 		    }
 		}
 		
-		public Either<T, Error> Find(System.Predicate<T> match)
+		public Either<IsNull<T>, Error> Find(System.Predicate<T> match)
 		{
 		    try
 		    {
-		        return new Either<T, Error>((this.Value.Find(match))!);
+		        return new Either<IsNull<T>, Error>((this.Value.Find(match))!.IsNull()!);
 		    }
 		    catch (Exception exception)
 		    {
-		        return new Either<T, Error>(Error.Matches(exception).Error);
+		        return new Either<IsNull<T>, Error>(Error.Matches(exception).Error);
 		    }
 		}
 		
@@ -250,15 +250,15 @@ public static class List_T__Auto__Extensions
 		    }
 		}
 		
-		public Either<T, Error> FindLast(System.Predicate<T> match)
+		public Either<IsNull<T>, Error> FindLast(System.Predicate<T> match)
 		{
 		    try
 		    {
-		        return new Either<T, Error>((this.Value.FindLast(match))!);
+		        return new Either<IsNull<T>, Error>((this.Value.FindLast(match))!.IsNull()!);
 		    }
 		    catch (Exception exception)
 		    {
-		        return new Either<T, Error>(Error.Matches(exception).Error);
+		        return new Either<IsNull<T>, Error>(Error.Matches(exception).Error);
 		    }
 		}
 		

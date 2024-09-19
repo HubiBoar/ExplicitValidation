@@ -183,7 +183,7 @@ public class ObjectGenerator : IIncrementalGenerator
             :
             nullable
             ?
-            $"return new {returnType}(({methodCall})!);"
+            $"return new {returnType}(({methodCall})!.IsNull()!);"
             :
             $"return new {returnType}({methodCall});";
 
@@ -248,7 +248,7 @@ public class ObjectGenerator : IIncrementalGenerator
             if(method.ReturnType.NullableAnnotation is NullableAnnotation.Annotated)
             {
                 returnName = method.ReturnType.WithNullableAnnotation(NullableAnnotation.NotAnnotated).ToDisplayString();
-                return ($"Either<{returnName}, Error>", true, null);
+                return ($"Either<IsNull<{returnName}>, Error>", true, null);
             }
 
             return ($"Either<{returnName}, Error>", false, null);
@@ -274,7 +274,7 @@ public class ObjectGenerator : IIncrementalGenerator
         if(taskSymbol.NullableAnnotation is NullableAnnotation.Annotated)
         {
             returnName = taskSymbol.WithNullableAnnotation(NullableAnnotation.NotAnnotated).ToDisplayString();
-            return ($"Either<{returnName}, Error>", true, taskPrefix);
+            return ($"Either<IsNull<{returnName}>, Error>", true, taskPrefix);
         }
 
         return ($"Either<{returnName}, Error>", false, taskPrefix);
@@ -284,6 +284,5 @@ public class ObjectGenerator : IIncrementalGenerator
             return type.AllInterfaces.Any(x => x.ToDisplayString().StartsWith(ResultType));
         }
     }
-
 }
 

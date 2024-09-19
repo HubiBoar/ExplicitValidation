@@ -1,19 +1,51 @@
-using System.Diagnostics.CodeAnalysis;
 
 namespace Definit.Results.NewApproach;
 
 public static class NullExtensions
 {
     public static void Deconstruct<T>(this IsNull<T>? isNull, out T? t, out Null? nul)
+        where T : struct
+    {
+        if(isNull is null)
+        {
+            t = null;
+            nul = null;
+            return;
+        }
+
+        (var t_, nul) = isNull.Value.Value;
+        t = t_ is null ? null : t_.Value;
+    }
+
+    public static void Deconstruct<T>(this IsNull<T> isNull, out T? t, out Null? nul)
+        where T : struct
+    {
+        (var t_, nul) = isNull.Value;
+    
+        t = t_ is null ? null : t_.Value;
+    }
+
+    public static void Deconstruct<T>(this IsNull<T> isNull, out T? t, out Null? nul)
         where T : class
     {
-        t = null;
-        nul = null;
+        (var t_, nul) = isNull.Value;
+    
+        t = t_ is null ? null : t_.Value;
+    }
 
-        if(isNull is not null)
+    public static void Deconstruct<T>(this IsNull<T>? isNull, out T? t, out Null? nul)
+        where T : class
+    {
+        if(isNull is null)
         {
-            (t, nul) = isNull.Value;
+            t = null;
+            nul = null;
+            return;
         }
+
+        (var t_, nul) = isNull.Value.Value;
+
+        t = t_ is null ? null : t_.Value;
     }
 
     public static IsNull<T>? IsNull<T>(this Or<T>? value)
@@ -27,15 +59,24 @@ public static class NullExtensions
         return NewApproach.IsNull<T>.Create(value.Value.Value);
     }
 
-    public static IsNull<T> IsNull<T>([MaybeNull] this T? t)
-        where T : class
+    public static IsNull<T> IsNull<T>(this T? t)
+        where T : struct
+    {
+        if(t is null)
+        {
+            return NewApproach.IsNull<T>.Null;
+        }
+
+        return NewApproach.IsNull<T>.Create(t.Value);
+    }
+
+    public static IsNull<T> IsNull<T>(this T t)
     {
         return NewApproach.IsNull<T>.Create(t);
     }
 }
 
 public readonly struct NotNull<T>
-    where T : class
 {
     public T Value { get; }
 
@@ -46,7 +87,7 @@ public readonly struct NotNull<T>
 
     public static implicit operator T(NotNull<T> value) => value.Value;
 
-    public static IsNull<T> IsNull([MaybeNull] T? value) =>
+    public static IsNull<T> IsNull(T? value) =>
         value is null
         ? 
         new IsNull<T>(Result.Null)
@@ -55,7 +96,6 @@ public readonly struct NotNull<T>
 }
 
 public readonly struct IsNull<T>
-    where T : class
 {
     public Either<NotNull<T>, Null> Value { get; }
 
@@ -64,11 +104,6 @@ public readonly struct IsNull<T>
 
     public IsNull(Either<NotNull<T>, Null> value) => Value = value;
 
-    public void Deconstruct(out T? t, out Null? nul)
-    {
-        (var t_0, nul) = Value.Value;
-        t = t_0?.Value;
-    }
-
-    public static IsNull<T> Create([MaybeNull] T? value) => NotNull<T>.IsNull(value); 
+    public static IsNull<T> Create(T? value) => NotNull<T>.IsNull(value); 
+    public static IsNull<T> Null { get; }= new (Result.Null); 
 }

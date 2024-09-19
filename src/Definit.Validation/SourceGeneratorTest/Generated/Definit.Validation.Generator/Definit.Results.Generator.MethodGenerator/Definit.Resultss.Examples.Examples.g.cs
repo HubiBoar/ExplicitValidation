@@ -8,6 +8,18 @@ namespace Definit.Resultss.Examples
 	partial class Examples 
 	{
 		
+		private Definit.Results.NewApproach.Either<int, string, Definit.Resultss.Examples.NotFound> PrivateRun(int i)
+		{
+		    try
+		    {
+		        return ResultHelper.ToReturn<Definit.Resultss.Examples.ResultExample2<int>, Definit.Results.NewApproach.Either<int, string, Definit.Resultss.Examples.NotFound>>(_PrivateRun(i));
+		    }
+		    catch (Exception exception)
+		    {
+		        return ResultHelper.ToReturn<Definit.Resultss.Examples.ResultExample2<int>, Definit.Results.NewApproach.Either<int, string, Definit.Resultss.Examples.NotFound>>(exception);
+		    }
+		}
+		
 		private Definit.Results.NewApproach.Either<string, Definit.Resultss.Examples.NotFound> PrivateRun(string t)
 		{
 		    try

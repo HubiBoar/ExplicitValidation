@@ -10,7 +10,7 @@ namespace Definit.Results.Generator;
 [Generator]
 public class MethodGenerator : IIncrementalGenerator
 {
-    private const string ResultType = "Definit.Results.NewApproach.IResult";
+    private const string ResultType = "Definit.Results.NewApproach.IResultBase<";
     private const string TaskType = "System.Threading.Tasks.Task<";
 
     private record struct TypeInfo
@@ -65,6 +65,7 @@ public class MethodGenerator : IIncrementalGenerator
         (
             name => name,
             "Definit.Results",
+            "Definit.Results.NewApproach",
             "Definit.Validation",
             "System.Diagnostics.CodeAnalysis"
         );
@@ -74,13 +75,13 @@ public class MethodGenerator : IIncrementalGenerator
         foreach(var method in type.Methods)
         {
             var returnType = GetResultType(method.Symbol)!.Value;
-            var returnError = returnType.Type.TypeArguments.Last();
             var isAsync = returnType.IsTask;
-            var returnValue = $"{returnType.Type.ToDisplayString()}.Value";
+            var returnEither = returnType.Type.AllInterfaces.Single(x => x.ToDisplayString().StartsWith(ResultType)).TypeArguments.Single().ToDisplayString();
+            var returnResult = returnType.Type.ToDisplayString();
 
             var decStatic = method.Symbol.IsStatic ? " static": "";
             var decAsync = isAsync ? " async" : ""; 
-            var decReturn = isAsync ? $"{TaskType}{returnValue}>" : returnValue;
+            var decReturn = isAsync ? $"{TaskType}{returnEither}>" : returnEither;
             var decName = method.Symbol.Name.Remove(0, 1);
 
             var decGeneric = method.Symbol.GetMethodGenericArgs();
@@ -91,18 +92,17 @@ public class MethodGenerator : IIncrementalGenerator
             var awaitCall = isAsync ? "await " : "";
             var parametersCall = method.Symbol.GetCallingParameters();
             var methodCall = $"{awaitCall}{method.Symbol.Name}({parametersCall})";
-            var errorCall = returnError.ToDisplayString();
 
             builder.AppendLine().AppendLine($$"""
             {{declaration}}{{decGenericConstraints}}
             {
                 try
                 {
-                    return new {{returnValue}}({{methodCall}});
+                    return ResultHelper.ToReturn<{{returnResult}}, {{returnEither}}>({{methodCall}});
                 }
-                catch(Exception exception)
+                catch (Exception exception)
                 {
-                    return new {{returnValue}}({{errorCall}}.Create(exception)); 
+                    return ResultHelper.ToReturn<{{returnResult}}, {{returnEither}}>(exception);
                 }
             }
             """);
@@ -115,12 +115,12 @@ public class MethodGenerator : IIncrementalGenerator
 
     private static readonly (string Attribute, string Keyword)[] Attributes = 
     [
-        ("Definit.Results.NewApproach.GenerateMethod.PublicAttribute", "public"),
-        ("Definit.Results.NewApproach.GenerateMethod.PrivateAttribute", "private"),
-        ("Definit.Results.NewApproach.GenerateMethod.Public.OverrideAttribute", "public override"),
-        ("Definit.Results.NewApproach.GenerateMethod.Private.OverrideAttribute", "private override"),
-        ("Definit.Results.NewApproach.GenerateMethod.Public.VirtualAttribute", "public virual"),
-        ("Definit.Results.NewApproach.GenerateMethod.Private.VirtualAttribute", "private virual")
+        ("Definit.Results.NewApproach.GenerateResult.Method.PublicAttribute", "public"),
+        ("Definit.Results.NewApproach.GenerateResult.Method.PrivateAttribute", "private"),
+        ("Definit.Results.NewApproach.GenerateResult.Method.Public.OverrideAttribute", "public override"),
+        ("Definit.Results.NewApproach.GenerateResult.Method.Private.OverrideAttribute", "private override"),
+        ("Definit.Results.NewApproach.GenerateResult.Method.Public.VirtualAttribute", "public virual"),
+        ("Definit.Results.NewApproach.GenerateResult.Method.Private.VirtualAttribute", "private virual")
     ];
 
     private static bool ShouldTransform(SyntaxNode node)
@@ -169,7 +169,6 @@ public class MethodGenerator : IIncrementalGenerator
                 return (typeSyntax, new MethodInfo(attribute.Keyword, methodSyntax, methodSymbol));
             }
         }
-
 
         return null;
     }  

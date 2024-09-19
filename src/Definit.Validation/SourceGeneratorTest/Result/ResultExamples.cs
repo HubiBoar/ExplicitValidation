@@ -54,7 +54,7 @@ public partial class Examples
     }
 
     [GenerateResult.Method.Private]
-    private Result<string, NotFound> _PrivateRun(string t)
+    private Result<string>.Error<NotFound> _PrivateRun(string t)
     {
         var result = GetResultExample2();
 
@@ -77,9 +77,9 @@ public partial class Examples
     }
 
     [GenerateResult.Method.Public]
-    private static Task<Result<T, NotFound>> _PublicRun<T>(T t)
+    private static Task<Result<T>.Error<NotFound>> _PublicRun<T>(T t)
         where T : IError<T>
     {
-        return Task.FromResult<Result<T, NotFound>>(t);
+        return Task.FromResult<Result<T>.Error<NotFound>>(t);
     }
 }

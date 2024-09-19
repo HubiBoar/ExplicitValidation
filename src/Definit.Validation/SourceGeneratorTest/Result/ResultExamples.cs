@@ -6,7 +6,7 @@ using Definit.Results.NewApproach;
 [assembly: GenerateResult.Object(typeof(StringBuilder))]
 [assembly: GenerateResult.Object<StringReader>]
 [assembly: GenerateResult.Object(typeof(List<>))]
-[assembly: GenerateResult.Object<List<string>>]
+[assembly: GenerateResult.Object<Task<string>>]
 
 namespace Definit.Resultss.Examples;
 

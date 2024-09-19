@@ -6,16 +6,11 @@ namespace Definit.Results.Generator;
 [Generator]
 public class ObjectGenericGenerator : IIncrementalGenerator
 {
-    private const string ResultType = "Definit.Results.NewApproach.IResult";
-    private const string TaskType = "System.Threading.Tasks.Task";
-    private const string ValueTaskType = "System.Threading.Tasks.ValueTask";
-    private const string Success = "Definit.Results.NewApproach.Success";
-
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var provider = context.SyntaxProvider.ForAttributeWithMetadataName
         (
-            "Definit.Results.NewApproach.GenerateObjectAttribute`1",
+            "Definit.Results.NewApproach.GenerateResult+ObjectAttribute`1",
             predicate: (c, _) => true,
 
             transform: (n, _) => n
@@ -37,7 +32,7 @@ public class ObjectGenericGenerator : IIncrementalGenerator
             .SelectMany(x => x.Attributes
                 .Where(y => y.AttributeClass is not null && y.AttributeClass!
                     .ToDisplayString()
-                    .StartsWith("Definit.Results.NewApproach.GenerateObjectAttribute<")) 
+                    .StartsWith("Definit.Results.NewApproach.GenerateResult.ObjectAttribute<")) 
                 .Select(x => GetType(context, x))))
         {
             context.AddSource($"{type.ClassName}.g.cs", type.Code);

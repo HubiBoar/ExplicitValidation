@@ -1,8 +1,49 @@
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Definit.Results.NewApproach;
 
 public static class NullExtensions
 {
+    public struct Either1<T0, T1>;
+
+    public static void Deconstruct<T0, T1>(this Either1<T0, T1> either, out T0? t0, out T1? t1)
+        where T0: struct
+        where T1: struct
+    {
+        t0 = null; t1 = null;
+    }
+
+    public static void Deconstruct<T0, T1>(this Either1<T0?, T1?> either, out IsNull<T0>? t0, out IsNull<T1>? t1)
+        where T0: struct
+        where T1: struct
+    {
+        t0 = null; t1 = null;
+    }
+
+    public static void Deconstruct<T0, T1>(this Either1<T0, T1> either, out IsNull<T0>? t0, out IsNull<T1>? t1)
+        where T0 : class
+        where T1 : class
+    {
+        t0 = null; t1 = null;
+    }
+
+    public static class Test
+    {
+        private static Either1<string, string> StringTest() => throw new Exception();
+        private static Either1<string?, string?> StringNullableTest() => throw new Exception();
+        private static Either1<int?, int?> IntNullableTest() => throw new Exception();
+        private static Either1<int, int> IntTest() => throw new Exception();
+
+        private static void Run()
+        {
+            var ((str1, str1Null), (str2, str2Null)) = StringTest();
+            var ((str3, str3Null), (str4, str4Null)) = StringNullableTest();
+            var (int1, int2) = IntTest();
+            var ((int3, int3Null), (int4, int4Null)) = IntNullableTest();
+        }
+    }
+
     public static void Deconstruct<T>(this IsNull<T>? isNull, out T? t, out Null? nul)
         where T : struct
     {
@@ -56,6 +97,8 @@ public static class NullExtensions
             return null;
         }
 
+        int? str = 5;
+        str.IsNull();
         return NewApproach.IsNull<T>.Create(value.Value.Value);
     }
 

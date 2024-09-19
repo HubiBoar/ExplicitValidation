@@ -9,8 +9,9 @@ namespace Definit.Results.Generator;
 [Generator]
 public class ResultGenerator : IIncrementalGenerator
 {
-    const string ResultName = "Definit.Results.NewApproach.IResult<";
+    const string ResultName = "Definit.Results.NewApproach.IResultBase<";
     const string EitherName = "Definit.Results.NewApproach.IEither<";
+    const string ErrorName = "Definit.Results.NewApproach.IError<";
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
@@ -62,41 +63,19 @@ public class ResultGenerator : IIncrementalGenerator
                 .ToDisplayString()
                 .StartsWith(ResultName));
 
-        var genericArgs = interf.TypeArguments.Select(x => x.ToDisplayString()).ToArray();
+        var eitherType = interf.TypeArguments.Single() as INamedTypeSymbol; 
+
+        var genericArgs = eitherType!.TypeArguments.Select(x => x.ToDisplayString()).ToArray();
 
         var name = typeInfo.Name;
         var fullName = typeInfo.FullName;
         var constructorName = symbol.Name;
 
-        var (interior, either) = ResultBaseGenerator.ResultInterior(genericArgs, constructorName, name);
+        var (interior, _) = ResultBaseGenerator.ResultInterior(genericArgs, constructorName, name);
 
-        var genericEitherArgs = interf
-            .TypeArguments
-            .OfType<INamedTypeSymbol>()
-            .Where(x => x
-                .AllInterfaces
-                .SingleOrDefault(x =>
-                {
-                    var name = x.ToDisplayString();
-                    return name.StartsWith(EitherName);
-                }) is not null)
-            .SelectMany(x => x!.TypeArguments.Select(y => (Arg: x.ToDisplayString(), Sub: y.ToDisplayString())));
+        code.AddBlock(interior);
 
-        var constructors = string.Join("\n", genericEitherArgs.Select(
-            x => $"public {constructorName}({x.Sub} value) => Either = new {x.Arg}(value);"));
-
-        var operators = string.Join("\n", genericEitherArgs.Select(
-            x => $"public static implicit operator {name}({x.Sub} value) => new (value);"));
-
-        code.AddBlock($$"""
-        {{interior}}
-
-        {{constructors}}
-
-        {{operators}}
-        """);
-
-        return (code.ToString(), typeInfo.FullName);
+        return (code.ToString(), fullName);
     }
 }
 

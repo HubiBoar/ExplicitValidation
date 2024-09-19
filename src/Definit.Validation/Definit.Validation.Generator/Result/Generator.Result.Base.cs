@@ -79,6 +79,8 @@ public class ResultBaseGenerator : IIncrementalGenerator
             })
             .ToArray());
 
+            var fromException = string.Join("\n\t\t", GenerateFromException(["Err"], either).Split('\n')); 
+
             var code = $$"""
             using Err = {{ErrorType}};
             using Success = {{SuccessType}};
@@ -88,14 +90,15 @@ public class ResultBaseGenerator : IIncrementalGenerator
 
             public readonly partial struct {{resultName}} : {{resultName}}.Base{{genericConstraints}}
             {
-                public interface Base : IResultBase<{{either}}>;
+                public interface Base : IResultBase<{{either}}>
+                {
+                    {{fromException}}
+                }
                 
                 {{interior}}
 
 
 
-
-                //ERRORS
 
                 {{errors}}
             }
@@ -104,6 +107,33 @@ public class ResultBaseGenerator : IIncrementalGenerator
             return (code, $"Definit.Results.NewApproach.Result_{i}");
         })
         .ToImmutableArray();
+    }
+
+    private static string GenerateFromException(string[] errorGenerics, string either)
+    {
+        var errorHandling = string.Join("\n\n", errorGenerics.Select((x, i) => 
+        {
+            if(i == errorGenerics.Length -1)
+            {
+                return $"   return ErrorHelper.Matches<{x}>(exception).Error;";
+            }
+
+            return $$"""
+                var {{x}}_match = ErrorHelper.Matches<{{x}}>(exception);
+
+                if({{x}}_match.Matches)
+                {
+                    return {{x}}_match.Error;
+                }
+            """;
+        }));
+
+        return $$"""
+        static {{either}} IResultBase<{{either}}>.FromException(Exception exception)
+        {
+        {{errorHandling}}
+        }
+        """;
     }
 
     private static string GenerateErrorType
@@ -116,17 +146,28 @@ public class ResultBaseGenerator : IIncrementalGenerator
             errorGenerics.Select(x => $"where {x} : struct, IError<{x}>"));
        
         var errorGenericArgs = string.Join(", ", errorGenerics);
-        var parentGenericArgs = string.Join(", ", errorGenerics);
         var genericName = $"Error<{errorGenericArgs}>";
-        var (interior, either) = ResultInterior(parentGenerics.Concat(errorGenerics).ToArray(), "Error", genericName); 
+
+        var genericArgs = parentGenerics.Concat(errorGenerics).ToArray();
+        var (interior, either) = ResultInterior
+        (
+            genericArgs,
+            "Error",
+            genericName
+        ); 
 
         interior = string.Join("\n\t", interior.Split('\n'));
+
+        var fromException = string.Join("\n\t\t", GenerateFromException(errorGenerics, either).Split('\n')); 
 
         return $$"""
         public readonly struct {{genericName}} : {{genericName}}.Base 
             {{genericConstraints}}
         {
-            public interface Base : IResultBase<{{either}}>;
+            public interface Base : IResultBase<{{either}}>
+            {
+                {{fromException}}
+            }
 
             {{interior}}
         }
@@ -147,24 +188,6 @@ public class ResultBaseGenerator : IIncrementalGenerator
         var operators = string.Join("\n", eitherGenerics
             .Select(x => $"public static implicit operator {typeName}([DisallowNull] {x} value) => new (value);"));
 
-        var errorHandling = string.Join("\n\n", eitherGenerics.Skip(1).Select((x, i) => 
-        {
-            var index = i+1;
-            if(index == eitherGenerics.Length -1)
-            {
-                return $"   return ErrorHelper.Matches<{x}>(exception).Error;";
-            }
-
-            return $$"""
-                var {{x}}_match = ErrorHelper.Matches<{{x}}>(exception);
-
-                if({{x}}_match.Matches)
-                {
-                    return {{x}}_match.Error;
-                }
-            """;
-        }));
-
         var code = $$"""
         private {{either}} Either { get; }
 
@@ -174,11 +197,6 @@ public class ResultBaseGenerator : IIncrementalGenerator
         public {{constructorName}}({{either}} value) => Either = value;
 
         {{either}} IResultBase<{{either}}>.Value => Either;
-
-        static {{either}} IResultBase<{{either}}>.FromException(Exception exception)
-        {
-        {{errorHandling}}
-        }
 
         public static implicit operator {{typeName}}([DisallowNull] EitherMatchError _) => throw new EitherMatchException<Either<{{genericArgs}}>>();
         {{operators}}

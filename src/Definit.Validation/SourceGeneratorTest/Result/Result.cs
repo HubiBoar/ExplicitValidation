@@ -21,14 +21,14 @@ public static class ResultHelper
 {
     public static T ToReturn<TResult, T>(TResult result)
         where T : struct, IEitherBase 
-        where TResult : IResultBase<T>
+        where TResult : struct, IResultBase<T>
     {
         return result.Value;
     }
 
     public static T ToReturn<TResult, T>(Exception exception)
         where T : struct, IEitherBase 
-        where TResult : IResultBase<T>
+        where TResult : struct, IResultBase<T>
     {
         return TResult.FromException(exception);
     }

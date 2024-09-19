@@ -194,7 +194,7 @@ public static class List_T__Auto__Extensions
 		{
 		    try
 		    {
-		        return new Either<IsNull<T>, Error>((this.Value.Find(match))!.IsNull()!);
+		        return new Either<IsNull<T>, Error>((this.Value.Find(match)).IsNull());
 		    }
 		    catch (Exception exception)
 		    {
@@ -254,7 +254,7 @@ public static class List_T__Auto__Extensions
 		{
 		    try
 		    {
-		        return new Either<IsNull<T>, Error>((this.Value.FindLast(match))!.IsNull()!);
+		        return new Either<IsNull<T>, Error>((this.Value.FindLast(match)).IsNull());
 		    }
 		    catch (Exception exception)
 		    {

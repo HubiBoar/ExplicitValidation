@@ -183,7 +183,7 @@ public class ObjectGenerator : IIncrementalGenerator
             :
             nullable
             ?
-            $"return new {returnType}(({methodCall})!.IsNull()!);"
+            $"return new {returnType}(({methodCall}).IsNull());"
             :
             $"return new {returnType}({methodCall});";
 

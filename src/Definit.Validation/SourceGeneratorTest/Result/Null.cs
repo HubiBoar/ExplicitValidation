@@ -70,7 +70,7 @@ public static class NullExtensions
         return NewApproach.IsNull<T>.Create(t.Value);
     }
 
-    public static IsNull<T> IsNull<T>(this T t)
+    public static IsNull<T> IsNull<T>(this T? t)
     {
         return NewApproach.IsNull<T>.Create(t);
     }

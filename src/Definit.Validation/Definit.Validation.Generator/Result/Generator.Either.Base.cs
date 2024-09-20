@@ -58,7 +58,14 @@ public class EitherBaseGenerator : IIncrementalGenerator
             
             var genericArgs = string.Join(", ", generic.Select(x => x));
             var either = $"Either<{genericArgs}>";
-            var (interior, extension, genericOrArgs) = EitherInterior(generic, "Either", either);
+            var (interior, extension, genericOrArgs) = EitherInterior
+            (
+                generic,
+                generic,
+                string.Empty,
+                "Either",
+                either
+            );
 
             interior = string.Join("\n\t", interior.Split('\n'));
             extension = string.Join("\n\t", extension.Split('\n'));
@@ -93,12 +100,15 @@ public class EitherBaseGenerator : IIncrementalGenerator
     public static (string Interior, string Extensions, string GenericOrArgs) EitherInterior
     (
         string[] genericParams,
+        string[] typeGenericParams,
+        string typeGenericConstraints,
         string constructorName,
         string typeName
     )
     {
         var generic = genericParams.Select(x => (Type: x, Name: $"{x}_arg")).ToArray();
         var genericArgs = string.Join(", ", generic.Select(x => x.Type));
+        var typeGenericArgs = string.Join(", ", typeGenericParams);
         var genericOrArgs = string.Join(", ", generic.Select(x => $"Or<{x.Type}>?"));
 
         var constructors = string.Join("\n", generic
@@ -109,12 +119,11 @@ public class EitherBaseGenerator : IIncrementalGenerator
 
                 var argsString = string.Join(", ", args);
 
-                return $"public Either({x.Type} value) => Value = ({argsString});";
+                return $"public {constructorName}({x.Type} value) => Value = ({argsString});";
             }));
 
-        var either = $"Either<{genericArgs}>";
         var operators = string.Join("\n", generic
-            .Select(x => $"public static implicit operator {either}({x.Type} value) => new (value);"));
+            .Select(x => $"public static implicit operator {typeName}({x.Type} value) => new (value);"));
 
         var outArgs = string.Join(",\n\t", generic.Select(x => $"out Or<{x.Type}>? {x.Name}"));
         var returns = string.Join(", ", generic.Select(x => x.Name));
@@ -133,20 +142,20 @@ public class EitherBaseGenerator : IIncrementalGenerator
         """;
 
         var extension = $$"""
-        public static void Deconstruct<{{genericArgs}}>
+        public static void Deconstruct<{{typeGenericArgs}}>
         (
-            this Either<{{genericArgs}}> result,
+            this {{typeName}} result,
             {{outArgs}}
-        )
+        ){{typeGenericConstraints}}
         {
             ({{returns}}) = result.Value;
         }
 
-        public static void Deconstruct<{{genericArgs}}>
+        public static void Deconstruct<{{typeGenericArgs}}>
         (
-            this Either<{{genericArgs}}>? result,
+            this {{typeName}}? result,
             {{outArgs}}
-        )
+        ){{typeGenericConstraints}}
         {
             if(result is null)
             {

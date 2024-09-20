@@ -20,7 +20,7 @@ public class EitherGenerator : IIncrementalGenerator
                 c is TypeDeclarationSyntax type
                 && type.Modifiers.Any(m => m.IsKind(SyntaxKind.PartialKeyword)),
 
-            transform: (n, _) => ((n.TargetNode as TypeDeclarationSyntax)!, (n.TargetSymbol as ITypeSymbol)!)
+            transform: (n, _) => ((n.TargetNode as TypeDeclarationSyntax)!, (n.TargetSymbol as INamedTypeSymbol)!)
         );
 
         var compilation = context.CompilationProvider.Combine(provider.Collect());
@@ -32,7 +32,7 @@ public class EitherGenerator : IIncrementalGenerator
     (
         SourceProductionContext context,
         Compilation compilation,
-        ImmutableArray<(TypeDeclarationSyntax Syntax, ITypeSymbol Symbol)> typeList
+        ImmutableArray<(TypeDeclarationSyntax Syntax, INamedTypeSymbol Symbol)> typeList
     )
     {
         foreach(var type in typeList.Select(x => GetType(x.Syntax, x.Symbol)))
@@ -45,30 +45,38 @@ public class EitherGenerator : IIncrementalGenerator
     private static (string Code, string ClassName) GetType
     (
         TypeDeclarationSyntax syntax,
-        ITypeSymbol symbol
+        INamedTypeSymbol symbol
     )
     {
         var (code, typeInfo) = syntax.BuildTypeHierarchy
         (
             name => $"readonly {name}",
             "Definit.Results",
+            "Definit.Results.NewApproach",
             "Definit.Validation",
             "System.Diagnostics.CodeAnalysis"
         );
 
         var interf = symbol.AllInterfaces
-            .Single(x => x
+            .Single(x => x.AllInterfaces.Any(y => y
                 .ToDisplayString()
-                .StartsWith(EitherName))
+                .StartsWith(EitherName)))
             .ContainingType;
-
-        var genericArgs = interf.TypeArguments.Select(x => x.ToDisplayString()).ToArray();
 
         var name = typeInfo.Name;
         var fullName = typeInfo.FullName;
         var constructorName = symbol.Name;
 
-        var (interior, extensions, _) = EitherBaseGenerator.EitherInterior(genericArgs, constructorName, name);
+        var genericArgs = interf.TypeArguments.Select(x => x.ToDisplayString()).ToArray();
+
+        var (interior, extensions, _) = EitherBaseGenerator.EitherInterior
+        (
+            genericArgs,
+            symbol.TypeArguments.Select(x => x.ToDisplayString()).ToArray(),
+            symbol.TypeArguments.GetGenericConstraints(),
+            constructorName, 
+            name
+        );
 
         extensions = string.Join("\n\t", extensions.Split('\n'));
         code.AddBlock(interior); 
@@ -83,7 +91,7 @@ public class EitherGenerator : IIncrementalGenerator
 
         """;
 
-        return (code.ToString(), typeInfo.FullName);
+        return (result, fullName);
     }
 }
 

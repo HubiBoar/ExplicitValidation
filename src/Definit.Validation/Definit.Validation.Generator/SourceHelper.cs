@@ -45,12 +45,28 @@ public static class SourceHelper
        
         var code = new SourceBuilder(usings.ToArray(), nameSpace); 
 
+        int index = 0;
         foreach(var parent in parents)
         {
-            code.AddBlock(parent.GenerateTypeName());
+            if(index == 0)
+            {
+                code.AddBlockDontIndent(parent.GenerateTypeName());
+            }
+            else
+            {
+                code.AddBlock(parent.GenerateTypeName());
+            }
+            index ++;
         }
 
-        code.AddBlock(editTypeInfo(typeInfo.GenerateTypeName()));
+        if(parents.Count > 0)
+        {
+            code.AddBlock(editTypeInfo(typeInfo.GenerateTypeName()));
+        }
+        else
+        {
+            code.AddBlockDontIndent(editTypeInfo(typeInfo.GenerateTypeName()));
+        }
 
         return (code, typeInfo);
     }

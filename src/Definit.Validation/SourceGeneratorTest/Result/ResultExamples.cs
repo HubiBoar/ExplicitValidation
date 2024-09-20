@@ -1,26 +1,26 @@
 using System.Text;
 using Definit.Results.NewApproach;
 
-[assembly: GenerateEither.Base(10)]
-[assembly: GenerateResult.Base(5, 5)]
-//[assembly: GenerateResult.Object(typeof(StringBuilder))]
-//[assembly: GenerateResult.Object<StringReader>]
-//[assembly: GenerateResult.Object(typeof(List<>))]
-//[assembly: GenerateResult.Object<Task<string>>]
+//[assembly: GenerateEither.Base(10)]
+//[assembly: GenerateResult.Base(5, 5)]
+[assembly: GenerateResult.Object(typeof(StringBuilder))]
+[assembly: GenerateResult.Object<StringReader>]
+[assembly: GenerateResult.Object(typeof(List<>))]
+[assembly: GenerateResult.Object<Task<string>>]
 
 namespace Definit.Resultss.Examples;
 
-//[GenerateResult]
-//public partial struct ResultExample<T> : Result<T>.Error<NotFound>.Base
-//    where T : notnull;
-//
-//[GenerateResult]
-//public partial struct ResultExample2<T> : Result<T, string>.Error<NotFound>.Base
-//    where T : notnull;
+[GenerateResult]
+public partial struct ResultExample<T> : Result<T>.Error<NotFound>.Base
+    where T : notnull;
 
-//[GenerateEither]
-//public partial struct EitherExample2<T> : IEither<Either<T, string>, Either<int, string>>
-//    where T : notnull;
+[GenerateResult]
+public partial struct ResultExample2<T> : Result<T, string>.Error<NotFound>.Base
+    where T : notnull;
+
+[GenerateEither]
+public partial struct EitherExample2<T> : Either<T, string, int>.Base
+    where T : notnull;
 
 public readonly record struct NotFound(Either<KeyNotFoundException, Exception> Exception)
     : IError<NotFound, KeyNotFoundException>;

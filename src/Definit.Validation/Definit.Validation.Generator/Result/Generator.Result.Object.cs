@@ -7,7 +7,7 @@ namespace Definit.Results.Generator;
 [Generator]
 public class ObjectGenerator : IIncrementalGenerator
 {
-    private const string ResultType = "Definit.Results.NewApproach.IResult";
+    private const string ResultType = "Definit.Results.NewApproach.IResultBase";
     private const string TaskType = "System.Threading.Tasks.Task";
     private const string ValueTaskType = "System.Threading.Tasks.ValueTask";
     private const string Success = "Definit.Results.NewApproach.Success";
@@ -157,7 +157,7 @@ public class ObjectGenerator : IIncrementalGenerator
                 return null;
             }
 
-            var (returnType, taskPrefix) = result.Value;
+            var (returnType, returnsSuccess, taskPrefix) = result.Value;
 
             var isUnsafe = method.IsUnsafe();
 
@@ -175,7 +175,7 @@ public class ObjectGenerator : IIncrementalGenerator
             var parametersCall = method.GetCallingParameters();
             var awaitCall = isAsync ? "await " : "";
             var methodCall = $"{awaitCall}this.Value.{method.Name}({string.Join(", ", parametersCall)})";
-            var returnCall = method.ReturnsVoid ? 
+            var returnCall = returnsSuccess ? 
             $"""
             {methodCall};
             return new {returnType}(Result.Success);
@@ -223,11 +223,11 @@ public class ObjectGenerator : IIncrementalGenerator
         }
     }
 
-    private static (string ReturnType, string? TaskPrefix)? GetReturnType(IMethodSymbol method)
+    private static (string ReturnType, bool ReturnsSuccess, string? TaskPrefix)? GetReturnType(IMethodSymbol method)
     {
         if(method.ReturnsVoid)
         {
-            return ($"Either<Success, Error>", null);
+            return ($"Either<Success, Error>", true, null);
         }
 
         if(IsResult(method.ReturnType))
@@ -241,7 +241,7 @@ public class ObjectGenerator : IIncrementalGenerator
 
         if(isTask is false && isValueTask is false)
         {
-            return ($"Either<{returnName}, Error>", null);
+            return ($"Either<{returnName}, Error>", false, null);
         }
 
         var taskPrefix = isTask ? "Task" : "ValueTask";
@@ -250,7 +250,7 @@ public class ObjectGenerator : IIncrementalGenerator
 
         if(typeSymbol.IsGenericType == false)
         {
-            return ($"Either<Success, Error>", taskPrefix);
+            return ($"Either<Success, Error>", true, taskPrefix);
         }
 
         var taskSymbol = typeSymbol.TypeArguments.Single();
@@ -262,7 +262,7 @@ public class ObjectGenerator : IIncrementalGenerator
 
         returnName = taskSymbol.ToDisplayString();
 
-        return ($"Either<{returnName}, Error>", taskPrefix);
+        return ($"Either<{returnName}, Error>", false, taskPrefix);
 
         static bool IsResult(ITypeSymbol type)
         {

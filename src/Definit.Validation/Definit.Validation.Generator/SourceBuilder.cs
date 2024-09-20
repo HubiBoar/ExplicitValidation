@@ -18,7 +18,7 @@ public sealed class SourceBuilder
 
         if(string.IsNullOrEmpty(nameSpace) == false)
         {
-            _code.AppendLine().Append($"namespace {nameSpace}");
+            _code.AppendLine().Append($"namespace {nameSpace};");
         }
     }
 
@@ -34,6 +34,15 @@ public sealed class SourceBuilder
         }
 
         return code.ToString();
+    }
+
+    public SourceBuilder AddBlockDontIndent(string value)
+    {
+        _code.AppendLine().Append($$"""{{AddTabs(_indentation)}}""");
+
+        AddBlock(_code, value, _indentation);
+
+        return this;
     }
 
     public SourceBuilder AddBlock(string value)

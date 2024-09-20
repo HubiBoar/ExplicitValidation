@@ -43,36 +43,28 @@ public class ResultBaseGenerator : IIncrementalGenerator
         GeneratorAttributeSyntaxContext context
     )
     {
-        int count = int.Parse(context
+        var constructorArgs = context
             .Attributes
             .Single(x => x
                 .AttributeClass!
                 .ToDisplayString() == "Definit.Results.NewApproach.GenerateResult.BaseAttribute")
-            .ConstructorArguments
-            .Single()
-            .Value!
-            .ToString());
+            .ConstructorArguments;
 
-        if(count <= 2)
+        var resultCount = int.Parse(constructorArgs.First().Value!.ToString());
+        var errorCount = int.Parse(constructorArgs.Last().Value!.ToString());
+    
+        return Enumerable.Range(0, resultCount + 1).Select(length =>
         {
-            return ImmutableArray<(string Code, string ClassName)>.Empty;
-        }
-
-        return Enumerable.Range(0, count + 1).Select(i =>
-        {
-            var resultGenerics = i == 0 ? ["Success"] : Enumerable.Range(0, i).Select(x => $"T{x}").ToArray();
+            var resultGenerics = length == 0 ? ["Success"] : Enumerable.Range(0, length).Select(x => $"T{x}").ToArray();
             var genericArgs = string.Join(", ", resultGenerics);
 
-            var genericConstraints = i == 0 ? "" : "\n\t" + string.Join("\n\t",
-                resultGenerics.Select(x => $"where {x} : notnull"));
-
-            var resultName = i == 0 ? "Result" : $"Result<{genericArgs}>";
+            var resultName = length == 0 ? "Result" : $"Result<{genericArgs}>";
 
             var (interiorRaw, either) = ResultInterior(resultGenerics.Concat(["Err"]).ToArray(), "Result", resultName); 
 
             var interior = string.Join("\n\t", interiorRaw.Split('\n'));
 
-            var errors = string.Join("\n\n\n\t", Enumerable.Range(1, count).Select(y =>
+            var errors = string.Join("\n\n\n\t", Enumerable.Range(1, errorCount).Select(y =>
             {
                 var errorGenerics = Enumerable.Range(0, y).Select(x => $"TE{x}").ToArray();
                 return string.Join("\n\t", GenerateErrorType(resultGenerics, errorGenerics).Split('\n'));
@@ -88,7 +80,7 @@ public class ResultBaseGenerator : IIncrementalGenerator
 
             namespace Definit.Results.NewApproach;
 
-            public readonly partial struct {{resultName}} : {{resultName}}.Base{{genericConstraints}}
+            public readonly partial struct {{resultName}} : {{resultName}}.Base
             {
                 public interface Base : IResultBase<{{either}}>
                 {
@@ -98,13 +90,11 @@ public class ResultBaseGenerator : IIncrementalGenerator
                 {{interior}}
 
 
-
-
                 {{errors}}
             }
             """;
 
-            return (code, $"Definit.Results.NewApproach.Result_{i}");
+            return (code, $"Definit.Results.NewApproach.Result_{length}");
         })
         .ToImmutableArray();
     }
@@ -186,7 +176,7 @@ public class ResultBaseGenerator : IIncrementalGenerator
         var either = $"Either<{genericArgs}>";
 
         var operators = string.Join("\n", eitherGenerics
-            .Select(x => $"public static implicit operator {typeName}([DisallowNull] {x} value) => new (value);"));
+            .Select(x => $"public static implicit operator {typeName}({x} value) => new (value);"));
 
         var code = $$"""
         private {{either}} Either { get; }

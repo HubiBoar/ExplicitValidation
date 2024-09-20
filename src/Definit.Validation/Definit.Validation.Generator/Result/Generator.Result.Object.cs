@@ -54,7 +54,6 @@ public class ObjectGenerator : IIncrementalGenerator
     {
         var methods = new StringBuilder();
         
-        var typeName = type.Name;
         var wrapperName = $"Wrapper";
         var wrapperGenericArgs = string.Empty;
         var wrapperGenericConstraints = string.Empty;
@@ -67,6 +66,7 @@ public class ObjectGenerator : IIncrementalGenerator
             wrapperGenericConstraints = type.TypeArguments.GetGenericConstraints();
         }
 
+        var typeName = type.Name;
         if(type.IsGenericType)
         {
             var types = string.Join("_", type.TypeArguments.Select(x => x.ToDisplayString()));
@@ -157,7 +157,7 @@ public class ObjectGenerator : IIncrementalGenerator
                 return null;
             }
 
-            var (returnType, nullable, taskPrefix) = result.Value;
+            var (returnType, taskPrefix) = result.Value;
 
             var isUnsafe = method.IsUnsafe();
 
@@ -181,11 +181,7 @@ public class ObjectGenerator : IIncrementalGenerator
             return new {returnType}(Result.Success);
             """
             :
-            nullable
-            ?
-            $"return new {returnType}(({methodCall}).IsNull());"
-            :
-            $"return new {returnType}({methodCall});";
+            $"return new {returnType}(({methodCall})!);";
 
             returnCall = string.Join("\n\t\t", returnCall.Split('\n'));
 
@@ -227,11 +223,11 @@ public class ObjectGenerator : IIncrementalGenerator
         }
     }
 
-    private static (string ReturnType, bool nullable, string? TaskPrefix)? GetReturnType(IMethodSymbol method)
+    private static (string ReturnType, string? TaskPrefix)? GetReturnType(IMethodSymbol method)
     {
         if(method.ReturnsVoid)
         {
-            return ($"Either<Success, Error>", false, null);
+            return ($"Either<Success, Error>", null);
         }
 
         if(IsResult(method.ReturnType))
@@ -245,13 +241,7 @@ public class ObjectGenerator : IIncrementalGenerator
 
         if(isTask is false && isValueTask is false)
         {
-            if(method.ReturnType.NullableAnnotation is NullableAnnotation.Annotated)
-            {
-                returnName = method.ReturnType.WithNullableAnnotation(NullableAnnotation.NotAnnotated).ToDisplayString();
-                return ($"Either<IsNull<{returnName}>, Error>", true, null);
-            }
-
-            return ($"Either<{returnName}, Error>", false, null);
+            return ($"Either<{returnName}, Error>", null);
         }
 
         var taskPrefix = isTask ? "Task" : "ValueTask";
@@ -260,7 +250,7 @@ public class ObjectGenerator : IIncrementalGenerator
 
         if(typeSymbol.IsGenericType == false)
         {
-            return ($"Either<Success, Error>", false, taskPrefix);
+            return ($"Either<Success, Error>", taskPrefix);
         }
 
         var taskSymbol = typeSymbol.TypeArguments.Single();
@@ -271,13 +261,8 @@ public class ObjectGenerator : IIncrementalGenerator
         }
 
         returnName = taskSymbol.ToDisplayString();
-        if(taskSymbol.NullableAnnotation is NullableAnnotation.Annotated)
-        {
-            returnName = taskSymbol.WithNullableAnnotation(NullableAnnotation.NotAnnotated).ToDisplayString();
-            return ($"Either<IsNull<{returnName}>, Error>", true, taskPrefix);
-        }
 
-        return ($"Either<{returnName}, Error>", false, taskPrefix);
+        return ($"Either<{returnName}, Error>", taskPrefix);
 
         static bool IsResult(ITypeSymbol type)
         {

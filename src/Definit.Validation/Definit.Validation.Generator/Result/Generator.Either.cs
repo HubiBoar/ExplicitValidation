@@ -9,6 +9,8 @@ namespace Definit.Results.Generator;
 [Generator]
 public class EitherGenerator : IIncrementalGenerator
 {
+    const string EitherName = "Definit.Results.NewApproach.IEitherBase<";
+
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var provider = context.SyntaxProvider.ForAttributeWithMetadataName
@@ -55,8 +57,10 @@ public class EitherGenerator : IIncrementalGenerator
         );
 
         var interf = symbol.AllInterfaces
-            .Single(x => x.ToDisplayString()
-            .StartsWith("Definit.Results.NewApproach.IEither"));
+            .Single(x => x
+                .ToDisplayString()
+                .StartsWith(EitherName))
+            .ContainingType;
 
         var genericArgs = interf.TypeArguments.Select(x => x.ToDisplayString()).ToArray();
 
@@ -64,39 +68,20 @@ public class EitherGenerator : IIncrementalGenerator
         var fullName = typeInfo.FullName;
         var constructorName = symbol.Name;
 
-        var tuple = $"({string.Join(", ", genericArgs.Select(x => $"Null<{x}>?"))})";
-        var constructors = string.Join("\n", genericArgs.Select((x, index) =>
+        var (interior, extensions, _) = EitherBaseGenerator.EitherInterior(genericArgs, constructorName, name);
+
+        extensions = string.Join("\n\t", extensions.Split('\n'));
+        code.AddBlock(interior); 
+
+        var result = $$"""
+        {{code.ToString()}}
+
+        public static partial class {{constructorName}}__Auto__Extensions
         {
-            var tupleParams = Enumerable.Range(0, genericArgs.Length).Select(_ => "null").ToArray();
-            tupleParams[index] = "value"; 
-            var init = string.Join(", ", tupleParams);
-            return $"public {constructorName}([DisallowNull] {x} value) => Value = ({init});";
-        }));
+            {{extensions}}
+        }
 
-        var deconstructorOut = string.Join(", ", genericArgs.Select((x, i) => $"out Null<{x}>? t{i}"));
-        var deconstructorAsignment = string.Join(", ", genericArgs.Select((x, i) => $"t{i}"));
-        var deconstructor = $"public void Deconstruct({deconstructorOut}) => ({deconstructorAsignment}) = Value;";
-
-        var operators = string.Join("\n\n", genericArgs.Select(x => $$"""
-        public static implicit operator {{name}}([DisallowNull] {{x}} value) => new (value!); 
-        public static implicit operator {{name}}([DisallowNull] Null<{{x}}> value) => new (value); 
-        public static implicit operator {{name}}([DisallowNull] Null<{{x}}>? value) => new (value!.Value); 
-        """));
-
-        code.AddBlock($$"""
-        public {{tuple}} Value { get; }                                                                                              
-                                                                                                                                                  
-        [Obsolete("Must not be used without parameters", true)]                                                                                   
-        public {{constructorName}}() {}                                                                                                                        
-                                                                                                                                                  
-        {{constructors}}
-                                                                                                                                                  
-        {{deconstructor}}
-                                                                                                                                                  
-        public static implicit operator {{name}}([DisallowNull] ResultMatchError value) => throw new ResultMatchException<{{fullName}}>(); 
-
-        {{operators}}
-        """);
+        """;
 
         return (code.ToString(), typeInfo.FullName);
     }

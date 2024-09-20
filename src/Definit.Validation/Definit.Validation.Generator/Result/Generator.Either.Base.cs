@@ -6,8 +6,6 @@ namespace Definit.Results.Generator;
 [Generator]
 public class EitherBaseGenerator : IIncrementalGenerator
 {
-    private const string ResultType = "Definit.Results.NewApproach.IResult";
-
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var provider = context.SyntaxProvider.ForAttributeWithMetadataName
@@ -53,251 +51,113 @@ public class EitherBaseGenerator : IIncrementalGenerator
             .Value!
             .ToString());
 
-        if(count <= 2)
+        return Enumerable.Range(0, count).Select(inx =>
         {
-            return ImmutableArray<(string Code, string ClassName)>.Empty;
-        }
-
-        return Enumerable.Range(2, count).SelectMany(i =>
-        {
-            var generic = Enumerable.Range(0, i).Select(x => (Type: $"T{x}", Name: $"t{x}", Ret: $"t_{x}")).ToArray();
-            var genericArgs = string.Join(", ", generic.Select(x => x.Type));
-            var genericOrArgs = string.Join(", ", generic.Select(x => $"Or<{x.Type}>?"));
-
-            var genericConstraints = string.Join("\n\t", generic.Select(x => $"where {x.Type} : notnull"));
-
-            var deconstructors = 
-                GenerateAllStates(generic.Length)
-                .Select(state =>
-                    CreateDeconstruct
-                    (
-                        generic
-                            .Select((x, i) => (Type: x.Type, Name: x.Name, Ret : x.Ret, IsNull : state[i]))
-                            .ToImmutableArray()
-                    )) 
-                .ToArray();
-
-            var constructors = string.Join("\n\t", generic
-                .Select((x, i) =>
-                {
-                    var args = Enumerable.Range(0, generic.Length).Select(_ => "null").ToArray();
-                    args[i] = "value";
-
-                    var argsString = string.Join(", ", args);
-
-                    return $"public Either([DisallowNull] {x.Type} value) => Value = ({argsString});";
-                }));
-
+            var length = inx + 2;
+            var generic = Enumerable.Range(0, length).Select(x => $"T{x}").ToArray();
+            
+            var genericArgs = string.Join(", ", generic.Select(x => x));
             var either = $"Either<{genericArgs}>";
-            var operators = string.Join("\n\t", generic
-                .Select(x => $"public static implicit operator {either}([DisallowNull] {x.Type} value) => new (value);"));
+            var (interior, extension, genericOrArgs) = EitherInterior(generic, "Either", either);
 
-            List<(string, string)> result = [];
-
-            string fileName = $"Definit.Results.NewApproach.Either_{i}"; 
+            interior = string.Join("\n\t", interior.Split('\n'));
+            extension = string.Join("\n\t", extension.Split('\n'));
 
             var setupCode = $$"""
+            #nullable enable
+
             using System.Diagnostics.CodeAnalysis;
 
             namespace Definit.Results.NewApproach;
 
-            public interface I{{either}} : IEitherBase<({{genericOrArgs}})>
-                {{genericConstraints}};
-
-            public readonly struct {{either}} : IEither<{{genericArgs}}> 
-                {{genericConstraints}}
+            public readonly struct {{either}} : {{either}}.Base 
             {
-                public ({{genericOrArgs}}) Value { get; }
+                public interface Base : IEitherBase<({{genericOrArgs}})>;
 
-                [Obsolete(DefaultConstructorException.Attribute, true)]
-                public Either() => throw new DefaultConstructorException();
+                {{interior}}
+            }
 
-                {{constructors}}
-
-                public static implicit operator {{either}}([DisallowNull] EitherMatchError _) => throw new EitherMatchException<Either<{{genericArgs}}>>();
-                {{operators}}
+            public static partial class EitherExtensions 
+            {
+                {{extension}}
             }
             """;
 
-            result.Add((setupCode, $"{fileName}/{fileName}_Setup"));
+            string fileName = $"Definit.Results.NewApproach.Either_{length}"; 
 
-            var deconstructorsCode = $$"""
-
-            namespace Definit.Results.NewApproach;
-
-            public static partial class EitherExtensions
-            {
-            }
-            """;
-
-            result.Add((deconstructorsCode, $"{fileName}/Deconstructors/{fileName}_Deconstructors"));
-
-            var index = 0;
-            const int chunkSize = 500;
-            foreach(var chunk in deconstructors.Chunk((int)(chunkSize / deconstructors.Average(x => x.Split('\n').Length))))
-            {
-                var code = $$"""
-                namespace Definit.Results.NewApproach;
-
-                public static partial class EitherExtensions 
-                {
-                    {{string.Join("\n\t", chunk)}}
-                }
-                """;
-
-                result.Add((code, $"{fileName}/Deconstructors/{fileName}_Deconstructors_Chunk_{index}"));
-
-                index ++;
-            }
-
-            return result;
+            return (setupCode, fileName);
         })
         .ToImmutableArray();
     }
 
-    private static bool[][] GenerateAllStates(int size)
+    public static (string Interior, string Extensions, string GenericOrArgs) EitherInterior
+    (
+        string[] genericParams,
+        string constructorName,
+        string typeName
+    )
     {
-        int totalStates = (int)Math.Pow(2, size); 
-        bool[][] result = new bool[totalStates][];
+        var generic = genericParams.Select(x => (Type: x, Name: $"{x}_arg")).ToArray();
+        var genericArgs = string.Join(", ", generic.Select(x => x.Type));
+        var genericOrArgs = string.Join(", ", generic.Select(x => $"Or<{x.Type}>?"));
 
-        for (int i = 0; i < totalStates; i++)
-        {
-            bool[] currentState = new bool[size];
-            
-            for (int bit = 0; bit < size; bit++)
+        var constructors = string.Join("\n", generic
+            .Select((x, i) =>
             {
-                currentState[bit] = (i & (1 << bit)) != 0;
-            }
+                var args = Enumerable.Range(0, generic.Length).Select(_ => "null").ToArray();
+                args[i] = "value!";
 
-            result[i] = currentState;
-        }
+                var argsString = string.Join(", ", args);
 
-        return result;
-    }
+                return $"public Either({x.Type} value) => Value = ({argsString});";
+            }));
 
-    private static string CreateDeconstruct(ImmutableArray<(string Type, string Name, string Ret, bool IsNull)> arguments)
-    {
-        var genericArgs = string.Join(", ", arguments.Select(x => x.Type));
-        var outArgs = string.Join(",\n\t\t", arguments.Select(x => 
-            x.IsNull
-            ?
-            $"out IsNull<{x.Type}>? {x.Name}"
-            :
-            $"out {x.Type}? {x.Name}"
-            ));
+        var either = $"Either<{genericArgs}>";
+        var operators = string.Join("\n", generic
+            .Select(x => $"public static implicit operator {either}({x.Type} value) => new (value);"));
 
-        var constraints = string.Join("\n\t\t", arguments.Select(x =>
-            x.IsNull
-            ?
-            $"where {x.Type} : class"
-            :
-            $"where {x.Type} : struct"));
+        var outArgs = string.Join(",\n\t", generic.Select(x => $"out Or<{x.Type}>? {x.Name}"));
+        var returns = string.Join(", ", generic.Select(x => x.Name));
+        var nullValues = string.Join(" ", generic.Select(x => $"{x.Name} = null;"));
 
-        var values = string.Join("\n\t\t", arguments
-            .Select(x => x.IsNull ? $"{x.Name} = {x.Ret}.IsNull();" : $"{x.Name} = {x.Ret};"));
+        var interior = $$"""
+        public ({{genericOrArgs}}) Value { get; }
 
-        var nullValues = string.Join("\n\t\t\t", arguments
-            .Select(x => $"{x.Name} = null;"));
+        [Obsolete(DefaultConstructorException.Attribute, true)]
+        public {{constructorName}}() => throw new DefaultConstructorException();
 
-        var returns = string.Join(", ", arguments.Select(x => x.Ret));
+        {{constructors}}
 
-        return $$"""
+        public static implicit operator {{typeName}}([DisallowNull] EitherMatchError _) => throw new EitherMatchException<Either<{{genericArgs}}>>();
+        {{operators}}
+        """;
 
-            public static void Deconstruct<{{genericArgs}}>
-            (
-                this Either<{{genericArgs}}> result,
-                {{outArgs}}
-            )
-                {{constraints}}
-            {
-                var ({{returns}}) = result.Value;
-
-                {{values}}
-            }
-
-            public static void Deconstruct<{{genericArgs}}>
-            (
-                this Either<{{genericArgs}}>? result,
-                {{outArgs}}
-            )
-                {{constraints}}
-            {
-                if(result is null)
-                {
-                    {{nullValues}}
-                    return;
-                }
-
-                var ({{returns}}) = result.Value.Value;
-
-                {{values}}
-            }
-        """; 
-    }
-
-    private static List<List<T>> GetAllPermutations<T>(T[] numbers)
-    {
-        List<List<T>> result = [];
-
-        for (int i = 1; i <= numbers.Length; i++)
-        {
-            CombineAndPermute(numbers, [], 0, i, result);
-        }
-
-        return result;
-
-        static void CombineAndPermute
+        var extension = $$"""
+        public static void Deconstruct<{{genericArgs}}>
         (
-            T[] numbers,
-            List<T> currentCombination, 
-            int start,
-            int k,
-            List<List<T>> result
+            this Either<{{genericArgs}}> result,
+            {{outArgs}}
         )
         {
-            if (currentCombination.Count == k)
+            ({{returns}}) = result.Value;
+        }
+
+        public static void Deconstruct<{{genericArgs}}>
+        (
+            this Either<{{genericArgs}}>? result,
+            {{outArgs}}
+        )
+        {
+            if(result is null)
             {
-                result.AddRange(GetPermutations(currentCombination));
+                {{nullValues}}
                 return;
             }
 
-            for (int i = start; i < numbers.Length; i++)
-            {
-                currentCombination.Add(numbers[i]);  
-                CombineAndPermute(numbers, currentCombination, i + 1, k, result);  
-                currentCombination.RemoveAt(currentCombination.Count - 1);  
-            }
+            ({{returns}}) = result.Value.Value;
         }
+        """;
 
-        static List<List<T>> GetPermutations(List<T> combination)
-        {
-            List<List<T>> result = [];
-            PermuteRecursive(combination, 0, combination.Count - 1, result);
-            return result;
-        }
-
-        static void PermuteRecursive(List<T> combination, int l, int r, List<List<T>> result)
-        {
-            if (l == r)
-            {
-                result.Add(new List<T>(combination));
-            }
-            else
-            {
-                for (int i = l; i <= r; i++)
-                {
-                    Swap(combination, l, i);
-                    PermuteRecursive(combination, l + 1, r, result);
-                    Swap(combination, l, i);  
-                }
-            }
-        }
-
-        static void Swap(List<T> list, int i, int j)
-        {
-            T temp = list[i];
-            list[i] = list[j];
-            list[j] = temp;
-        }
+        return (interior, extension, genericOrArgs);
     }
 }

@@ -65,7 +65,6 @@ public class MethodGenerator : IIncrementalGenerator
         (
             name => name,
             "Definit.Results",
-            "Definit.Validation",
             "System.Diagnostics.CodeAnalysis"
         );
 

@@ -52,7 +52,6 @@ public class EitherGenerator : IIncrementalGenerator
         (
             name => $"readonly {name}",
             "Definit.Results",
-            "Definit.Validation",
             "System.Diagnostics.CodeAnalysis"
         );
 

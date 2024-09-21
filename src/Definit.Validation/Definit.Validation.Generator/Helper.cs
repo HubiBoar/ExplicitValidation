@@ -2,8 +2,9 @@ using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Definit.Utils.SourceGenerator;
 
-namespace Definit.Utils.SourceGenerator;
+namespace Definit.Validation.Generator;
 
 public static class Helper
 {

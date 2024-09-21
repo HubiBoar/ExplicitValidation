@@ -54,7 +54,6 @@ public class ResultGenerator : IIncrementalGenerator
         (
             name => $"readonly {name}",
             "Definit.Results",
-            "Definit.Validation",
             "System.Diagnostics.CodeAnalysis"
         );
         var interf = symbol.AllInterfaces

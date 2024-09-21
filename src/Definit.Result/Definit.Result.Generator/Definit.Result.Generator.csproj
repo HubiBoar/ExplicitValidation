@@ -29,6 +29,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\Definit.Utils\Definit.Utils.SourceGeneration\Definit.Utils.SourceGeneration.csproj" />
+        <ProjectReference Include="..\..\Definit.Utils\Definit.Utils.SourceGeneration\Definit.Utils.SourceGeneration.csproj" OutputItemType="Analyzer"/>
     </ItemGroup>
 </Project>

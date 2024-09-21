@@ -1,6 +1,6 @@
 namespace Definit.Utils.SourceGenerator;
 
-internal static class LinqExtensions
+public static class LinqExtensions
 {
     public static IEnumerable<TSource> DistinctBy<TSource, TKey>
     (

@@ -4,15 +4,28 @@
         <Title>Definit.Validation</Title>
         <Description>Definit Validation</Description>
         <PackageTags>validation</PackageTags>
+        <Nullable>enable</Nullable>
+        <WarningsAsErrors>Nullable</WarningsAsErrors>
     </PropertyGroup>
-    
+
+    <PropertyGroup>
+        <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+        <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
+    </PropertyGroup>
+
+    <Target Name="CleanSourceGeneratedFiles" BeforeTargets="BeforeBuild" DependsOnTargets="$(BeforeBuildDependsOn)">
+        <RemoveDir Directories="Generated" />
+    </Target>
+
     <ItemGroup>
-        <PackageReference Include="OneOf" />
-    </ItemGroup>
+        <Compile Remove="Generated\**" />
+        <Content Include="Generated\**" />
+    </ItemGroup> 
 
     <ItemGroup>
         <ProjectReference Include="..\..\Definit.Result\Definit.Result\Definit.Result.csproj" />
         <ProjectReference Include="..\..\Definit.Utils\Definit.Utils\Definit.Utils.csproj" />
+        <ProjectReference Include="..\Definit.Validation.Generator\Definit.Validation.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
     </ItemGroup>
 
 </Project>

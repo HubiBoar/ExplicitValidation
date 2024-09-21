@@ -1,118 +1,51 @@
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
+namespace Definit.Results.NewApproach;
 
-namespace Definit.Results;
-
-public sealed class StackTrace
+public interface IError<TSelf, TException> : IError<TSelf>
+    where TSelf : struct, IError<TSelf, TException>
+    where TException : notnull, Exception
 {
-    public string Value { get; }
+    public Either<TException, Exception> Exception { get; init; }
 
-    public StackTrace()
+    static (bool Matches, TSelf Error) IError<TSelf>.Matches(Exception exception)
     {
-        Value = Environment.StackTrace;
-    }
-
-    public StackTrace(Exception exception)
-    {
-        if(exception is ErrorException error)
-        {
-            Value = error.Error.StackTrace.Value ?? Environment.StackTrace;
-        }
-        else
-        {
-            Value = exception.StackTrace ?? Environment.StackTrace;
-        }
-    }
-
-    public StackTrace(Error error)
-    {
-        Value = error.StackTrace.Value ?? Environment.StackTrace;
+        var (matches, error) = exception.Matches<TException>();
+        return (matches, new TSelf() { Exception = error }); 
     }
 }
 
-public interface IError
+public interface IError<TSelf>
+    where TSelf : notnull, IError<TSelf>
 {
-    public string Message { get; }
-    public StackTrace StackTrace { get; }
+    public abstract static (bool Matches, TSelf Error) Matches(Exception exception); 
+}
 
-    public string GetFullMessage() => $"Error :: {GetType()} :: {Message} :: {StackTrace}"; 
+public readonly record struct Error<T>(Either<T, Exception> Exception) : IError<Error<T>, T>
+    where T : Exception;
 
-    public Error ToError();
+public readonly record struct Error(Exception Exception) : IError<Error>
+{
+    public static (bool Matches, Error Error) Matches(Exception exception) => (true, new Error(exception)); 
 }
 
 public static class ErrorExtensions
 {
-    public static string GetFullMessage(this IError error) => error.GetFullMessage();
-}
-
-public interface IApiResult<T>
-    where T : IResult
-{
-    public T ToApiResult();
-}
-
-public interface ILogResult
-{
-    public void Log(ILogger logger);
-}
-
-public sealed class ErrorException : Exception
-{
-    public Error Error { get; }
-
-    public ErrorException(Error error) : base($"{nameof(ErrorException)} :: {error.Message}")
+    public static (bool Matches, Either<T, Exception> Either) Matches<T>(this Exception exception)
+        where T : Exception
     {
-        Error = error;
-    }
-}
-
-public sealed class Error : IApiResult<IResult>, ILogResult, IError
-{
-    public string Message { get; }
-    public StackTrace StackTrace { get; }
-
-    private readonly Func<IResult> _getResult;
-    private readonly Action<ILogger> _logMethod;
-
-    public Error(string message, StackTrace? stackTrace = null, Action<ILogger>? logMethod = null, Func<IResult>? getResult = null)
-    {
-        Message = message;
-        StackTrace = stackTrace ?? new StackTrace();
-        _logMethod = logMethod ?? LogDefault;
-        _getResult = getResult ?? ToBadRequest;
-    }
-
-    public Error(Exception exception)
-    {
-        if(exception is ErrorException errorException)
+        if(exception is T match)
         {
-            var error = errorException.Error;
-
-            StackTrace = new StackTrace(error);
-            Message = error.Message;
-            _getResult = error.ToApiResult;
-            _logMethod = error.Log;
+            return (true, match);
         }
-        else
-        {
-           StackTrace = new StackTrace(exception);
-           Message = exception.Message;
-
-           _logMethod = LogDefault;
-           _getResult= ToBadRequest;
-        }
+        
+        return (false, exception);
     }
+}
 
-    private void LogDefault(ILogger logger)  => logger.LogError(Message);
-    public void Log(ILogger logger)          => _logMethod(logger);
-
-    public BadRequest<string> ToBadRequest() => TypedResults.BadRequest(Message);
-    public IResult ToApiResult()             => _getResult();
-
-    public ErrorException ToException()      => new (this);
-    public Error ToError()                   => this;
-
-    public static implicit operator Task<Error>(Error value)   => Task.FromResult(value);
-    public static implicit operator Error(Exception exception) => new (exception);
+public static class ErrorHelper
+{
+    public static (bool Matches, T Error) Matches<T>(Exception exception)
+        where T : notnull, IError<T>
+    {
+        return T.Matches(exception);
+    }
 }

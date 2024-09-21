@@ -27,8 +27,4 @@
       </PackageReference>
       <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
     </ItemGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\..\Definit.Utils\Definit.Utils.SourceGeneration\Definit.Utils.SourceGeneration.csproj" />
-    </ItemGroup>
 </Project>

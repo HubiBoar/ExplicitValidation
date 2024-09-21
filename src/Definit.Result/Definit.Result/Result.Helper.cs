@@ -1,4 +1,4 @@
-namespace Definit.Results.NewApproach;
+namespace Definit.Results;
 
 public readonly struct Success;
 public readonly struct Null;
@@ -14,11 +14,11 @@ public partial struct Result
         try
         {
             func();
-            return ResultHelper.ToReturn<Definit.Results.NewApproach.Result, Either<Success, Error>>(Success);
+            return ResultHelper.ToReturn<Definit.Results.Result, Either<Success, Error>>(Success);
         }
         catch (Exception exception)
         {
-            return ResultHelper.ToReturn<Definit.Results.NewApproach.Result, Either<Success, Error>>(exception);
+            return ResultHelper.ToReturn<Definit.Results.Result, Either<Success, Error>>(exception);
         }
     }
 
@@ -27,11 +27,11 @@ public partial struct Result
     {
         try
         {
-            return ResultHelper.ToReturn<Definit.Results.NewApproach.Result<T>, Either<T, Error>>(func());
+            return ResultHelper.ToReturn<Definit.Results.Result<T>, Either<T, Error>>(func());
         }
         catch (Exception exception)
         {
-            return ResultHelper.ToReturn<Definit.Results.NewApproach.Result<T>, Either<T, Error>>(exception);
+            return ResultHelper.ToReturn<Definit.Results.Result<T>, Either<T, Error>>(exception);
         }
     }
 }

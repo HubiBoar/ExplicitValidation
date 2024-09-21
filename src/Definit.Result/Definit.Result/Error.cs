@@ -1,4 +1,4 @@
-namespace Definit.Results.NewApproach;
+namespace Definit.Results;
 
 public interface IError<TSelf, TException> : IError<TSelf>
     where TSelf : struct, IError<TSelf, TException>

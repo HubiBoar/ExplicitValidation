@@ -7,16 +7,16 @@ namespace Definit.Results.Generator;
 [Generator]
 public class ObjectGenerator : IIncrementalGenerator
 {
-    private const string ResultType = "Definit.Results.NewApproach.IResultBase";
+    private const string ResultType = "Definit.Results.IResultBase";
     private const string TaskType = "System.Threading.Tasks.Task";
     private const string ValueTaskType = "System.Threading.Tasks.ValueTask";
-    private const string Success = "Definit.Results.NewApproach.Success";
+    private const string Success = "Definit.Results.Success";
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var provider = context.SyntaxProvider.ForAttributeWithMetadataName
         (
-            "Definit.Results.NewApproach.GenerateResult+ObjectAttribute",
+            "Definit.Results.GenerateResult+ObjectAttribute",
             predicate: (c, _) => true,
 
             transform: (n, _) => n
@@ -37,7 +37,7 @@ public class ObjectGenerator : IIncrementalGenerator
         foreach(var type in typeList
             .SelectMany(x => x.Attributes
                 .Where(y => y.AttributeClass is not null && y.AttributeClass!
-                    .ToDisplayString() == "Definit.Results.NewApproach.GenerateResult.ObjectAttribute") 
+                    .ToDisplayString() == "Definit.Results.GenerateResult.ObjectAttribute") 
                 .Select(x => GetType(context, compilation, x))))
 
         {
@@ -96,7 +96,7 @@ public class ObjectGenerator : IIncrementalGenerator
         var code = $$"""
         #nullable enable
 
-        using Definit.Results.NewApproach;
+        using Definit.Results;
         using System.Diagnostics.CodeAnalysis;
 
         namespace {{type.ContainingNamespace.ToDisplayString()}};

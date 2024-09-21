@@ -1,4 +1,4 @@
-namespace Definit.Results.NewApproach;
+namespace Definit.Results;
 
 public sealed class DefaultConstructorException : Exception
 {

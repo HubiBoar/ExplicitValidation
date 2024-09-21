@@ -1,4 +1,4 @@
-namespace Definit.Results.NewApproach;
+namespace Definit.Results;
 
 public static partial class GenerateResult
 {

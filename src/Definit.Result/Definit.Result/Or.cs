@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
-namespace Definit.Results.NewApproach;
+namespace Definit.Results;
 
 public readonly struct Or<T>
 {

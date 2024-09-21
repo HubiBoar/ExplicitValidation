@@ -6,14 +6,14 @@ namespace Definit.Results.Generator;
 [Generator]
 public class ResultBaseGenerator : IIncrementalGenerator
 {
-    private const string SuccessType = "Definit.Results.NewApproach.Success";
-    private const string ErrorType = "Definit.Results.NewApproach.Error";
+    private const string SuccessType = "Definit.Results.Success";
+    private const string ErrorType = "Definit.Results.Error";
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var provider = context.SyntaxProvider.ForAttributeWithMetadataName
         (
-            "Definit.Results.NewApproach.GenerateResult+BaseAttribute",
+            "Definit.Results.GenerateResult+BaseAttribute",
             predicate: (c, _) => true,
 
             transform: (n, _) => (n)
@@ -47,7 +47,7 @@ public class ResultBaseGenerator : IIncrementalGenerator
             .Attributes
             .Single(x => x
                 .AttributeClass!
-                .ToDisplayString() == "Definit.Results.NewApproach.GenerateResult.BaseAttribute")
+                .ToDisplayString() == "Definit.Results.GenerateResult.BaseAttribute")
             .ConstructorArguments;
 
         var resultCount = int.Parse(constructorArgs.First().Value!.ToString());
@@ -78,7 +78,7 @@ public class ResultBaseGenerator : IIncrementalGenerator
             using Success = {{SuccessType}};
             using System.Diagnostics.CodeAnalysis;
 
-            namespace Definit.Results.NewApproach;
+            namespace Definit.Results;
 
             public readonly partial struct {{resultName}} : {{resultName}}.Base
             {
@@ -94,7 +94,7 @@ public class ResultBaseGenerator : IIncrementalGenerator
             }
             """;
 
-            return (code, $"Definit.Results.NewApproach.Result_{length}");
+            return (code, $"Definit.Results.Result_{length}");
         })
         .ToImmutableArray();
     }

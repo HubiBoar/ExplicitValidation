@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Definit.Utils.SourceGenerator;
 
-internal static class Helper
+public static class Helper
 {
     public record struct Object
     (

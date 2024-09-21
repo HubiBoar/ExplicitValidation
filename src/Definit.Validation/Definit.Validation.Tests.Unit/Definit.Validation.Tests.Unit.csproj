@@ -6,7 +6,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="FluentAssertions" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" />
         <PackageReference Include="xunit" />
         
@@ -22,8 +21,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\Definit.Primitives\Definit.Primitives\Definit.Primitives.csproj" />
-      <ProjectReference Include="..\Definit.Validation.FluentValidation\Definit.Validation.FluentValidation.csproj" />
       <ProjectReference Include="..\Definit.Validation\Definit.Validation.csproj" />
     </ItemGroup>
 

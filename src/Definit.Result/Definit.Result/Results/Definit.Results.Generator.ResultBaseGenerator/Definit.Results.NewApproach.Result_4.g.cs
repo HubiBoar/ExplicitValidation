@@ -1,8 +1,8 @@
-﻿using Err = Definit.Results.NewApproach.Error;
-using Success = Definit.Results.NewApproach.Success;
+﻿using Err = Definit.Results.Error;
+using Success = Definit.Results.Success;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Definit.Results.NewApproach;
+namespace Definit.Results;
 
 public readonly partial struct Result<T0, T1, T2, T3> : Result<T0, T1, T2, T3>.Base
 {

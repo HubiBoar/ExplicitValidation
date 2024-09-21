@@ -10,7 +10,7 @@ public class ObjectGenericGenerator : IIncrementalGenerator
     {
         var provider = context.SyntaxProvider.ForAttributeWithMetadataName
         (
-            "Definit.Results.NewApproach.GenerateResult+ObjectAttribute`1",
+            "Definit.Results.GenerateResult+ObjectAttribute`1",
             predicate: (c, _) => true,
 
             transform: (n, _) => n
@@ -32,7 +32,7 @@ public class ObjectGenericGenerator : IIncrementalGenerator
             .SelectMany(x => x.Attributes
                 .Where(y => y.AttributeClass is not null && y.AttributeClass!
                     .ToDisplayString()
-                    .StartsWith("Definit.Results.NewApproach.GenerateResult.ObjectAttribute<")) 
+                    .StartsWith("Definit.Results.GenerateResult.ObjectAttribute<")) 
                 .Select(x => GetType(context, x))))
         {
             context.AddSource($"{type.ClassName}.g.cs", type.Code);

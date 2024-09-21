@@ -2,7 +2,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-namespace Definit.Results.NewApproach;
+namespace Definit.Results;
 
 public readonly struct Either<T0, T1, T2, T3, T4, T5, T6, T7, T8> : Either<T0, T1, T2, T3, T4, T5, T6, T7, T8>.Base 
 {

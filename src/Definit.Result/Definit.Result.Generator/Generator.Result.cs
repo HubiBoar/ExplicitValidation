@@ -1,5 +1,5 @@
 using System.Collections.Immutable;
-using Definit.Validation.Generator;
+using Definit.Utils.SourceGenerator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -9,15 +9,15 @@ namespace Definit.Results.Generator;
 [Generator]
 public class ResultGenerator : IIncrementalGenerator
 {
-    const string ResultName = "Definit.Results.NewApproach.IResultBase<";
-    const string EitherName = "Definit.Results.NewApproach.IEither<";
-    const string ErrorName = "Definit.Results.NewApproach.IError<";
+    const string ResultName = "Definit.Results.IResultBase<";
+    const string EitherName = "Definit.Results.IEither<";
+    const string ErrorName = "Definit.Results.IError<";
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var provider = context.SyntaxProvider.ForAttributeWithMetadataName
         (
-            "Definit.Results.NewApproach.GenerateResultAttribute",
+            "Definit.Results.GenerateResultAttribute",
             predicate: (c, _) =>
                 c is TypeDeclarationSyntax type
                 && type.Modifiers.Any(m => m.IsKind(SyntaxKind.PartialKeyword)),
@@ -55,7 +55,6 @@ public class ResultGenerator : IIncrementalGenerator
             name => $"readonly {name}",
             "Definit.Results",
             "Definit.Validation",
-            "Definit.Results.NewApproach",
             "System.Diagnostics.CodeAnalysis"
         );
         var interf = symbol.AllInterfaces

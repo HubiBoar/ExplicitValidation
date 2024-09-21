@@ -10,7 +10,7 @@ public class EitherBaseGenerator : IIncrementalGenerator
     {
         var provider = context.SyntaxProvider.ForAttributeWithMetadataName
         (
-            "Definit.Results.NewApproach.GenerateEither+BaseAttribute",
+            "Definit.Results.GenerateEither+BaseAttribute",
             predicate: (c, _) => true,
 
             transform: (n, _) => (n)
@@ -45,7 +45,7 @@ public class EitherBaseGenerator : IIncrementalGenerator
             .Attributes
             .Single(x => x
                 .AttributeClass!
-                .ToDisplayString() == "Definit.Results.NewApproach.GenerateEither.BaseAttribute")
+                .ToDisplayString() == "Definit.Results.GenerateEither.BaseAttribute")
             .ConstructorArguments
             .Single()
             .Value!
@@ -75,7 +75,7 @@ public class EitherBaseGenerator : IIncrementalGenerator
 
             using System.Diagnostics.CodeAnalysis;
 
-            namespace Definit.Results.NewApproach;
+            namespace Definit.Results;
 
             public readonly struct {{either}} : {{either}}.Base 
             {
@@ -90,7 +90,7 @@ public class EitherBaseGenerator : IIncrementalGenerator
             }
             """;
 
-            string fileName = $"Definit.Results.NewApproach.Either_{length}"; 
+            string fileName = $"Definit.Results.Either_{length}"; 
 
             return (setupCode, fileName);
         })

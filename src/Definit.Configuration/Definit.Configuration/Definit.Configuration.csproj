@@ -7,8 +7,6 @@
     </PropertyGroup>
     
     <ItemGroup>
-        <PackageReference Include="OneOf" />
-        <PackageReference Include="OneOf.Else" />
         <PackageReference Include="Microsoft.FeatureManagement.AspNetCore" />
         <PackageReference Include="Microsoft.Extensions.Options" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
@@ -19,7 +17,6 @@
     <ItemGroup>
         <ProjectReference Include="..\..\Definit.Result\Definit.Result\Definit.Result.csproj" />
         <ProjectReference Include="..\..\Definit.Utils\Definit.Utils\Definit.Utils.csproj" />
-        <ProjectReference Include="..\..\Definit.Validation\Definit.Validation.FluentValidation\Definit.Validation.FluentValidation.csproj" />
         <ProjectReference Include="..\..\Definit.Validation\Definit.Validation\Definit.Validation.csproj" />
     </ItemGroup>
 

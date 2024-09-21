@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 using System.Text;
-using Definit.Validation.Generator;
+using Definit.Utils.SourceGenerator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -10,7 +10,7 @@ namespace Definit.Results.Generator;
 [Generator]
 public class MethodGenerator : IIncrementalGenerator
 {
-    private const string ResultType = "Definit.Results.NewApproach.IResultBase<";
+    private const string ResultType = "Definit.Results.IResultBase<";
     private const string TaskType = "System.Threading.Tasks.Task<";
 
     private record struct TypeInfo
@@ -65,7 +65,6 @@ public class MethodGenerator : IIncrementalGenerator
         (
             name => name,
             "Definit.Results",
-            "Definit.Results.NewApproach",
             "Definit.Validation",
             "System.Diagnostics.CodeAnalysis"
         );
@@ -115,12 +114,12 @@ public class MethodGenerator : IIncrementalGenerator
 
     private static readonly (string Attribute, string Keyword)[] Attributes = 
     [
-        ("Definit.Results.NewApproach.GenerateResult.Method.PublicAttribute", "public"),
-        ("Definit.Results.NewApproach.GenerateResult.Method.PrivateAttribute", "private"),
-        ("Definit.Results.NewApproach.GenerateResult.Method.Public.OverrideAttribute", "public override"),
-        ("Definit.Results.NewApproach.GenerateResult.Method.Private.OverrideAttribute", "private override"),
-        ("Definit.Results.NewApproach.GenerateResult.Method.Public.VirtualAttribute", "public virual"),
-        ("Definit.Results.NewApproach.GenerateResult.Method.Private.VirtualAttribute", "private virual")
+        ("Definit.Results.GenerateResult.Method.PublicAttribute", "public"),
+        ("Definit.Results.GenerateResult.Method.PrivateAttribute", "private"),
+        ("Definit.Results.GenerateResult.Method.Public.OverrideAttribute", "public override"),
+        ("Definit.Results.GenerateResult.Method.Private.OverrideAttribute", "private override"),
+        ("Definit.Results.GenerateResult.Method.Public.VirtualAttribute", "public virual"),
+        ("Definit.Results.GenerateResult.Method.Private.VirtualAttribute", "private virual")
     ];
 
     private static bool ShouldTransform(SyntaxNode node)

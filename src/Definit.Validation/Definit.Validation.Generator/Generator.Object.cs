@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using Definit.Utils.SourceGenerator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 

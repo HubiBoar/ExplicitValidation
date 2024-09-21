@@ -1,5 +1,5 @@
 using System.Text;
-using Definit.Results.NewApproach;
+using Definit.Results;
 
 //[assembly: GenerateEither.Base(10)]
 //[assembly: GenerateResult.Base(5, 5)]

@@ -37,6 +37,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Definit.Validation.Generato
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Definit.Result.Generator", "Definit.Result\Definit.Result.Generator\Definit.Result.Generator.csproj", "{171D7A8E-7D9E-42A3-9646-90B329143564}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Definit.Utils.SourceGeneration", "Definit.Utils\Definit.Utils.SourceGeneration\Definit.Utils.SourceGeneration.csproj", "{BD57D196-0153-4979-8ABB-E0DC7843196D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -87,6 +89,10 @@ Global
 		{171D7A8E-7D9E-42A3-9646-90B329143564}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{171D7A8E-7D9E-42A3-9646-90B329143564}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{171D7A8E-7D9E-42A3-9646-90B329143564}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BD57D196-0153-4979-8ABB-E0DC7843196D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BD57D196-0153-4979-8ABB-E0DC7843196D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BD57D196-0153-4979-8ABB-E0DC7843196D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BD57D196-0153-4979-8ABB-E0DC7843196D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{7E943ACF-5C6A-414E-B5D6-642B431C84E6} = {47336CDD-7014-4A30-A11E-B938881263AC}
@@ -100,5 +106,6 @@ Global
 		{51815C53-7450-41F8-85A3-02424760968F} = {E286AD75-97A4-486B-84EF-BD2503C59912}
 		{0D52FFD3-F002-4768-AE2E-6FB38DCF5BC0} = {47336CDD-7014-4A30-A11E-B938881263AC}
 		{171D7A8E-7D9E-42A3-9646-90B329143564} = {E286AD75-97A4-486B-84EF-BD2503C59912}
+		{BD57D196-0153-4979-8ABB-E0DC7843196D} = {CAE278B5-F322-4038-B1A6-2700C9E07EDE}
 	EndGlobalSection
 EndGlobal

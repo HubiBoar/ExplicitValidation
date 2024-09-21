@@ -1,4 +1,4 @@
-namespace Definit.Results.NewApproach;
+namespace Definit.Results;
 
 [System.AttributeUsage(System.AttributeTargets.Struct, AllowMultiple = false)]
 public sealed class GenerateResultAttribute : Attribute;

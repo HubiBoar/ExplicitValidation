@@ -1,5 +1,5 @@
 using System.Collections.Immutable;
-using Definit.Validation.Generator;
+using Definit.Utils.SourceGenerator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -9,13 +9,13 @@ namespace Definit.Results.Generator;
 [Generator]
 public class EitherGenerator : IIncrementalGenerator
 {
-    const string EitherName = "Definit.Results.NewApproach.IEitherBase<";
+    const string EitherName = "Definit.Results.IEitherBase<";
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var provider = context.SyntaxProvider.ForAttributeWithMetadataName
         (
-            "Definit.Results.NewApproach.GenerateEitherAttribute",
+            "Definit.Results.GenerateEitherAttribute",
             predicate: (c, _) =>
                 c is TypeDeclarationSyntax type
                 && type.Modifiers.Any(m => m.IsKind(SyntaxKind.PartialKeyword)),
@@ -52,7 +52,6 @@ public class EitherGenerator : IIncrementalGenerator
         (
             name => $"readonly {name}",
             "Definit.Results",
-            "Definit.Results.NewApproach",
             "Definit.Validation",
             "System.Diagnostics.CodeAnalysis"
         );

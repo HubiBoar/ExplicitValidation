@@ -1,34 +1,43 @@
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Definit.Utils.SourceGenerator;
 
 public sealed class TypeInfo
 {
-    public string? NameSpace  { get; }
-    public string Keyword     { get; }
-    public string Name        { get; }
-    public string Constraints { get; }
-    public string FullName    { get; }
+    public string? NameSpace       { get; }
+    public INamedTypeSymbol Symbol { get; }
+    public string TypeName         { get; }
 
-    public TypeInfo(string? nameSpace, string[] parentsNames, TypeDeclarationSyntax type)
+    public IReadOnlyList<TypeInfo> Parents  { get; }
+
+    public TypeInfo(INamedTypeSymbol symbol)
     {
-        Keyword     = type.Keyword.ValueText;
-        Name        = type.Identifier.ToString() + type.TypeParameterList;
-        Constraints = type.ConstraintClauses.ToString();
-        FullName    = string.IsNullOrEmpty(nameSpace)
-            ?
-            parentsNames.Length > 0 ? $"{string.Join(".", parentsNames)}.{Name}" : Name
-            :
-            parentsNames.Length > 0 ? $"{nameSpace}.{string.Join(".", parentsNames)}.{Name}" : $"{nameSpace}.{Name}";
+        Symbol = symbol;
+        NameSpace = symbol.ContainingNamespace.IsGlobalNamespace ? null : symbol.ContainingNamespace.ToDisplayString();
+        var type = Symbol.TypeKind switch
+        {
+            TypeKind.Class => "class",
+            _ => "struct"
+        };
 
-        NameSpace  = nameSpace;
-    }
+        var generics = string.Join(", ", Symbol.TypeArguments.Select(x => x.ToDisplayString()));
+        generics = string.IsNullOrEmpty(generics) ? string.Empty : $"<{generics}>";
+        var constraints = Symbol.TypeArguments.GetGenericConstraints();
+        constraints = string.IsNullOrEmpty(constraints) ? string.Empty : $"\n\t{constraints}";
 
-    public string GenerateTypeName()
-    {
-        return $"partial {Keyword} {Name} {Constraints}";
+        TypeName = $"partial {type} {Symbol.Name}{generics}{constraints}";
+        
+        var parents = new List<TypeInfo>();
+
+        var parent = symbol.ContainingType;
+
+        while(parent is not null)
+        {
+            parents.Add(new TypeInfo(parent));
+            parent = parent.ContainingType;
+        }
+
+        Parents = parents;
     }
 }
 
@@ -36,98 +45,37 @@ public static class SourceHelper
 {
     public static (SourceBuilder Code, TypeInfo TypeInfo) BuildTypeHierarchy
     (
-        this TypeDeclarationSyntax syntax,
+        this INamedTypeSymbol symbol,
         Func<string, string> editTypeInfo,
         params string[] usings
     )
     {
-        var (nameSpace, typeInfo, parents) = GetTypeAndParentsInfo(syntax); 
-       
-        var code = new SourceBuilder(usings.ToArray(), nameSpace); 
+        var typeInfo = new TypeInfo(symbol); 
+        var code = new SourceBuilder(usings.ToArray(), typeInfo.NameSpace); 
 
         int index = 0;
-        foreach(var parent in parents)
+        foreach(var parent in typeInfo.Parents)
         {
             if(index == 0)
             {
-                code.AddBlockDontIndent(parent.GenerateTypeName());
+                code.AddBlockDontIndent(parent.TypeName);
             }
             else
             {
-                code.AddBlock(parent.GenerateTypeName());
+                code.AddBlock(parent.TypeName);
             }
             index ++;
         }
 
-        if(parents.Count > 0)
+        if(typeInfo.Parents.Count > 0)
         {
-            code.AddBlock(editTypeInfo(typeInfo.GenerateTypeName()));
+            code.AddBlock(editTypeInfo(typeInfo.TypeName));
         }
         else
         {
-            code.AddBlockDontIndent(editTypeInfo(typeInfo.GenerateTypeName()));
+            code.AddBlockDontIndent(editTypeInfo(typeInfo.TypeName));
         }
 
         return (code, typeInfo);
     }
-
-    private static (string? NameSpace, TypeInfo TypeInfo, Stack<TypeInfo> Parents) GetTypeAndParentsInfo
-    (
-        TypeDeclarationSyntax syntax
-    )
-    {
-        var nameSpace = GetNamespace(syntax);
-        var parents  = new Stack<TypeInfo>();
-        var parentNames = new List<string>();
-
-        TypeDeclarationSyntax? parentSyntax = syntax.Parent as TypeDeclarationSyntax;
-        while (parentSyntax != null && IsAllowedKind(parentSyntax.Kind()))
-        {
-            var parent = new TypeInfo(nameSpace, parentNames.ToArray(), parentSyntax);
-            parents.Push(parent);
-            parentNames.Add(parent.Name);
-            parentSyntax = (parentSyntax.Parent as TypeDeclarationSyntax);
-        }
-
-        var typeInfo = new TypeInfo(nameSpace, parentNames.ToArray(), syntax);
-        return (nameSpace, typeInfo, parents);
-    }
-
-    private static string? GetNamespace(TypeDeclarationSyntax syntax)
-    {
-        string? nameSpace = null;
-
-        SyntaxNode? potentialNamespaceParent = syntax.Parent;
-        
-        while (potentialNamespaceParent != null &&
-                potentialNamespaceParent is not NamespaceDeclarationSyntax
-                && potentialNamespaceParent is not FileScopedNamespaceDeclarationSyntax)
-        {
-            potentialNamespaceParent = potentialNamespaceParent.Parent;
-        }
-
-        if (potentialNamespaceParent is BaseNamespaceDeclarationSyntax namespaceParent)
-        {
-            nameSpace = namespaceParent.Name.ToString();
-            
-            while (true)
-            {
-                if (namespaceParent.Parent is not NamespaceDeclarationSyntax parent)
-                {
-                    break;
-                }
-
-                nameSpace = $"{namespaceParent.Name}.{nameSpace}";
-                namespaceParent = parent;
-            }
-        }
-
-        return nameSpace;
-    }
-
-    private static bool IsAllowedKind(SyntaxKind kind) =>
-        kind == SyntaxKind.ClassDeclaration  ||
-        kind == SyntaxKind.StructDeclaration ||
-        kind == SyntaxKind.RecordDeclaration ||
-        kind == SyntaxKind.InterfaceDeclaration;
 }

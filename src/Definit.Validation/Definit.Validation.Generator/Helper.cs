@@ -37,7 +37,7 @@ public static class Helper
         (
             IsValidValueAttribute,
             context,
-            type => type.Modifiers.Any(x => x.IsKind(SyntaxKind.ReadOnlyKeyword)), 
+            type => true, 
             (s, c, v) =>
             {
                 var values = v

@@ -15,7 +15,7 @@ public class MethodGenerator : IIncrementalGenerator
 
     private record struct TypeInfo
     (
-        TypeDeclarationSyntax Parent,
+        INamedTypeSymbol Parent,
         ImmutableArray<MethodInfo> Methods
     );
 
@@ -44,7 +44,7 @@ public class MethodGenerator : IIncrementalGenerator
     (
         SourceProductionContext context,
         Compilation compilation,
-        ImmutableArray<(TypeDeclarationSyntax Type, MethodInfo Method)> typeList
+        ImmutableArray<(INamedTypeSymbol Type, MethodInfo Method)> typeList
     )
     {
         var types = typeList
@@ -108,7 +108,7 @@ public class MethodGenerator : IIncrementalGenerator
 
         code.AddBlock(builder.ToString());
 
-        return (code.ToString(), typeInfo.FullName);
+        return (code.ToString(), typeInfo.Symbol.ToDisplayString());
     }
 
     private static readonly (string Attribute, string Keyword)[] Attributes = 
@@ -132,7 +132,7 @@ public class MethodGenerator : IIncrementalGenerator
             && type.Modifiers.Any(x => x.IsKind(SyntaxKind.PartialKeyword));
     }
 
-    private static (TypeDeclarationSyntax Type, MethodInfo Method)? Transform
+    private static (INamedTypeSymbol Type, MethodInfo Method)? Transform
     (
         GeneratorSyntaxContext context
     )
@@ -207,78 +207,3 @@ public class MethodGenerator : IIncrementalGenerator
     }
 }
 
-public static class GeneratorExtensions
-{
-    public static string GetCallingParameters(this IMethodSymbol method)
-    {
-        var parametersCall = method.Parameters.Select(x => GetParam(x)).ToArray();
-
-        return string.Join(", ", parametersCall);
-
-        static string GetParam(IParameterSymbol p)
-        {
-            return p.RefKind switch
-            {
-                RefKind.Ref => $"ref {p.Name}", 
-                RefKind.In => $"in {p.Name}", 
-                RefKind.Out => $"out {p.Name}",  
-                RefKind.RefReadOnlyParameter => $"ref readonly {p.Name}", 
-                _ => p.Name
-            };
-        }
-    }
-
-    public static bool IsUnsafe(this IMethodSymbol method)
-    {
-        return method.Parameters.Select(x => x.Type).Any(x => x.TypeKind == TypeKind.Pointer);
-    }
-
-    public static string GetMethodGenericArgs(this IMethodSymbol method)
-    {
-        var isGeneric = method.IsGenericMethod;
-
-        if(isGeneric is false)
-        {
-            return string.Empty;
-        }
-
-        var genericParams = string.Join(", ", method.TypeArguments.Select(x => x.ToDisplayString()));
-
-        return $"<{genericParams}>";
-    }
-
-    public static string GetMethodGenericConstraints(this IMethodSymbol method)
-    {
-        var isGeneric = method.IsGenericMethod;
-
-        if(isGeneric is false)
-        {
-            return string.Empty;
-        }
-
-        return method.TypeArguments.GetGenericConstraints();
-    }
-
-    public static string GetGenericConstraints(this IEnumerable<ITypeSymbol> typeArguments)
-    {
-        var parameters = 
-            typeArguments
-            .OfType<ITypeParameterSymbol>()
-            .Where(x => x.ConstraintTypes.Length > 0)
-            .ToArray();
-
-        if(parameters.Length == 0)
-        {
-            return string.Empty;
-        }
-
-        return
-            "\n\t" + string
-                .Join("\n\t", parameters
-                    .Select(x => "where " + x.ToDisplayString() + " : " + string
-                        .Join(", ", x
-                            .ConstraintTypes
-                            .Select(y => y
-                                .ToDisplayString()))));
-    }
-}

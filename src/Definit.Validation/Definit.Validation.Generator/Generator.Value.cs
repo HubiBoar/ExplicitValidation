@@ -34,7 +34,7 @@ public class ValueGenerator : IIncrementalGenerator
     {
         var (code, typeInfo) = type.BuildTypeHierarchy
         (
-            name => $"{name}: {Helper.GenerateValidValueName(genericTypeSymbol)}",
+            name => $"readonly {name}: {Helper.GenerateValidValueName(genericTypeSymbol)}",
             "Definit.Results",
             "Definit.Validation"
         );

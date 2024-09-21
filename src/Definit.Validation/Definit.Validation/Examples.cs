@@ -66,3 +66,12 @@ internal static partial class Example
         return Result.Success;
     }
 }
+
+partial class Example
+{
+    partial class Parent1
+    {
+
+    }
+}
+

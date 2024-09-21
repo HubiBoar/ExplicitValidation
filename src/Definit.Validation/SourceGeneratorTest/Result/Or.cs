@@ -19,6 +19,12 @@ public readonly struct Or<T>
 
 public static class OrExtensions
 {
+    public static T? GetValue<T>(this Or<T?> o)
+        where T : struct
+    {
+        return o.Out;
+    }
+
     public static T? GetValue<T>(this Or<T?>? o)
         where T : struct
     {

@@ -29,7 +29,7 @@ public class ValueGenerator : IIncrementalGenerator
     private static (string Code, string ClassName) GetType
     (
         TypeDeclarationSyntax type,
-        ITypeSymbol genericTypeSymbol
+        INamedTypeSymbol genericTypeSymbol
     )
     {
         var (code, typeInfo) = type.BuildTypeHierarchy

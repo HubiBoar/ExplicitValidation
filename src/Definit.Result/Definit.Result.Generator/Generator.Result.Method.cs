@@ -31,9 +31,7 @@ public class MethodGenerator : IIncrementalGenerator
         var provider = context.SyntaxProvider
             .CreateSyntaxProvider(
                 predicate: static (s, _) => ShouldTransform(s), 
-                transform: static (ctx, _) => Transform(ctx)) 
-            .Where(static m => m is not null)
-            .Select(static (x, _) => x!.Value);
+                transform: static (ctx, _) => ctx); 
 
         var compilation = context.CompilationProvider.Combine(provider.Collect());
 
@@ -44,10 +42,13 @@ public class MethodGenerator : IIncrementalGenerator
     (
         SourceProductionContext context,
         Compilation compilation,
-        ImmutableArray<(INamedTypeSymbol Type, MethodInfo Method)> typeList
+        ImmutableArray<GeneratorSyntaxContext> syntaxes
     )
     {
-        var types = typeList
+        var types = syntaxes
+            .Select(x => Transform(compilation, x))
+            .Where(x => x is not null)
+            .Select(x => x!.Value)
             .GroupBy(x => x.Type)
             .Select(x => new TypeInfo(x.Key, x.Select(v => v.Method).ToImmutableArray()))
             .ToArray();
@@ -134,10 +135,14 @@ public class MethodGenerator : IIncrementalGenerator
 
     private static (INamedTypeSymbol Type, MethodInfo Method)? Transform
     (
+        Compilation compilation,
         GeneratorSyntaxContext context
     )
     {
-        var typeSyntax = (TypeDeclarationSyntax)context.Node.Parent!; 
+        var parentSyntax = (TypeDeclarationSyntax)context.Node.Parent!; 
+        var typeSymbol = compilation
+            .GetSemanticModel(parentSyntax.SyntaxTree)
+            .GetDeclaredSymbol(parentSyntax) as INamedTypeSymbol;
 
         var methodSyntax = (MethodDeclarationSyntax)context.Node;
 
@@ -164,7 +169,7 @@ public class MethodGenerator : IIncrementalGenerator
                    return null;
                 }
 
-                return (typeSyntax, new MethodInfo(attribute.Keyword, methodSyntax, methodSymbol));
+                return (typeSymbol!, new MethodInfo(attribute.Keyword, methodSyntax, methodSymbol));
             }
         }
 

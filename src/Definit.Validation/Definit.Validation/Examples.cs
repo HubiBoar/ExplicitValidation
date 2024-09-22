@@ -10,7 +10,7 @@ internal static partial class Example
         public static void Rule(Rule<string> rule) => rule.NotNull();
     }
 
-    private static partial class Parent1
+    public static partial class Parent1
     {
         [IsValid<string>]
         public partial struct Value1

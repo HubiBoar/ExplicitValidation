@@ -3,11 +3,11 @@ using Definit.Validation;
 
 namespace Definit.Validation;
 
-partial class Example 
+partial class Example
 {
-	partial class Parent1 
+	partial class Parent1
 	{
-		readonly partial struct Value1 : Definit.Validation.IIsValid<string>
+		readonly partial struct Value1: Definit.Validation.IIsValid<string>
 		{
 			private readonly static Rule<string> _rule;
 			
@@ -24,9 +24,9 @@ partial class Example
 			    Value = value;
 			}
 			
-			public static implicit operator Definit.Validation.Parent1.Example.Value1(string value) => new (value);
+			public static implicit operator Definit.Validation.Example.Parent1.Value1(string value) => new (value);
 			
-			public static implicit operator string(Definit.Validation.Parent1.Example.Value1 value) => value.Value;
+			public static implicit operator string(Definit.Validation.Example.Parent1.Value1 value) => value.Value;
 			
 			public Result Validate() => _rule.Validate(Value);
 			
@@ -34,14 +34,14 @@ partial class Example
 			
 			public readonly struct Valid
 			{
-			    public Definit.Validation.Parent1.Example.Value1 Value { get; }
+			    public Definit.Validation.Example.Parent1.Value1 Value { get; }
 			
-			    private Valid(Definit.Validation.Parent1.Example.Value1 value)
+			    private Valid(Definit.Validation.Example.Parent1.Value1 value)
 			    {
 			        Value = value;
 			    }
 			
-			    public static Result<Valid> Create(Definit.Validation.Parent1.Example.Value1 value)
+			    public static Result<Valid> Create(Definit.Validation.Example.Parent1.Value1 value)
 			    {
 			        if(value.Validate().Is(out Error error))
 			        {

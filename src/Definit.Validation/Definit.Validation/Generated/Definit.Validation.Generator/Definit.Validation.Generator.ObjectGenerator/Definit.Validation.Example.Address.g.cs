@@ -3,9 +3,9 @@ using Definit.Validation;
 
 namespace Definit.Validation;
 
-partial class Example 
+partial class Example
 {
-	partial record Address : Definit.Validation.IIsValid
+	partial record Address: Definit.Validation.IIsValid
 	{
 		public Result Validate() => IsValid();
 		

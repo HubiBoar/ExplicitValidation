@@ -4,54 +4,60 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Definit.Results;
 
-public readonly partial struct Result<T0, T1> : Result<T0, T1>.Base
+public readonly struct Result<T0, T1, T2, T3> : Result<T0, T1, T2, T3>.Base
 {
-    public interface Base : IResultBase<Either<T0, T1, Err>>
+    public interface Base : IResultBase<Either<T0, T1, T2, T3, Err>>
     {
-        static Either<T0, T1, Err> IResultBase<Either<T0, T1, Err>>.FromException(Exception exception)
+        static Either<T0, T1, T2, T3, Err> IResultBase<Either<T0, T1, T2, T3, Err>>.FromException(Exception exception)
 		{
 		   return ErrorHelper.Matches<Err>(exception).Error;
 		}
     }
     
-    private Either<T0, T1, Err> Either { get; }
+    private Either<T0, T1, T2, T3, Err> Either { get; }
 	
 	[Obsolete(DefaultConstructorException.Attribute, true)]
 	public Result() => throw new DefaultConstructorException();
 	
-	public Result(Either<T0, T1, Err> value) => Either = value;
+	public Result(Either<T0, T1, T2, T3, Err> value) => Either = value;
 	
-	Either<T0, T1, Err> IResultBase<Either<T0, T1, Err>>.Value => Either;
+	Either<T0, T1, T2, T3, Err> IResultBase<Either<T0, T1, T2, T3, Err>>.Value => Either;
 	
-	public static implicit operator Result<T0, T1>([DisallowNull] EitherMatchError _) => throw new EitherMatchException<Either<T0, T1, Err>>();
-	public static implicit operator Result<T0, T1>(T0 value) => new (value);
-	public static implicit operator Result<T0, T1>(T1 value) => new (value);
-	public static implicit operator Result<T0, T1>(Err value) => new (value);
+	public static implicit operator Result<T0, T1, T2, T3>([DisallowNull] EitherMatchError _) => throw new EitherMatchException<Either<T0, T1, T2, T3, Err>>();
+	
+	public static implicit operator Result<T0, T1, T2, T3>(T0 value) => new (value);
+	public static implicit operator Result<T0, T1, T2, T3>(T1 value) => new (value);
+	public static implicit operator Result<T0, T1, T2, T3>(T2 value) => new (value);
+	public static implicit operator Result<T0, T1, T2, T3>(T3 value) => new (value);
+	public static implicit operator Result<T0, T1, T2, T3>(Err value) => new (value);
 
 
     public readonly struct Error<TE0> : Error<TE0>.Base 
 	    where TE0 : struct, IError<TE0>
 	{
-	    public interface Base : IResultBase<Either<T0, T1, TE0>>
+	    public interface Base : IResultBase<Either<T0, T1, T2, T3, TE0>>
 	    {
-	        static Either<T0, T1, TE0> IResultBase<Either<T0, T1, TE0>>.FromException(Exception exception)
+	        static Either<T0, T1, T2, T3, TE0> IResultBase<Either<T0, T1, T2, T3, TE0>>.FromException(Exception exception)
 			{
 			   return ErrorHelper.Matches<TE0>(exception).Error;
 			}
 	    }
 	
-	    private Either<T0, T1, TE0> Either { get; }
+	    private Either<T0, T1, T2, T3, TE0> Either { get; }
 		
 		[Obsolete(DefaultConstructorException.Attribute, true)]
 		public Error() => throw new DefaultConstructorException();
 		
-		public Error(Either<T0, T1, TE0> value) => Either = value;
+		public Error(Either<T0, T1, T2, T3, TE0> value) => Either = value;
 		
-		Either<T0, T1, TE0> IResultBase<Either<T0, T1, TE0>>.Value => Either;
+		Either<T0, T1, T2, T3, TE0> IResultBase<Either<T0, T1, T2, T3, TE0>>.Value => Either;
 		
-		public static implicit operator Error<TE0>([DisallowNull] EitherMatchError _) => throw new EitherMatchException<Either<T0, T1, TE0>>();
+		public static implicit operator Error<TE0>([DisallowNull] EitherMatchError _) => throw new EitherMatchException<Either<T0, T1, T2, T3, TE0>>();
+		
 		public static implicit operator Error<TE0>(T0 value) => new (value);
 		public static implicit operator Error<TE0>(T1 value) => new (value);
+		public static implicit operator Error<TE0>(T2 value) => new (value);
+		public static implicit operator Error<TE0>(T3 value) => new (value);
 		public static implicit operator Error<TE0>(TE0 value) => new (value);
 	}
 
@@ -60,9 +66,9 @@ public readonly partial struct Result<T0, T1> : Result<T0, T1>.Base
 	    where TE0 : struct, IError<TE0>
 		where TE1 : struct, IError<TE1>
 	{
-	    public interface Base : IResultBase<Either<T0, T1, TE0, TE1>>
+	    public interface Base : IResultBase<Either<T0, T1, T2, T3, TE0, TE1>>
 	    {
-	        static Either<T0, T1, TE0, TE1> IResultBase<Either<T0, T1, TE0, TE1>>.FromException(Exception exception)
+	        static Either<T0, T1, T2, T3, TE0, TE1> IResultBase<Either<T0, T1, T2, T3, TE0, TE1>>.FromException(Exception exception)
 			{
 			    var TE0_match = ErrorHelper.Matches<TE0>(exception);
 			
@@ -75,18 +81,21 @@ public readonly partial struct Result<T0, T1> : Result<T0, T1>.Base
 			}
 	    }
 	
-	    private Either<T0, T1, TE0, TE1> Either { get; }
+	    private Either<T0, T1, T2, T3, TE0, TE1> Either { get; }
 		
 		[Obsolete(DefaultConstructorException.Attribute, true)]
 		public Error() => throw new DefaultConstructorException();
 		
-		public Error(Either<T0, T1, TE0, TE1> value) => Either = value;
+		public Error(Either<T0, T1, T2, T3, TE0, TE1> value) => Either = value;
 		
-		Either<T0, T1, TE0, TE1> IResultBase<Either<T0, T1, TE0, TE1>>.Value => Either;
+		Either<T0, T1, T2, T3, TE0, TE1> IResultBase<Either<T0, T1, T2, T3, TE0, TE1>>.Value => Either;
 		
-		public static implicit operator Error<TE0, TE1>([DisallowNull] EitherMatchError _) => throw new EitherMatchException<Either<T0, T1, TE0, TE1>>();
+		public static implicit operator Error<TE0, TE1>([DisallowNull] EitherMatchError _) => throw new EitherMatchException<Either<T0, T1, T2, T3, TE0, TE1>>();
+		
 		public static implicit operator Error<TE0, TE1>(T0 value) => new (value);
 		public static implicit operator Error<TE0, TE1>(T1 value) => new (value);
+		public static implicit operator Error<TE0, TE1>(T2 value) => new (value);
+		public static implicit operator Error<TE0, TE1>(T3 value) => new (value);
 		public static implicit operator Error<TE0, TE1>(TE0 value) => new (value);
 		public static implicit operator Error<TE0, TE1>(TE1 value) => new (value);
 	}
@@ -97,9 +106,9 @@ public readonly partial struct Result<T0, T1> : Result<T0, T1>.Base
 		where TE1 : struct, IError<TE1>
 		where TE2 : struct, IError<TE2>
 	{
-	    public interface Base : IResultBase<Either<T0, T1, TE0, TE1, TE2>>
+	    public interface Base : IResultBase<Either<T0, T1, T2, T3, TE0, TE1, TE2>>
 	    {
-	        static Either<T0, T1, TE0, TE1, TE2> IResultBase<Either<T0, T1, TE0, TE1, TE2>>.FromException(Exception exception)
+	        static Either<T0, T1, T2, T3, TE0, TE1, TE2> IResultBase<Either<T0, T1, T2, T3, TE0, TE1, TE2>>.FromException(Exception exception)
 			{
 			    var TE0_match = ErrorHelper.Matches<TE0>(exception);
 			
@@ -119,18 +128,21 @@ public readonly partial struct Result<T0, T1> : Result<T0, T1>.Base
 			}
 	    }
 	
-	    private Either<T0, T1, TE0, TE1, TE2> Either { get; }
+	    private Either<T0, T1, T2, T3, TE0, TE1, TE2> Either { get; }
 		
 		[Obsolete(DefaultConstructorException.Attribute, true)]
 		public Error() => throw new DefaultConstructorException();
 		
-		public Error(Either<T0, T1, TE0, TE1, TE2> value) => Either = value;
+		public Error(Either<T0, T1, T2, T3, TE0, TE1, TE2> value) => Either = value;
 		
-		Either<T0, T1, TE0, TE1, TE2> IResultBase<Either<T0, T1, TE0, TE1, TE2>>.Value => Either;
+		Either<T0, T1, T2, T3, TE0, TE1, TE2> IResultBase<Either<T0, T1, T2, T3, TE0, TE1, TE2>>.Value => Either;
 		
-		public static implicit operator Error<TE0, TE1, TE2>([DisallowNull] EitherMatchError _) => throw new EitherMatchException<Either<T0, T1, TE0, TE1, TE2>>();
+		public static implicit operator Error<TE0, TE1, TE2>([DisallowNull] EitherMatchError _) => throw new EitherMatchException<Either<T0, T1, T2, T3, TE0, TE1, TE2>>();
+		
 		public static implicit operator Error<TE0, TE1, TE2>(T0 value) => new (value);
 		public static implicit operator Error<TE0, TE1, TE2>(T1 value) => new (value);
+		public static implicit operator Error<TE0, TE1, TE2>(T2 value) => new (value);
+		public static implicit operator Error<TE0, TE1, TE2>(T3 value) => new (value);
 		public static implicit operator Error<TE0, TE1, TE2>(TE0 value) => new (value);
 		public static implicit operator Error<TE0, TE1, TE2>(TE1 value) => new (value);
 		public static implicit operator Error<TE0, TE1, TE2>(TE2 value) => new (value);
@@ -143,9 +155,9 @@ public readonly partial struct Result<T0, T1> : Result<T0, T1>.Base
 		where TE2 : struct, IError<TE2>
 		where TE3 : struct, IError<TE3>
 	{
-	    public interface Base : IResultBase<Either<T0, T1, TE0, TE1, TE2, TE3>>
+	    public interface Base : IResultBase<Either<T0, T1, T2, T3, TE0, TE1, TE2, TE3>>
 	    {
-	        static Either<T0, T1, TE0, TE1, TE2, TE3> IResultBase<Either<T0, T1, TE0, TE1, TE2, TE3>>.FromException(Exception exception)
+	        static Either<T0, T1, T2, T3, TE0, TE1, TE2, TE3> IResultBase<Either<T0, T1, T2, T3, TE0, TE1, TE2, TE3>>.FromException(Exception exception)
 			{
 			    var TE0_match = ErrorHelper.Matches<TE0>(exception);
 			
@@ -172,18 +184,21 @@ public readonly partial struct Result<T0, T1> : Result<T0, T1>.Base
 			}
 	    }
 	
-	    private Either<T0, T1, TE0, TE1, TE2, TE3> Either { get; }
+	    private Either<T0, T1, T2, T3, TE0, TE1, TE2, TE3> Either { get; }
 		
 		[Obsolete(DefaultConstructorException.Attribute, true)]
 		public Error() => throw new DefaultConstructorException();
 		
-		public Error(Either<T0, T1, TE0, TE1, TE2, TE3> value) => Either = value;
+		public Error(Either<T0, T1, T2, T3, TE0, TE1, TE2, TE3> value) => Either = value;
 		
-		Either<T0, T1, TE0, TE1, TE2, TE3> IResultBase<Either<T0, T1, TE0, TE1, TE2, TE3>>.Value => Either;
+		Either<T0, T1, T2, T3, TE0, TE1, TE2, TE3> IResultBase<Either<T0, T1, T2, T3, TE0, TE1, TE2, TE3>>.Value => Either;
 		
-		public static implicit operator Error<TE0, TE1, TE2, TE3>([DisallowNull] EitherMatchError _) => throw new EitherMatchException<Either<T0, T1, TE0, TE1, TE2, TE3>>();
+		public static implicit operator Error<TE0, TE1, TE2, TE3>([DisallowNull] EitherMatchError _) => throw new EitherMatchException<Either<T0, T1, T2, T3, TE0, TE1, TE2, TE3>>();
+		
 		public static implicit operator Error<TE0, TE1, TE2, TE3>(T0 value) => new (value);
 		public static implicit operator Error<TE0, TE1, TE2, TE3>(T1 value) => new (value);
+		public static implicit operator Error<TE0, TE1, TE2, TE3>(T2 value) => new (value);
+		public static implicit operator Error<TE0, TE1, TE2, TE3>(T3 value) => new (value);
 		public static implicit operator Error<TE0, TE1, TE2, TE3>(TE0 value) => new (value);
 		public static implicit operator Error<TE0, TE1, TE2, TE3>(TE1 value) => new (value);
 		public static implicit operator Error<TE0, TE1, TE2, TE3>(TE2 value) => new (value);
@@ -198,9 +213,9 @@ public readonly partial struct Result<T0, T1> : Result<T0, T1>.Base
 		where TE3 : struct, IError<TE3>
 		where TE4 : struct, IError<TE4>
 	{
-	    public interface Base : IResultBase<Either<T0, T1, TE0, TE1, TE2, TE3, TE4>>
+	    public interface Base : IResultBase<Either<T0, T1, T2, T3, TE0, TE1, TE2, TE3, TE4>>
 	    {
-	        static Either<T0, T1, TE0, TE1, TE2, TE3, TE4> IResultBase<Either<T0, T1, TE0, TE1, TE2, TE3, TE4>>.FromException(Exception exception)
+	        static Either<T0, T1, T2, T3, TE0, TE1, TE2, TE3, TE4> IResultBase<Either<T0, T1, T2, T3, TE0, TE1, TE2, TE3, TE4>>.FromException(Exception exception)
 			{
 			    var TE0_match = ErrorHelper.Matches<TE0>(exception);
 			
@@ -234,18 +249,21 @@ public readonly partial struct Result<T0, T1> : Result<T0, T1>.Base
 			}
 	    }
 	
-	    private Either<T0, T1, TE0, TE1, TE2, TE3, TE4> Either { get; }
+	    private Either<T0, T1, T2, T3, TE0, TE1, TE2, TE3, TE4> Either { get; }
 		
 		[Obsolete(DefaultConstructorException.Attribute, true)]
 		public Error() => throw new DefaultConstructorException();
 		
-		public Error(Either<T0, T1, TE0, TE1, TE2, TE3, TE4> value) => Either = value;
+		public Error(Either<T0, T1, T2, T3, TE0, TE1, TE2, TE3, TE4> value) => Either = value;
 		
-		Either<T0, T1, TE0, TE1, TE2, TE3, TE4> IResultBase<Either<T0, T1, TE0, TE1, TE2, TE3, TE4>>.Value => Either;
+		Either<T0, T1, T2, T3, TE0, TE1, TE2, TE3, TE4> IResultBase<Either<T0, T1, T2, T3, TE0, TE1, TE2, TE3, TE4>>.Value => Either;
 		
-		public static implicit operator Error<TE0, TE1, TE2, TE3, TE4>([DisallowNull] EitherMatchError _) => throw new EitherMatchException<Either<T0, T1, TE0, TE1, TE2, TE3, TE4>>();
+		public static implicit operator Error<TE0, TE1, TE2, TE3, TE4>([DisallowNull] EitherMatchError _) => throw new EitherMatchException<Either<T0, T1, T2, T3, TE0, TE1, TE2, TE3, TE4>>();
+		
 		public static implicit operator Error<TE0, TE1, TE2, TE3, TE4>(T0 value) => new (value);
 		public static implicit operator Error<TE0, TE1, TE2, TE3, TE4>(T1 value) => new (value);
+		public static implicit operator Error<TE0, TE1, TE2, TE3, TE4>(T2 value) => new (value);
+		public static implicit operator Error<TE0, TE1, TE2, TE3, TE4>(T3 value) => new (value);
 		public static implicit operator Error<TE0, TE1, TE2, TE3, TE4>(TE0 value) => new (value);
 		public static implicit operator Error<TE0, TE1, TE2, TE3, TE4>(TE1 value) => new (value);
 		public static implicit operator Error<TE0, TE1, TE2, TE3, TE4>(TE2 value) => new (value);

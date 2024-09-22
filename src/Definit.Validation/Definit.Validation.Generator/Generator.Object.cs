@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using Definit.Utils.SourceGenerator;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Definit.Validation.Generator;
@@ -8,43 +9,59 @@ namespace Definit.Validation.Generator;
 [Generator]
 public class ObjectGenerator : IIncrementalGenerator
 {
+    private const string Attribute = "Definit.Validation.IsValidAttribute";
+    private const string IsValidName = "Definit.Validation.IIsValid";
+    
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        Helper.RunIsValid(context, (s, c, v) => Execute(s, c, v));
+        var provider = context.SyntaxProvider.ForAttributeWithMetadataName
+        (
+            Attribute,
+            predicate: (c, _) =>
+                c is TypeDeclarationSyntax type
+                && type.Modifiers.Any(m => m.IsKind(SyntaxKind.PartialKeyword)),
+
+            transform: (n, _) => (n.TargetSymbol as INamedTypeSymbol)!
+        );
+
+        var compilation = context.CompilationProvider.Combine(provider.Collect());
+        context.RegisterSourceOutput(compilation, (spc, source) => Execute(spc, source.Left, source.Right)); 
     }
 
     private static void Execute
     (
         SourceProductionContext context,
         Compilation compilation,
-        ImmutableArray<Helper.Object> typeList
+        ImmutableArray<INamedTypeSymbol> typeList
     )
     {
-        foreach(var type in typeList.Select(x => GetType(x.Type, x.Symbol)))
-        {
-            context.AddSource($"{type.ClassName}.g.cs", type.Code);
-        }
+        SourceHelper.Run
+        (
+            context,
+            () => typeList
+                .Select<INamedTypeSymbol, Func<(string, string)>>(x => () => GetType(x))
+                .ToImmutableArray()
+        );
     }
 
     private static (string Code, string ClassName) GetType
     (
-        TypeDeclarationSyntax type,
-        ITypeSymbol typeSymbol
+        INamedTypeSymbol type
     )
     {
-        var (code, typeInfo) = type.BuildTypeHierarchy
+        var (code, info) = type.BuildTypeHierarchy
         (
-            name => $"{name}: {Helper.IsValidName}",
+            name => $"{name}: {IsValidName}",
             "Definit.Results",
             "Definit.Validation"
         );
 
-        var name = typeInfo.Name;
+        var name = info.Name;
 
-        var properties = typeSymbol
+        var properties = type
             .GetMembers()
             .OfType<IPropertySymbol>()
-            .Where(x => Helper.IsValid(x.Type))
+            .Where(x => IsValid(x.Type))
             .Select(x => (Name: x.Name, Type: x.Type.ToDisplayString()));
 
         var propertiesDeclarations = string.Join("\n\t", properties.Select(x => $$"""public {{x.Type}}.Valid {{x.Name}} { get; }"""));
@@ -66,17 +83,17 @@ public class ObjectGenerator : IIncrementalGenerator
 
         public readonly struct Valid
         {
-            public {{typeInfo.FullName}} Value { get; } 
+            public {{name}} Value { get; } 
     
             {{propertiesDeclarations}}
 
-            private Valid({{typeInfo.FullName}} Value, {{constructorParams}})
+            private Valid({{name}} Value, {{constructorParams}})
             {
                 this.Value = Value;
                 {{constructorAssignment}}
             }
 
-            public static Result<Valid> Create({{typeInfo.FullName}} value)
+            public static Result<Valid> Create({{name}} value)
             {
                 List<(string Error, string PropertyName)> errors = [];
                 
@@ -90,11 +107,32 @@ public class ObjectGenerator : IIncrementalGenerator
                 return new Valid(value, {{validCreation}});
             }
 
-            public static implicit operator {{typeInfo.FullName}}(Valid value) => value.Value;
+            public static implicit operator {{name}}(Valid value) => value.Value;
         }
         """);
 
-        return (code.ToString(), typeInfo.FullName);
+        return (code.ToString(), name);
+    }
+
+    private static bool IsValid(ITypeSymbol type)
+    {
+        return type
+            .GetAttributes()
+            .Any(x =>
+            {
+                if(x.AttributeClass is null)
+                {
+                    return false;
+                }
+
+                var name = x.AttributeClass.ToDisplayString();
+                
+                return name.StartsWith(Attribute);
+            })
+            ||
+            type
+            .AllInterfaces
+            .Any(x => x.ToDisplayString() == IsValidName);
     }
 }
 

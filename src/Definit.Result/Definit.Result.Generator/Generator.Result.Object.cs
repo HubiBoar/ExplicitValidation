@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using System.Text;
+using Definit.Utils.SourceGenerator;
 using Microsoft.CodeAnalysis;
 
 namespace Definit.Results.Generator;
@@ -34,15 +35,13 @@ public class ObjectGenerator : IIncrementalGenerator
         ImmutableArray<GeneratorAttributeSyntaxContext> typeList
     )
     {
-        foreach(var type in typeList
+        SourceHelper.Run(context, () => 
+            typeList
             .SelectMany(x => x.Attributes
                 .Where(y => y.AttributeClass is not null && y.AttributeClass!
                     .ToDisplayString() == "Definit.Results.GenerateResult.ObjectAttribute") 
-                .Select(x => GetType(context, compilation, x))))
-
-        {
-            context.AddSource($"{type.ClassName}.g.cs", type.Code);
-        }
+                .Select<AttributeData, Func<(string, string)>>(x => () => GetType(context, compilation, x)))
+                .ToImmutableArray());
     }
 
     public static (string Code, string ClassName) Generate

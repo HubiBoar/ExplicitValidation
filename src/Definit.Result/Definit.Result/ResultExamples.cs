@@ -55,6 +55,12 @@ public partial class Examples
     }
 
     [GenerateResult.Method.Private]
+    private Result _PrivateRun2(string t)
+    {
+        return Result.Success;
+    }
+
+    [GenerateResult.Method.Private]
     private Result<string>.Error<NotFound> _PrivateRun(string t)
     {
         var result = GetResultExample2();

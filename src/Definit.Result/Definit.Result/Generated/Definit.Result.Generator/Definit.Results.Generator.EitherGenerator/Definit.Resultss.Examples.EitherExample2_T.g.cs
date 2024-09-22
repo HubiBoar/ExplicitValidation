@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Definit.Resultss.Examples;
 
-readonly partial struct EitherExample2<T> where T : notnull
+readonly partial struct EitherExample2<T>
 {
 	public (Or<T>?, Or<string>?, Or<int>?) Value { get; }
 	
@@ -14,17 +14,17 @@ readonly partial struct EitherExample2<T> where T : notnull
 	public EitherExample2(string value) => Value = (null, value!, null);
 	public EitherExample2(int value) => Value = (null, null, value!);
 	
-	public static implicit operator EitherExample2<T>([DisallowNull] EitherMatchError _) => throw new EitherMatchException<Either<T, string, int>>();
-	public static implicit operator EitherExample2<T>(T value) => new (value);
-	public static implicit operator EitherExample2<T>(string value) => new (value);
-	public static implicit operator EitherExample2<T>(int value) => new (value);
+	public static implicit operator Definit.Resultss.Examples.EitherExample2<T>([DisallowNull] EitherMatchError _) => throw new EitherMatchException<Either<T, string, int>>();
+	public static implicit operator Definit.Resultss.Examples.EitherExample2<T>(T value) => new (value);
+	public static implicit operator Definit.Resultss.Examples.EitherExample2<T>(string value) => new (value);
+	public static implicit operator Definit.Resultss.Examples.EitherExample2<T>(int value) => new (value);
 }
 
 public static partial class EitherExample2__Auto__Extensions
 {
     public static void Deconstruct<T>
 	(
-	    this EitherExample2<T> result,
+	    this Definit.Resultss.Examples.EitherExample2<T> result,
 	    out Or<T>? T_arg,
 		out Or<string>? string_arg,
 		out Or<int>? int_arg
@@ -35,7 +35,7 @@ public static partial class EitherExample2__Auto__Extensions
 	
 	public static void Deconstruct<T>
 	(
-	    this EitherExample2<T>? result,
+	    this Definit.Resultss.Examples.EitherExample2<T>? result,
 	    out Or<T>? T_arg,
 		out Or<string>? string_arg,
 		out Or<int>? int_arg

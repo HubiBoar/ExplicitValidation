@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Definit.Resultss.Examples;
 
-partial class Examples 
+partial class Examples
 {
 	
 	private Definit.Results.Either<int, string, Definit.Resultss.Examples.NotFound> PrivateRun(int i)
@@ -15,6 +15,18 @@ partial class Examples
 	    catch (Exception exception)
 	    {
 	        return ResultHelper.ToReturn<Definit.Resultss.Examples.ResultExample2<int>, Definit.Results.Either<int, string, Definit.Resultss.Examples.NotFound>>(exception);
+	    }
+	}
+	
+	private Definit.Results.Error? PrivateRun2(string t)
+	{
+	    try
+	    {
+	        return ResultHelper.ToReturn<Definit.Results.Result, Definit.Results.Error?>(_PrivateRun2(t));
+	    }
+	    catch (Exception exception)
+	    {
+	        return ResultHelper.ToReturn<Definit.Results.Result, Definit.Results.Error?>(exception);
 	    }
 	}
 	

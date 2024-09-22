@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Definit.Results;
 
 [System.AttributeUsage(System.AttributeTargets.Struct, AllowMultiple = false)]
@@ -22,22 +24,24 @@ public static partial class GenerateResult
 public static class ResultHelper
 {
     public static T ToReturn<TResult, T>(TResult result)
-        where T : struct, IEitherBase 
         where TResult : struct, IResultBase<T>
     {
         return result.Value;
     }
 
     public static T ToReturn<TResult, T>(Exception exception)
-        where T : struct, IEitherBase 
         where TResult : struct, IResultBase<T>
     {
         return TResult.FromException(exception);
     }
+
+    public static Error? Test()
+    {
+        return ToReturn<Result, Error?>(Result.Success);
+    }
 }
 
 public interface IResultBase<TValue>
-    where TValue : struct, IEitherBase
 {
     internal TValue Value { get; }
 

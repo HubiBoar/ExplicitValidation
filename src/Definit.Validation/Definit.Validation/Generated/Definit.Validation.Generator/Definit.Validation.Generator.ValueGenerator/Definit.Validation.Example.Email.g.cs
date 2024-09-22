@@ -3,9 +3,9 @@ using Definit.Validation;
 
 namespace Definit.Validation;
 
-partial class Example 
+partial class Example
 {
-	readonly partial struct Email : Definit.Validation.IIsValid<string>
+	readonly partial struct Email: Definit.Validation.IIsValid<string>
 	{
 		private readonly static Rule<string> _rule;
 		

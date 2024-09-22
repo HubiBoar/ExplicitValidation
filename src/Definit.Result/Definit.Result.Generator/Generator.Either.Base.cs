@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using Definit.Utils.SourceGenerator;
 using Microsoft.CodeAnalysis;
 
 namespace Definit.Results.Generator;
@@ -28,15 +29,12 @@ public class EitherBaseGenerator : IIncrementalGenerator
         ImmutableArray<GeneratorAttributeSyntaxContext> typeList
     )
     {
-        foreach(var type in typeList.SelectMany(x => GetType(x)))
-        {
-            var name = type.ClassName.Replace("<", "_").Replace(">", "").Replace(", ", "_").Replace(" ", "_").Replace(",", "_");
-        
-            context.AddSource($"{name}.g.cs", type.Code);
-        }
+        SourceHelper.Run(context, () => typeList
+            .SelectMany<GeneratorAttributeSyntaxContext, Func<(string, string)>>(x => GetType(x))
+            .ToImmutableArray());
     }
 
-    private static ImmutableArray<(string Code, string ClassName)> GetType
+    private static ImmutableArray<Func<(string Code, string ClassName)>> GetType
     (
         GeneratorAttributeSyntaxContext context
     )
@@ -51,7 +49,7 @@ public class EitherBaseGenerator : IIncrementalGenerator
             .Value!
             .ToString());
 
-        return Enumerable.Range(0, count).Select(inx =>
+        return Enumerable.Range(0, count).Select<int, Func<(string, string)>>(inx => () =>
         {
             var length = inx + 2;
             var generic = Enumerable.Range(0, length).Select(x => $"T{x}").ToArray();

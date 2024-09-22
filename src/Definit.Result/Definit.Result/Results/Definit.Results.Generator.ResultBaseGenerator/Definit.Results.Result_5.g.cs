@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Definit.Results;
 
-public readonly partial struct Result<T0, T1, T2, T3, T4> : Result<T0, T1, T2, T3, T4>.Base
+public readonly struct Result<T0, T1, T2, T3, T4> : Result<T0, T1, T2, T3, T4>.Base
 {
     public interface Base : IResultBase<Either<T0, T1, T2, T3, T4, Err>>
     {
@@ -24,6 +24,7 @@ public readonly partial struct Result<T0, T1, T2, T3, T4> : Result<T0, T1, T2, T
 	Either<T0, T1, T2, T3, T4, Err> IResultBase<Either<T0, T1, T2, T3, T4, Err>>.Value => Either;
 	
 	public static implicit operator Result<T0, T1, T2, T3, T4>([DisallowNull] EitherMatchError _) => throw new EitherMatchException<Either<T0, T1, T2, T3, T4, Err>>();
+	
 	public static implicit operator Result<T0, T1, T2, T3, T4>(T0 value) => new (value);
 	public static implicit operator Result<T0, T1, T2, T3, T4>(T1 value) => new (value);
 	public static implicit operator Result<T0, T1, T2, T3, T4>(T2 value) => new (value);
@@ -53,6 +54,7 @@ public readonly partial struct Result<T0, T1, T2, T3, T4> : Result<T0, T1, T2, T
 		Either<T0, T1, T2, T3, T4, TE0> IResultBase<Either<T0, T1, T2, T3, T4, TE0>>.Value => Either;
 		
 		public static implicit operator Error<TE0>([DisallowNull] EitherMatchError _) => throw new EitherMatchException<Either<T0, T1, T2, T3, T4, TE0>>();
+		
 		public static implicit operator Error<TE0>(T0 value) => new (value);
 		public static implicit operator Error<TE0>(T1 value) => new (value);
 		public static implicit operator Error<TE0>(T2 value) => new (value);
@@ -91,6 +93,7 @@ public readonly partial struct Result<T0, T1, T2, T3, T4> : Result<T0, T1, T2, T
 		Either<T0, T1, T2, T3, T4, TE0, TE1> IResultBase<Either<T0, T1, T2, T3, T4, TE0, TE1>>.Value => Either;
 		
 		public static implicit operator Error<TE0, TE1>([DisallowNull] EitherMatchError _) => throw new EitherMatchException<Either<T0, T1, T2, T3, T4, TE0, TE1>>();
+		
 		public static implicit operator Error<TE0, TE1>(T0 value) => new (value);
 		public static implicit operator Error<TE0, TE1>(T1 value) => new (value);
 		public static implicit operator Error<TE0, TE1>(T2 value) => new (value);
@@ -138,6 +141,7 @@ public readonly partial struct Result<T0, T1, T2, T3, T4> : Result<T0, T1, T2, T
 		Either<T0, T1, T2, T3, T4, TE0, TE1, TE2> IResultBase<Either<T0, T1, T2, T3, T4, TE0, TE1, TE2>>.Value => Either;
 		
 		public static implicit operator Error<TE0, TE1, TE2>([DisallowNull] EitherMatchError _) => throw new EitherMatchException<Either<T0, T1, T2, T3, T4, TE0, TE1, TE2>>();
+		
 		public static implicit operator Error<TE0, TE1, TE2>(T0 value) => new (value);
 		public static implicit operator Error<TE0, TE1, TE2>(T1 value) => new (value);
 		public static implicit operator Error<TE0, TE1, TE2>(T2 value) => new (value);
@@ -194,6 +198,7 @@ public readonly partial struct Result<T0, T1, T2, T3, T4> : Result<T0, T1, T2, T
 		Either<T0, T1, T2, T3, T4, TE0, TE1, TE2, TE3> IResultBase<Either<T0, T1, T2, T3, T4, TE0, TE1, TE2, TE3>>.Value => Either;
 		
 		public static implicit operator Error<TE0, TE1, TE2, TE3>([DisallowNull] EitherMatchError _) => throw new EitherMatchException<Either<T0, T1, T2, T3, T4, TE0, TE1, TE2, TE3>>();
+		
 		public static implicit operator Error<TE0, TE1, TE2, TE3>(T0 value) => new (value);
 		public static implicit operator Error<TE0, TE1, TE2, TE3>(T1 value) => new (value);
 		public static implicit operator Error<TE0, TE1, TE2, TE3>(T2 value) => new (value);
@@ -259,6 +264,7 @@ public readonly partial struct Result<T0, T1, T2, T3, T4> : Result<T0, T1, T2, T
 		Either<T0, T1, T2, T3, T4, TE0, TE1, TE2, TE3, TE4> IResultBase<Either<T0, T1, T2, T3, T4, TE0, TE1, TE2, TE3, TE4>>.Value => Either;
 		
 		public static implicit operator Error<TE0, TE1, TE2, TE3, TE4>([DisallowNull] EitherMatchError _) => throw new EitherMatchException<Either<T0, T1, T2, T3, T4, TE0, TE1, TE2, TE3, TE4>>();
+		
 		public static implicit operator Error<TE0, TE1, TE2, TE3, TE4>(T0 value) => new (value);
 		public static implicit operator Error<TE0, TE1, TE2, TE3, TE4>(T1 value) => new (value);
 		public static implicit operator Error<TE0, TE1, TE2, TE3, TE4>(T2 value) => new (value);

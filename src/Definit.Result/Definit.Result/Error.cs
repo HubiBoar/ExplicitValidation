@@ -22,7 +22,7 @@ public interface IError<TSelf>
 public readonly record struct Error<T>(Either<T, Exception> Exception) : IError<Error<T>, T>
     where T : Exception;
 
-public readonly record struct Error(Exception Exception) : IError<Error>
+public readonly record struct Error(Exception Exception) : IError<Error>, IEitherBase
 {
     public static (bool Matches, Error Error) Matches(Exception exception) => (true, new Error(exception)); 
 }

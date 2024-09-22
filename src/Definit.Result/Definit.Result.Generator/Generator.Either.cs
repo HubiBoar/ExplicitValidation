@@ -20,7 +20,7 @@ public class EitherGenerator : IIncrementalGenerator
                 c is TypeDeclarationSyntax type
                 && type.Modifiers.Any(m => m.IsKind(SyntaxKind.PartialKeyword)),
 
-            transform: (n, _) => ((n.TargetNode as TypeDeclarationSyntax)!, (n.TargetSymbol as INamedTypeSymbol)!)
+            transform: (n, _) => (n.TargetSymbol as INamedTypeSymbol)!
         );
 
         var compilation = context.CompilationProvider.Combine(provider.Collect());
@@ -32,23 +32,20 @@ public class EitherGenerator : IIncrementalGenerator
     (
         SourceProductionContext context,
         Compilation compilation,
-        ImmutableArray<(TypeDeclarationSyntax Syntax, INamedTypeSymbol Symbol)> typeList
+        ImmutableArray<INamedTypeSymbol> typeList
     )
     {
-        foreach(var type in typeList.Select(x => GetType(x.Syntax, x.Symbol)))
-        {
-            var name = type.ClassName.Replace("<", "_").Replace(">", "").Replace(", ", "_").Replace(" ", "_").Replace(",", "_");
-            context.AddSource($"{name}.g.cs", type.Code);
-        }
-    }
+        SourceHelper.Run(context, () => typeList
+            .Select<INamedTypeSymbol, Func<(string, string)>>(x => () => GetType(x))
+            .ToImmutableArray());
+}
 
     private static (string Code, string ClassName) GetType
     (
-        TypeDeclarationSyntax syntax,
         INamedTypeSymbol symbol
     )
     {
-        var (code, typeInfo) = syntax.BuildTypeHierarchy
+        var (code, info) = symbol.BuildTypeHierarchy
         (
             name => $"readonly {name}",
             "Definit.Results",
@@ -61,9 +58,8 @@ public class EitherGenerator : IIncrementalGenerator
                 .StartsWith(EitherName)))
             .ContainingType;
 
-        var name = typeInfo.Name;
-        var fullName = typeInfo.FullName;
-        var constructorName = symbol.Name;
+        var name = info.Name;
+        var constructorName = info.ConstructorName;
 
         var genericArgs = interf.TypeArguments.Select(x => x.ToDisplayString()).ToArray();
 
@@ -89,7 +85,7 @@ public class EitherGenerator : IIncrementalGenerator
 
         """;
 
-        return (result, fullName);
+        return (result, name);
     }
 }
 

@@ -22,7 +22,7 @@ public class ResultGenerator : IIncrementalGenerator
                 c is TypeDeclarationSyntax type
                 && type.Modifiers.Any(m => m.IsKind(SyntaxKind.PartialKeyword)),
 
-            transform: (n, _) => ((n.TargetNode as TypeDeclarationSyntax)!, (n.TargetSymbol as ITypeSymbol)!)
+            transform: (n, _) =>((n.TargetSymbol as INamedTypeSymbol)!)
         );
 
         var compilation = context.CompilationProvider.Combine(provider.Collect());
@@ -34,29 +34,27 @@ public class ResultGenerator : IIncrementalGenerator
     (
         SourceProductionContext context,
         Compilation compilation,
-        ImmutableArray<(TypeDeclarationSyntax Syntax, ITypeSymbol Symbol)> typeList
+        ImmutableArray<INamedTypeSymbol> typeList
     )
     {
-        foreach(var type in typeList.Select(x => GetType(x.Syntax, x.Symbol)))
-        {
-            var name = type.ClassName.Replace("<", "_").Replace(">", "").Replace(", ", "_").Replace(" ", "_").Replace(",", "_");
-            context.AddSource($"{name}.g.cs", type.Code);
-        }
+        SourceHelper.Run(context, () => typeList
+            .Select<INamedTypeSymbol, Func<(string, string)>>(x => () => GetType(x))
+            .ToImmutableArray());
     }
 
     private static (string Code, string ClassName) GetType
     (
-        TypeDeclarationSyntax syntax,
-        ITypeSymbol symbol
+        INamedTypeSymbol type
     )
     {
-        var (code, typeInfo) = syntax.BuildTypeHierarchy
+        var (code, info) = type.BuildTypeHierarchy
         (
             name => $"readonly {name}",
             "Definit.Results",
             "System.Diagnostics.CodeAnalysis"
         );
-        var interf = symbol.AllInterfaces
+
+        var interf = type.AllInterfaces
             .Single(x => x
                 .ToDisplayString()
                 .StartsWith(ResultName));
@@ -65,15 +63,21 @@ public class ResultGenerator : IIncrementalGenerator
 
         var genericArgs = eitherType!.TypeArguments.Select(x => x.ToDisplayString()).ToArray();
 
-        var name = typeInfo.Name;
-        var fullName = typeInfo.FullName;
-        var constructorName = symbol.Name;
+        var name = info.Name;
+        var constructorName = info.ConstructorName;
 
-        var (interior, _) = ResultBaseGenerator.ResultInterior(genericArgs, constructorName, name);
+        var interior = ResultBaseGenerator.ResultInterior
+        (
+            genericArgs,
+            eitherType.ToDisplayString(),
+            constructorName, 
+            name,
+            false
+        );
 
         code.AddBlock(interior);
 
-        return (code.ToString(), fullName);
+        return (code.ToString(), name);
     }
 }
 

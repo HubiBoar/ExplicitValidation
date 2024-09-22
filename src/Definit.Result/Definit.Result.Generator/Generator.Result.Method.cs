@@ -45,24 +45,20 @@ public class MethodGenerator : IIncrementalGenerator
         ImmutableArray<GeneratorSyntaxContext> syntaxes
     )
     {
-        var types = syntaxes
-            .Select(x => Transform(compilation, x))
-            .Where(x => x is not null)
-            .Select(x => x!.Value)
-            .GroupBy(x => x.Type)
-            .Select(x => new TypeInfo(x.Key, x.Select(v => v.Method).ToImmutableArray()))
-            .ToArray();
-
-        foreach(var type in types.Select(x => GetType(x)))
-        {
-            var name = type.ClassName.Replace("<", "_").Replace(">", "").Replace(", ", "_").Replace(" ", "_").Replace(",", "_");
-            context.AddSource($"{name}.g.cs", type.Code);
-        }
+        SourceHelper.Run(context, () => 
+            syntaxes
+                .Select(x => Transform(compilation, x))
+                .Where(x => x is not null)
+                .Select(x => x!.Value)
+                .GroupBy(x => x.Type)
+                .Select(x => new TypeInfo(x.Key, x.Select(v => v.Method).ToImmutableArray()))
+                .Select<TypeInfo, Func<(string, string)>>(x => () => GetType(x))
+                .ToImmutableArray());
     }
 
     private static (string Code, string ClassName) GetType(TypeInfo type)
     {
-        var (code, typeInfo) = type.Parent.BuildTypeHierarchy
+        var (code, info) = type.Parent.BuildTypeHierarchy
         (
             name => name,
             "Definit.Results",
@@ -109,7 +105,7 @@ public class MethodGenerator : IIncrementalGenerator
 
         code.AddBlock(builder.ToString());
 
-        return (code.ToString(), typeInfo.Symbol.ToDisplayString());
+        return (code.ToString(), info.Name);
     }
 
     private static readonly (string Attribute, string Keyword)[] Attributes = 

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using Definit.Utils.SourceGenerator;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Definit.Validation.Generator;
@@ -8,45 +9,75 @@ namespace Definit.Validation.Generator;
 [Generator]
 public class ValueGenerator : IIncrementalGenerator
 {
+    private const string Attribute = "Definit.Validation.IsValidAttribute`1";
+    private const string AttributeName = "Definit.Validation.IsValidAttribute<";
+    private const string IsValidName = "Definit.Validation.IIsValid";
+
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        Helper.RunIsValidValue(context, (s, c, v) => Execute(s, c, v));
+        var provider = context.SyntaxProvider.ForAttributeWithMetadataName
+        (
+            Attribute,
+            predicate: (c, _) =>
+                c is TypeDeclarationSyntax type
+                && type.Modifiers.Any(m => m.IsKind(SyntaxKind.PartialKeyword)),
+
+            transform: (n, _) => (n.TargetSymbol as INamedTypeSymbol, n
+                .Attributes
+                .Single(x =>
+                    x.AttributeClass is not null 
+                    && x.AttributeClass
+                    .ToDisplayString()
+                    .StartsWith(AttributeName))
+                .AttributeClass!
+                .TypeArguments.Single() as INamedTypeSymbol)
+        );
+
+        var compilation = context.CompilationProvider.Combine(provider.Collect());
+        context.RegisterSourceOutput(compilation, (spc, source) => Execute(spc, source.Left, source.Right!)); 
     }
 
     private static void Execute
     (
         SourceProductionContext context,
         Compilation compilation,
-        ImmutableArray<Helper.Value> typeList
+        ImmutableArray<(INamedTypeSymbol Type, INamedTypeSymbol GenericType)> typeList
     )
     {
-        foreach(var type in typeList.Select(x => GetType(x.Type, x.GenericType)))
-        {
-            context.AddSource($"{type.ClassName}.g.cs", type.Code);
-        }
+        SourceHelper.Run
+        (
+            context,
+            () => typeList
+                .Select<(INamedTypeSymbol Type, INamedTypeSymbol GenericType), Func<(string, string)>>
+                (
+                    x => () => GetType(x.Type, x.GenericType)
+                )
+                .ToImmutableArray()
+        );
     }
 
     private static (string Code, string ClassName) GetType
     (
-        TypeDeclarationSyntax type,
+        INamedTypeSymbol type,
         INamedTypeSymbol genericTypeSymbol
     )
     {
-        var (code, typeInfo) = type.BuildTypeHierarchy
+        var (code, info) = type.BuildTypeHierarchy
         (
-            name => $"readonly {name}: {Helper.GenerateValidValueName(genericTypeSymbol)}",
+            name => $"readonly {name}: {IsValidName}<{genericTypeSymbol.ToDisplayString()}>",
             "Definit.Results",
             "Definit.Validation"
         );
 
-        var name = typeInfo.Name;
-        var fullName = typeInfo.FullName;
+        var constructorName = info.ConstructorName;
+        var name = info.Name;
+        var minimalName = info.MinimalName;
         var valueType = genericTypeSymbol.ToDisplayString();
 
         code.AddBlock($$"""
         private readonly static Rule<{{valueType}}> _rule;
 
-        static {{name}}()
+        static {{constructorName}}()
         {
             _rule = new();
             Rule(_rule);
@@ -54,14 +85,14 @@ public class ValueGenerator : IIncrementalGenerator
 
         public {{valueType}} Value { get; }
 
-        public {{name}}({{valueType}} value)
+        public {{constructorName}}({{valueType}} value)
         {
             Value = value;
         }
 
-        public static implicit operator {{fullName}}({{valueType}} value) => new (value);
+        public static implicit operator {{name}}({{valueType}} value) => new (value);
 
-        public static implicit operator {{valueType}}({{fullName}} value) => value.Value;
+        public static implicit operator {{valueType}}({{name}} value) => value.Value;
 
         public Result Validate() => _rule.Validate(Value);
 
@@ -69,14 +100,14 @@ public class ValueGenerator : IIncrementalGenerator
 
         public readonly struct Valid
         {
-            public {{fullName}} Value { get; }
+            public {{name}} Value { get; }
 
-            private Valid({{fullName}} value)
+            private Valid({{name}} value)
             {
                 Value = value;
             }
 
-            public static Result<Valid> Create({{fullName}} value)
+            public static Result<Valid> Create({{name}} value)
             {
                 if(value.Validate().Is(out Error error))
                 {
@@ -88,7 +119,7 @@ public class ValueGenerator : IIncrementalGenerator
         }
         """);
 
-        return (code.ToString(), typeInfo.FullName);
+        return (code.ToString(), name);
     }
 }
 

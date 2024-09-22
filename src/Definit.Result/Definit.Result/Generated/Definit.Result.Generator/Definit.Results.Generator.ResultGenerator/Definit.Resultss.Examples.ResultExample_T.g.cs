@@ -3,18 +3,19 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Definit.Resultss.Examples;
 
-readonly partial struct ResultExample<T> where T : notnull
+readonly partial struct ResultExample<T>
 {
-	private Either<T, Definit.Resultss.Examples.NotFound> Either { get; }
+	private Definit.Results.Either<T, Definit.Resultss.Examples.NotFound> Either { get; }
 	
 	[Obsolete(DefaultConstructorException.Attribute, true)]
 	public ResultExample() => throw new DefaultConstructorException();
 	
-	public ResultExample(Either<T, Definit.Resultss.Examples.NotFound> value) => Either = value;
+	public ResultExample(Definit.Results.Either<T, Definit.Resultss.Examples.NotFound> value) => Either = value;
 	
-	Either<T, Definit.Resultss.Examples.NotFound> IResultBase<Either<T, Definit.Resultss.Examples.NotFound>>.Value => Either;
+	Definit.Results.Either<T, Definit.Resultss.Examples.NotFound> IResultBase<Definit.Results.Either<T, Definit.Resultss.Examples.NotFound>>.Value => Either;
 	
-	public static implicit operator ResultExample<T>([DisallowNull] EitherMatchError _) => throw new EitherMatchException<Either<T, Definit.Resultss.Examples.NotFound>>();
-	public static implicit operator ResultExample<T>(T value) => new (value);
-	public static implicit operator ResultExample<T>(Definit.Resultss.Examples.NotFound value) => new (value);
+	public static implicit operator Definit.Resultss.Examples.ResultExample<T>([DisallowNull] EitherMatchError _) => throw new EitherMatchException<Definit.Results.Either<T, Definit.Resultss.Examples.NotFound>>();
+	
+	public static implicit operator Definit.Resultss.Examples.ResultExample<T>(T value) => new (value);
+	public static implicit operator Definit.Resultss.Examples.ResultExample<T>(Definit.Resultss.Examples.NotFound value) => new (value);
 }

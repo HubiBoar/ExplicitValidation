@@ -107,9 +107,10 @@ public class ValueGenerator : IIncrementalGenerator
                 Value = value;
             }
 
-            public static Result<Valid> Create({{name}} value)
+            public static Either<Valid, ValidationError?> Create({{name}} value)
             {
-                if(value.Validate().Is(out Error error))
+                var error = value.Validate();
+                if(error is not null)
                 {
                     return error;
                 }

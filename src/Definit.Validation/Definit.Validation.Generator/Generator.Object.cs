@@ -93,7 +93,7 @@ public class ObjectGenerator : IIncrementalGenerator
                 {{constructorAssignment}}
             }
 
-            public static Result<Valid> Create({{name}} value)
+            public static Either<Valid, Error> Create({{name}} value)
             {
                 List<(string Error, string PropertyName)> errors = [];
                 

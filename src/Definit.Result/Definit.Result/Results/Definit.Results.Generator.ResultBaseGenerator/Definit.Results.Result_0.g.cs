@@ -1,5 +1,4 @@
 ﻿using Err = Definit.Results.Error;
-using Success = Definit.Results.Success;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Definit.Results;

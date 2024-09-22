@@ -78,7 +78,6 @@ public class ResultBaseGenerator : IIncrementalGenerator
 
             var code = $$"""
             using Err = {{ErrorType}};
-            using Success = {{SuccessType}};
             using System.Diagnostics.CodeAnalysis;
 
             namespace Definit.Results;
@@ -125,7 +124,6 @@ public class ResultBaseGenerator : IIncrementalGenerator
 
         var code = $$"""
         using Err = {{ErrorType}};
-        using Success = {{SuccessType}};
         using System.Diagnostics.CodeAnalysis;
 
         namespace Definit.Results;

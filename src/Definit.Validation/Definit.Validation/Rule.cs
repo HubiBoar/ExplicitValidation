@@ -1,36 +1,29 @@
-using Definit.Results;
+using System.Collections.Immutable;
 
 namespace Definit.Validation;
 
 public sealed record Rule<TValue>()
 {
-    private readonly List<Func<TValue, Result>> _rules = [];
+    private readonly List<Func<TValue, (string Rule, string Message)?>> _rules = [];
 
-    public Result Validate(TValue value)
+    public ValidationErrors.Property? Validate(TValue value)
     {
-        List<string> errors = [];
+        List<(string Rule, string Message)> errors = [];
         foreach(var rule in _rules)
         {
-            if(rule(value).Is(out Error error))
+            var error = rule(value);
+            if(error is not null)
             {
-                errors.Add(error.Message);
+                errors.Add((error.Value.Rule, error.Value.Message));
             }
         }
 
         if(errors.Count > 0)
         {
-            return new Error(string.Join("; ", errors));
+            return new (errors.ToImmutableArray());
         }
 
-        return Result.Success;
-    }
-}
-
-public static class Rule
-{
-    public static Rule<TValue> Get<TValue>()
-    {
-        return new Rule<TValue>();
+        return null;
     }
 }
 

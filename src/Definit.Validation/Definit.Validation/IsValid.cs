@@ -1,4 +1,4 @@
-using Definit.Results;
+using System.Collections.Immutable;
 
 namespace Definit.Validation;
 
@@ -23,7 +23,7 @@ public sealed class IsValidAttribute<T> : Attribute
 
 public interface IIsValid
 {
-    Result Validate();
+    ValidationErrors? Validate();
 }
 
 public interface IIsValid<TValue> : IIsValid
@@ -32,3 +32,23 @@ public interface IIsValid<TValue> : IIsValid
 
     abstract static void Rule(Rule<TValue> rule);
 }
+
+public readonly record struct ValidationErrors
+(
+    ImmutableArray<(string Property, ValidationErrors.Property Errors)> Errors
+)
+{
+    public readonly record struct Property
+    (
+        ImmutableArray<(string Rule, string Message)> Errors
+    ); 
+}
+
+public static class Rule
+{
+    public static Rule<TValue> Get<TValue>()
+    {
+        return new Rule<TValue>();
+    }
+}
+

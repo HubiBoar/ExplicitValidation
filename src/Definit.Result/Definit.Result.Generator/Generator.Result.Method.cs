@@ -50,8 +50,8 @@ public class MethodGenerator : IIncrementalGenerator
                 .Select(x => Transform(compilation, x))
                 .Where(x => x is not null)
                 .Select(x => x!.Value)
-                .GroupBy(x => x.Type)
-                .Select(x => new TypeInfo(x.Key, x.Select(v => v.Method).ToImmutableArray()))
+                .GroupBy(x => x.Type, SymbolEqualityComparer.Default)
+                .Select(x => new TypeInfo((x.Key as INamedTypeSymbol)!, x.Select(v => v.Method).ToImmutableArray()))
                 .Select<TypeInfo, Func<(string, string)>>(x => () => GetType(x))
                 .ToImmutableArray());
     }
@@ -74,8 +74,8 @@ public class MethodGenerator : IIncrementalGenerator
             var returnEither = returnType.Type.AllInterfaces.Single(x => x.ToDisplayString().StartsWith(ResultType)).TypeArguments.Single().ToDisplayString();
             var returnResult = returnType.Type.ToDisplayString();
 
-            var decStatic = method.Symbol.IsStatic ? " static": "";
-            var decAsync = isAsync ? " async" : ""; 
+            var decStatic = method.Symbol.IsStatic ? " static": string.Empty;
+            var decAsync = isAsync ? " async" : string.Empty; 
             var decReturn = isAsync ? $"{TaskType}{returnEither}>" : returnEither;
             var decName = method.Symbol.Name.Remove(0, 1);
 
@@ -84,7 +84,7 @@ public class MethodGenerator : IIncrementalGenerator
             var decParameters = string.Join(", ", method.Symbol.Parameters.Select(x => x.ToDisplayString()));
             var declaration = $"{method.Keyword}{decStatic}{decAsync} {decReturn} {decName}{decGeneric}({decParameters})";
 
-            var awaitCall = isAsync ? "await " : "";
+            var awaitCall = isAsync ? "await " : string.Empty;
             var parametersCall = method.Symbol.GetCallingParameters();
             var methodCall = $"{awaitCall}{method.Symbol.Name}({parametersCall})";
 
@@ -174,7 +174,7 @@ public class MethodGenerator : IIncrementalGenerator
 
     private static (INamedTypeSymbol Type, bool IsTask)? GetResultType(IMethodSymbol symbol)
     {
-        if(symbol.ReturnType is INamedTypeSymbol returnType is false)
+        if((symbol.ReturnType is INamedTypeSymbol returnType) == false)
         {
             return null;
         }
@@ -184,12 +184,12 @@ public class MethodGenerator : IIncrementalGenerator
             return (returnType, false);
         }
         
-        if(returnType.ToDisplayString().StartsWith(TaskType) is false)
+        if(returnType.ToDisplayString().StartsWith(TaskType) == false)
         {
             return null;
         }
 
-        if(returnType.TypeArguments.First() is INamedTypeSymbol genericReturn is false)
+        if((returnType.TypeArguments.First() is INamedTypeSymbol genericReturn) == false)
         {
             return null;
         }

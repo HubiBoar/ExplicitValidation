@@ -63,7 +63,8 @@ public class ObjectGenerator : IIncrementalGenerator
             .GetMembers()
             .OfType<IPropertySymbol>()
             .Where(x => IsValid(x.Type))
-            .Select(x => (Name: x.Name, Type: x.Type.ToDisplayString()));
+            .Select(x => (Name: x.Name, Type: x.Type.ToDisplayString()))
+            .ToImmutableArray();
 
         var propertiesDeclarations = string.Join("\n\t", properties
             .Select(x => $$"""public {{x.Type}}.Valid {{x.Name}} { get; }"""));
@@ -71,15 +72,9 @@ public class ObjectGenerator : IIncrementalGenerator
         var constructorParams = string.Join(", ", properties.Select(x => $"{x.Type}.Valid {x.Name}"));
         var constructorAssignment = string.Join("\n\t\t", properties.Select(x => $"this.{x.Name} = {x.Name};"));
 
-        var validation = string.Join("\n\n", properties.Select(x => $$"""
-                var (valid_{{x.Name}}, error_{{x.Name}}) = value.{{x.Name}}.IsValid({{x.Name}});
+        var validation = CreateValidation(name, properties.Select(x => x.Name).ToImmutableArray());
 
-                if(error_{{x.Name}} is not null)
-                {
-                    errors.Add(error_{{x.Name}}.Value);
-                }
-        """));
-
+        var validAssignment = string.Join(", ", properties.Select(x => $"{x.Type} valid_{x.Name} = default!;"));
         var validCreation = string.Join(", ", properties.Select(x => $"valid_{x.Name}.Value!")).TrimEnd(',');
 
         code.AddBlock($$"""
@@ -103,14 +98,9 @@ public class ObjectGenerator : IIncrementalGenerator
             {
                 var name = propertyName is null ? "{{name}}" : propertyName; 
 
-                var errors = new ImmutableArray<ValidationError>();
-                
-        {{validation}}
+        {{validAssignment}}
 
-                if(errors.Length > 0)
-                {
-                    return new ValidationError(name, errors);
-                }
+        {{validation}}
 
                 return new Valid(value, {{validCreation}});
             }
@@ -141,6 +131,38 @@ public class ObjectGenerator : IIncrementalGenerator
             type
             .AllInterfaces
             .Any(x => x.ToDisplayString() == IsValidName);
+    }
+
+    private static string CreateValidation(string name, ImmutableArray<string> properties)
+    {
+        return Interior(name, properties.ToList(), [])!;
+
+        static string? Interior(string name, List<string> restOfProperties, string[] previousErrors)
+        {
+            if(restOfProperties.Count == 0)
+            {
+                return null;
+            }
+
+            var property = restOfProperties[0];
+            restOfProperties.RemoveAt(0);
+
+            var nextErrors = previousErrors.Concat([property]).ToArray();
+
+            var nextInterior = Interior(name, restOfProperties, nextErrors);
+
+            var errors = string.Join(", ", nextErrors);
+            var next = nextInterior is null ? string.Empty : string.Join("\n\t", nextInterior.Split('\n'));
+
+            return $$"""
+                (valid_{{property}}, var error_{{property}}) = value.{{property}}.IsValid({{property}});
+
+                if(error_{{property}} is not null)
+                {
+                    {{next}}return new ValidationError({{name}}, [{{errors}}]);
+                }
+            """;
+        }
     }
 }
 

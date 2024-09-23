@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 
 namespace Definit.Utils.SourceGenerator;
@@ -88,7 +89,7 @@ public static class GeneratorExtensions
         var parameters = 
             typeArguments
             .OfType<ITypeParameterSymbol>()
-            .Where(x => x.ConstraintTypes.Length > 0)
+            .Where(HasConstraints)
             .ToArray();
 
         if(parameters.Length == 0)
@@ -96,13 +97,54 @@ public static class GeneratorExtensions
             return string.Empty;
         }
 
-        return
-            "\n\t" + string
-                .Join("\n\t", parameters
-                    .Select(x => "where " + x.ToDisplayString() + " : " + string
-                        .Join(", ", x
-                            .ConstraintTypes
-                            .Select(y => y
-                                .ToDisplayString()))));
+        return "\n\t" + string.Join("\n\t", parameters.Select(ConstraintsToString)); 
     }
+
+    public static string ConstraintsToString(this ITypeParameterSymbol symbol) 
+    {
+        List<string> builder = new ();
+
+        if(symbol.HasValueTypeConstraint)
+        {
+            builder.Add("struct");
+        }
+
+        if(symbol.HasNotNullConstraint)
+        {
+            builder.Add("notnull");
+        }
+
+        if(symbol.HasReferenceTypeConstraint)
+        {
+            builder.Add("class");
+        }
+
+        if(symbol.HasUnmanagedTypeConstraint)
+        {
+            builder.Add("unmanaged");
+        }
+
+        foreach(var type in symbol.ConstraintTypes)
+        {
+            builder.Add($"{type.ToDisplayString()}");
+        }
+
+        if(symbol.HasConstructorConstraint)
+        {
+            builder.Add("new()");
+        }
+
+        var constraints = string.Join(", ", builder);
+        var name = symbol.ToDisplayString();
+
+        return $"where {name} : {constraints}";
+    }
+
+    public static bool HasConstraints(this ITypeParameterSymbol symbol) =>  
+        symbol.ConstraintTypes.Length > 0
+        || symbol.HasValueTypeConstraint
+        || symbol.HasNotNullConstraint
+        || symbol.HasReferenceTypeConstraint
+        || symbol.HasUnmanagedTypeConstraint
+        || symbol.HasConstructorConstraint;
 }

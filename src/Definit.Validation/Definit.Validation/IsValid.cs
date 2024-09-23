@@ -107,21 +107,14 @@ public static class Exx
         {
             var name = propertyName is null ? "Class" : propertyName; 
 
-            var errors = new ImmutableArray<ValidationError>();
-
             if(Value1.Validate("Value1").IsError(out var error0))
             {
-                errors.Add(error0.Value);
-            }
-
-            if(Value2.Validate("Value2").IsError(out var error1))
-            {
-                errors.Add(error1.Value);
-            }
-            
-            if(errors.Length > 0)
-            {
-                return new ValidationError(name, errors);
+                if(Value2.Validate("Value2").IsError(out var error1))
+                {
+                    return new ValidationError(name, [error0.Value, error1.Value]);
+                }
+                
+                return new ValidationError(name, [error0.Value]);
             }
 
             return null;

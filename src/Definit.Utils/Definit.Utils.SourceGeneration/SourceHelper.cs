@@ -34,10 +34,9 @@ public sealed class TypeInfo
             _                        => "struct"
         };
 
-        var generics = string.Join(", ", Symbol.TypeArguments.Select(x => x.ToDisplayString()));
+        var generics = string.Join(", ", symbol.TypeArguments.Select(x => x.ToDisplayString()));
         generics = string.IsNullOrEmpty(generics) ? string.Empty : $"<{generics}>";
-        var constraints = Symbol.TypeArguments.GetGenericConstraints();
-        constraints = string.IsNullOrEmpty(constraints) ? string.Empty : $"\n\t{constraints}";
+        var constraints = symbol.TypeArguments.GetGenericConstraints();
 
         TypeName = $"partial {type} {Symbol.Name}{generics}{constraints}";
         
@@ -77,7 +76,7 @@ public static class SourceHelper
                 }
                 catch (Exception ex)
                 {
-                    var code = string.Join("\n\t // ", ex.ToString().Split('\n'));
+                    var code = "// \t" +string.Join("\n\t // ", ex.ToString().Split('\n'));
 
                     context.AddSource($"EXCEPTION.{index}.g.cs", code);
                 }
@@ -87,7 +86,7 @@ public static class SourceHelper
         }
         catch (Exception ex)
         {
-            var code = string.Join("\n\t // ", ex.ToString().Split('\n'));
+            var code = "// \t" + string.Join("\n\t // ", ex.ToString().Split('\n'));
 
             context.AddSource($"EXCEPTION_TOP.g.cs", code);
         }

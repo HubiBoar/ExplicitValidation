@@ -11,6 +11,8 @@ public sealed class SourceBuilder
     {
         _code = new();
 
+        _code.AppendLine($"#nullable enable");
+        _code.AppendLine();
         foreach(var u in usings)
         {
             _code.AppendLine($"using {u};");

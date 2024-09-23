@@ -1,4 +1,6 @@
-﻿using Definit.Results;
+﻿#nullable enable
+
+using Definit.Results;
 using Definit.Validation;
 
 namespace Definit.Validation;
@@ -28,9 +30,9 @@ partial class Example
 			
 			public static implicit operator string(Definit.Validation.Example.Parent1.Value1 value) => value.Value;
 			
-			public Result Validate() => _rule.Validate(Value);
+			public ValidationError? Validate(string? propertyName = null) => _rule.Validate(Value, propertyName);
 			
-			public Result<Valid> IsValid() => Valid.Create(this);
+			public Either<Valid, ValidationError> IsValid(string? propertyName = null) => Valid.Create(this, propertyName);
 			
 			public readonly struct Valid
 			{
@@ -41,9 +43,10 @@ partial class Example
 			        Value = value;
 			    }
 			
-			    public static Result<Valid> Create(Definit.Validation.Example.Parent1.Value1 value)
+			    public static Either<Valid, ValidationError> Create(Definit.Validation.Example.Parent1.Value1 value, string? propertyName = null)
 			    {
-			        if(value.Validate().Is(out Error error))
+			        var error = value.Validate(propertyName);
+			        if(error is not null)
 			        {
 			            return error;
 			        }

@@ -1,4 +1,6 @@
-﻿using Definit.Results;
+﻿#nullable enable
+
+using Definit.Results;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Definit.Resultss.Examples;
@@ -43,7 +45,7 @@ partial class Examples
 	}
 	
 	public static async System.Threading.Tasks.Task<Definit.Results.Either<T, Definit.Resultss.Examples.NotFound>> PublicRun<T>(T t)
-		where T : Definit.Results.IError<T>
+		where T : struct, Definit.Results.IError<T>, Definit.Results.IError
 	{
 	    try
 	    {

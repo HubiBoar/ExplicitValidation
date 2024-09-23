@@ -1,4 +1,7 @@
-﻿using Definit.Results;
+﻿#nullable enable
+
+using System.Collections.Immutable;
+using Definit.Results;
 using Definit.Validation;
 
 namespace Definit.Validation;
@@ -23,21 +26,20 @@ partial class Example
 		        this.EmailProp = EmailProp;
 		    }
 		
-		    public static Result<Valid> Create(Definit.Validation.Example.Address value)
+		    public static Either<Valid, ValidationError> Create(Definit.Validation.Example.Address value, string? propertyName = null)
 		    {
-		        List<(string Error, string PropertyName)> errors = [];
-		        
-		        if(value.EmailProp.IsValid().Is(out Error error_EmailProp).Else(out var valid_EmailProp))
-		        {
-		            errors.Add((error_EmailProp.Message, "EmailProp"));
-		        }
+		        var name = propertyName is null ? "Definit.Validation.Example.Address" : propertyName; 
 		
-		        if(errors.Count > 0)
-		        {
-		            return new Error(string.Join(" :: ", errors.Select(x => $"{x.PropertyName} => {x.Error}")));
-		        }
+		Definit.Validation.Example.Email valid_EmailProp = default!;
 		
-		        return new Valid(value, valid_EmailProp);
+		    (valid_EmailProp, var error_EmailProp) = value.EmailProp.IsValid(EmailProp);
+		
+		    if(error_EmailProp is not null)
+		    {
+		        return new ValidationError(Definit.Validation.Example.Address, [EmailProp]);
+		    }
+		
+		        return new Valid(value, valid_EmailProp.Value!);
 		    }
 		
 		    public static implicit operator Definit.Validation.Example.Address(Valid value) => value.Value;

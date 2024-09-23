@@ -1,9 +1,12 @@
-﻿using Definit.Results;
+﻿#nullable enable
+
+using Definit.Results;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Definit.Resultss.Examples;
 
 readonly partial struct EitherExample2<T>
+	where T : notnull
 {
 	public (Or<T>?, Or<string>?, Or<int>?) Value { get; }
 	
@@ -29,6 +32,7 @@ public static partial class EitherExample2__Auto__Extensions
 		out Or<string>? string_arg,
 		out Or<int>? int_arg
 	)
+		where T : notnull
 	{
 	    (T_arg, string_arg, int_arg) = result.Value;
 	}
@@ -40,6 +44,7 @@ public static partial class EitherExample2__Auto__Extensions
 		out Or<string>? string_arg,
 		out Or<int>? int_arg
 	)
+		where T : notnull
 	{
 	    if(result is null)
 	    {

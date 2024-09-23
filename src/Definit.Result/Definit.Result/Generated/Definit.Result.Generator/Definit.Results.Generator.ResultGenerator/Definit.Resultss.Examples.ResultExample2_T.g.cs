@@ -1,9 +1,12 @@
-﻿using Definit.Results;
+﻿#nullable enable
+
+using Definit.Results;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Definit.Resultss.Examples;
 
 readonly partial struct ResultExample2<T>
+	where T : notnull
 {
 	private Definit.Results.Either<T, string, Definit.Resultss.Examples.NotFound> Either { get; }
 	

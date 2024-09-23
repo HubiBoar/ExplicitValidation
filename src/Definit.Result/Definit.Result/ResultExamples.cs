@@ -22,8 +22,7 @@ public partial struct ResultExample2<T> : Result<T, string>.Error<NotFound>.Base
 public partial struct EitherExample2<T> : Either<T, string, int>.Base
     where T : notnull;
 
-public readonly record struct NotFound(Either<KeyNotFoundException, Exception> Exception)
-    : IError<NotFound, KeyNotFoundException>;
+public readonly record struct NotFound(Error Error) : IError<NotFound, KeyNotFoundException>;
 
 public partial class Examples
 {
@@ -86,7 +85,7 @@ public partial class Examples
 
     [GenerateResult.Method.Public]
     private static Task<Result<T>.Error<NotFound>> _PublicRun<T>(T t)
-        where T : IError<T>
+        where T : struct, IError<T>, IError
     {
         return Task.FromResult<Result<T>.Error<NotFound>>(t);
     }

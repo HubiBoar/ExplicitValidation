@@ -1,4 +1,7 @@
-﻿using Definit.Results;
+﻿#nullable enable
+
+using System.Collections.Immutable;
+using Definit.Results;
 using Definit.Validation;
 
 namespace Definit.Validation;
@@ -25,26 +28,25 @@ partial class Example
 				this.Address = Address;
 		    }
 		
-		    public static Result<Valid> Create(Definit.Validation.Example.UserData value)
+		    public static Either<Valid, ValidationError> Create(Definit.Validation.Example.UserData value, string? propertyName = null)
 		    {
-		        List<(string Error, string PropertyName)> errors = [];
-		        
-		        if(value.Email.IsValid().Is(out Error error_Email).Else(out var valid_Email))
-		        {
-		            errors.Add((error_Email.Message, "Email"));
-		        }
+		        var name = propertyName is null ? "Definit.Validation.Example.UserData" : propertyName; 
 		
-		        if(value.Address.IsValid().Is(out Error error_Address).Else(out var valid_Address))
-		        {
-		            errors.Add((error_Address.Message, "Address"));
-		        }
+		Definit.Validation.Example.Email valid_Email = default!;, Definit.Validation.Example.Address valid_Address = default!;
 		
-		        if(errors.Count > 0)
-		        {
-		            return new Error(string.Join(" :: ", errors.Select(x => $"{x.PropertyName} => {x.Error}")));
-		        }
+		    (valid_Email, var error_Email) = value.Email.IsValid(Email);
 		
-		        return new Valid(value, valid_Email, valid_Address);
+		    if(error_Email is not null)
+		    {
+		            (valid_Address, var error_Address) = value.Address.IsValid(Address);
+			
+			    if(error_Address is not null)
+			    {
+			        return new ValidationError(Definit.Validation.Example.UserData, [Email, Address]);
+			    }return new ValidationError(Definit.Validation.Example.UserData, [Email]);
+		    }
+		
+		        return new Valid(value, valid_Email.Value!, valid_Address.Value!);
 		    }
 		
 		    public static implicit operator Definit.Validation.Example.UserData(Valid value) => value.Value;

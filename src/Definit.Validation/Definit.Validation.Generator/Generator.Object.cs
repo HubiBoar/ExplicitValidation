@@ -58,6 +58,7 @@ public class ObjectGenerator : IIncrementalGenerator
         );
 
         var name = info.Name;
+        var constructorName = info.ConstructorName;
 
         var properties = type
             .GetMembers()
@@ -72,15 +73,23 @@ public class ObjectGenerator : IIncrementalGenerator
         var constructorParams = string.Join(", ", properties.Select(x => $"{x.Type}.Valid {x.Name}"));
         var constructorAssignment = string.Join("\n\t\t", properties.Select(x => $"this.{x.Name} = {x.Name};"));
 
-        var validation = CreateValidation(name, properties.Select(x => x.Name).ToImmutableArray());
+        var validation = CreateValidation(properties.Select(x => x.Name).ToImmutableArray());
 
-        var validAssignment = string.Join(", ", properties.Select(x => $"{x.Type} valid_{x.Name} = default!;"));
-        var validCreation = string.Join(", ", properties.Select(x => $"valid_{x.Name}.Value!")).TrimEnd(',');
+        var validAssignment = string.Join(" ", properties.Select(x => $"{x.Type} valid_{x.Name} = default!;"));
+        var validCreation = string.Join(", ", properties.Select(x => $"valid_{x.Name}.Value!.NotNull()")).TrimEnd(',');
 
         code.AddBlock($$"""
-        public Result Validate() => IsValid();
+        public ValidationError? Validate(string? propertyName = null)
+        {
+            if(IsValid(propertyName).IsError(out var error))
+            {
+                return error;
+            }
 
-        public Result<Valid> IsValid() => Valid.Create(this);
+            return null;
+        }
+
+        public Either<Valid, ValidationError> IsValid(string? propertyName = null) => Valid.Create(this, propertyName);
 
         public readonly struct Valid
         {
@@ -96,9 +105,9 @@ public class ObjectGenerator : IIncrementalGenerator
 
             public static Either<Valid, ValidationError> Create({{name}} value, string? propertyName = null)
             {
-                var name = propertyName is null ? "{{name}}" : propertyName; 
+                var name = propertyName is null ? "{{constructorName}}" : propertyName; 
 
-        {{validAssignment}}
+                {{validAssignment}}
 
         {{validation}}
 
@@ -133,34 +142,30 @@ public class ObjectGenerator : IIncrementalGenerator
             .Any(x => x.ToDisplayString() == IsValidName);
     }
 
-    private static string CreateValidation(string name, ImmutableArray<string> properties)
+    private static string CreateValidation(ImmutableArray<string> properties)
     {
-        return Interior(name, properties.ToList(), [])!;
+        var validation = string.Join("\n", properties.Select(Interior));
+        
+        return $$"""
+                List<ValidationError> errors = [];
 
-        static string? Interior(string name, List<string> restOfProperties, string[] previousErrors)
-        {
-            if(restOfProperties.Count == 0)
-            {
-                return null;
-            }
-
-            var property = restOfProperties[0];
-            restOfProperties.RemoveAt(0);
-
-            var nextErrors = previousErrors.Concat([property]).ToArray();
-
-            var nextInterior = Interior(name, restOfProperties, nextErrors);
-
-            var errors = string.Join(", ", nextErrors);
-            var next = nextInterior is null ? string.Empty : string.Join("\n\t", nextInterior.Split('\n'));
-
-            return $$"""
-                (valid_{{property}}, var error_{{property}}) = value.{{property}}.IsValid({{property}});
-
-                if(error_{{property}} is not null)
+        {{validation}} 
+                if(errors.Count > 0)
                 {
-                    {{next}}return new ValidationError({{name}}, [{{errors}}]);
+                    return new ValidationError(name, errors.ToImmutableArray());
                 }
+        """;
+
+        static string Interior(string property)
+        {
+            return $$"""
+                    var (valid_{{property}}, error_{{property}}) = value.{{property}}.IsValid({{property}});
+
+                    if(error_{{property}} is not null)
+                    {
+                        errors.Add(error_{{property}}.NotNull());
+                    }
+
             """;
         }
     }

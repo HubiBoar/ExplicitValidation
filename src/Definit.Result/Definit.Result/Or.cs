@@ -31,6 +31,12 @@ public static class OrExtensions
         return o is null ? null : o.Value.Out;
     }
 
+    public static T NotNull<T>([DisallowNull] this Or<T>? o)
+        where T : struct
+    {
+        return o.Value.Out;
+    }
+
     public static T? GetValue<T>(this Or<T>? o)
         where T : struct
     {

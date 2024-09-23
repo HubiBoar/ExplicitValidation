@@ -10,9 +10,17 @@ partial class Example
 {
 	partial record UserData: Definit.Validation.IIsValid
 	{
-		public Result Validate() => IsValid();
+		public ValidationError? Validate(string? propertyName = null)
+		{
+		    if(IsValid(propertyName).IsError(out var error))
+		    {
+		        return error;
+		    }
 		
-		public Result<Valid> IsValid() => Valid.Create(this);
+		    return null;
+		}
+		
+		public Either<Valid, ValidationError> IsValid(string? propertyName = null) => Valid.Create(this, propertyName);
 		
 		public readonly struct Valid
 		{
@@ -30,23 +38,32 @@ partial class Example
 		
 		    public static Either<Valid, ValidationError> Create(Definit.Validation.Example.UserData value, string? propertyName = null)
 		    {
-		        var name = propertyName is null ? "Definit.Validation.Example.UserData" : propertyName; 
+		        var name = propertyName is null ? "UserData" : propertyName; 
 		
-		Definit.Validation.Example.Email valid_Email = default!;, Definit.Validation.Example.Address valid_Address = default!;
+		        Definit.Validation.Example.Email valid_Email = default!; Definit.Validation.Example.Address valid_Address = default!;
 		
-		    (valid_Email, var error_Email) = value.Email.IsValid(Email);
+		        List<ValidationError> errors = [];
 		
-		    if(error_Email is not null)
-		    {
-		            (valid_Address, var error_Address) = value.Address.IsValid(Address);
-			
-			    if(error_Address is not null)
-			    {
-			        return new ValidationError(Definit.Validation.Example.UserData, [Email, Address]);
-			    }return new ValidationError(Definit.Validation.Example.UserData, [Email]);
-		    }
+		        var (valid_Email, error_Email) = value.Email.IsValid(Email);
 		
-		        return new Valid(value, valid_Email.Value!, valid_Address.Value!);
+		        if(error_Email is not null)
+		        {
+		            errors.Add(error_Email.GetNotNullValue());
+		        }
+		
+		        var (valid_Address, error_Address) = value.Address.IsValid(Address);
+		
+		        if(error_Address is not null)
+		        {
+		            errors.Add(error_Address.GetNotNullValue());
+		        }
+		 
+		        if(errors.Count > 0)
+		        {
+		            return new ValidationError(name, errors.ToImmutableArray());
+		        }
+		
+		        return new Valid(value, valid_Email.Value!.GetNotNullValue(), valid_Address.Value!.GetNotNullValue());
 		    }
 		
 		    public static implicit operator Definit.Validation.Example.UserData(Valid value) => value.Value;

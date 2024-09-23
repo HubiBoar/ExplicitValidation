@@ -30,7 +30,7 @@ partial class Example
 			
 			public static implicit operator string(Definit.Validation.Example.Parent1.Value1 value) => value.Value;
 			
-			public ValidationError? Validate(string? propertyName = null) => _rule.Validate(Value, propertyName);
+			public ValidationError? Validate(string? propertyName = null) => _rule.Validate(Value, propertyName ?? "Value1");
 			
 			public Either<Valid, ValidationError> IsValid(string? propertyName = null) => Valid.Create(this, propertyName);
 			

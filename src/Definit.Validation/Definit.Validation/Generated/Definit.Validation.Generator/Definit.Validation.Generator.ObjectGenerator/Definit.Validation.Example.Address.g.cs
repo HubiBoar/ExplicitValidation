@@ -10,9 +10,17 @@ partial class Example
 {
 	partial record Address: Definit.Validation.IIsValid
 	{
-		public Result Validate() => IsValid();
+		public ValidationError? Validate(string? propertyName = null)
+		{
+		    if(IsValid(propertyName).IsError(out var error))
+		    {
+		        return error;
+		    }
 		
-		public Result<Valid> IsValid() => Valid.Create(this);
+		    return null;
+		}
+		
+		public Either<Valid, ValidationError> IsValid(string? propertyName = null) => Valid.Create(this, propertyName);
 		
 		public readonly struct Valid
 		{
@@ -28,18 +36,25 @@ partial class Example
 		
 		    public static Either<Valid, ValidationError> Create(Definit.Validation.Example.Address value, string? propertyName = null)
 		    {
-		        var name = propertyName is null ? "Definit.Validation.Example.Address" : propertyName; 
+		        var name = propertyName is null ? "Address" : propertyName; 
 		
-		Definit.Validation.Example.Email valid_EmailProp = default!;
+		        Definit.Validation.Example.Email valid_EmailProp = default!;
 		
-		    (valid_EmailProp, var error_EmailProp) = value.EmailProp.IsValid(EmailProp);
+		        List<ValidationError> errors = [];
 		
-		    if(error_EmailProp is not null)
-		    {
-		        return new ValidationError(Definit.Validation.Example.Address, [EmailProp]);
-		    }
+		        var (valid_EmailProp, error_EmailProp) = value.EmailProp.IsValid(EmailProp);
 		
-		        return new Valid(value, valid_EmailProp.Value!);
+		        if(error_EmailProp is not null)
+		        {
+		            errors.Add(error_EmailProp.GetNotNullValue());
+		        }
+		 
+		        if(errors.Count > 0)
+		        {
+		            return new ValidationError(name, errors.ToImmutableArray());
+		        }
+		
+		        return new Valid(value, valid_EmailProp.Value!.GetNotNullValue());
 		    }
 		
 		    public static implicit operator Definit.Validation.Example.Address(Valid value) => value.Value;

@@ -94,7 +94,6 @@ public class ValueGenerator : IIncrementalGenerator
 
         public static implicit operator {{valueType}}({{name}} value) => value.Value;
 
-        public ValidationError? Validate(string? propertyName = null) => _rule.Validate(Value, propertyName);
 
         public Either<Valid, ValidationError> IsValid(string? propertyName = null) => Valid.Create(this, propertyName);
 

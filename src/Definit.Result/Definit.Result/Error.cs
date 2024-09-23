@@ -6,6 +6,8 @@ public interface IError<TSelf, TException> : IError<TSelf>
     where TSelf : struct, IError<TSelf, TException>
     where TException : notnull, Exception
 {
+    public new Error Error { get; init; }
+
     static (bool Matches, TSelf Error) IError<TSelf>.Matches(Exception exception)
     {
         var (matches, error) = exception.Matches<TException>();
@@ -15,16 +17,7 @@ public interface IError<TSelf, TException> : IError<TSelf>
             Error = exception
         }); 
     }
-
-    static TSelf IError<TSelf>.FromError(Error error)
-    {
-        return new TSelf()
-        {
-            Error = error
-        }; 
-    }
 }
-
 
 public interface IError
 {
@@ -33,13 +26,13 @@ public interface IError
 public interface IError<TSelf> : IError
     where TSelf : struct, IError<TSelf>
 {
-    public Error Error { get; init; }
+    public Error Error { get; }
+    public string Context { get; init; }
 
     public abstract static (bool Matches, TSelf Error) Matches(Exception exception); 
-    public abstract static TSelf FromError(Error error);
 }
 
-public readonly record struct Err<T>(Error Error) : IError<Err<T>, T>
+public readonly record struct Err<T>(string Context, Error Error) : IError<Err<T>, T>
     where T : Exception;
 
 public readonly record struct Error(string Message, string StackTrace) : IError<Error>, IEitherBase
@@ -48,16 +41,8 @@ public readonly record struct Error(string Message, string StackTrace) : IError<
     public Error(string message) : this(message, Environment.StackTrace) {} 
     public Error(string prefix, Error error) : this($"{prefix} :: {error.Message}", error.StackTrace) {}
 
-    Error IError<Error>.Error
-    { 
-        get => this;
-
-        init
-        {
-            Message = value.Message;
-            StackTrace = value.StackTrace;
-        }
-    }
+    Error IError<Error>.Error => this;
+    public string Context { get; init; } = string.Empty;
 
     public static Error FromError(Error error) => error;
 
@@ -69,7 +54,7 @@ public readonly record struct Error(string Message, string StackTrace) : IError<
 public static class ErrorExtensions
 {
     public static bool IsError<T>(this T? value, [NotNullWhen(true)] out T? val)
-        where T : struct
+        where T : struct, IError
     {
         val = value;
         return value is not null;
@@ -95,8 +80,8 @@ public static class ErrorExtensions
     public static TError WithContext<TError>(this TError error, string context)
         where TError : struct, IError<TError>
     {
-        var newError = new Error(context, error.Error);
-        return TError.FromError(newError);
+        var previousContext = error.Context;
+        return error with { Context = $"{context} :: {previousContext}" };
     }
 }
 

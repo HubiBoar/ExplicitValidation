@@ -34,7 +34,7 @@ public interface IIsValid<TValue> : IIsValid
     abstract static void Rule(Rule<TValue> rule);
 }
 
-public readonly struct ValidationError : IError
+public readonly struct ValidationError : IError<ArgumentException, ValidationError>
 {
     public readonly record struct Property
     (

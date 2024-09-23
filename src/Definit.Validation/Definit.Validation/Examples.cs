@@ -34,30 +34,30 @@ internal static partial class Example
         Email EmailProp
     );
 
-    private static async Task<Result> Endpoint(UserData body)
+    private static async Task<Result.Error<ValidationError>> Endpoint(UserData body)
     {
-        if(body.IsValid().Is(out Error error).Else(out var valid))
+        if(body.IsValid().IsError(out var error, out var valid))
         {
-            return error;
+            return error.Value;
         }
 
-        return await Run(valid.Address);
+        return await Run(valid.NotNull().Address);
     }
 
-    private static async Task<Result> Run(Address.Valid valid)
+    private static async Task<Result.Error<ValidationError>> Run(Address.Valid valid)
     {
         await Task.CompletedTask;
         return Result.Success;
     }
 
-    private static async Task<Result> Endpoint(Email body)
+    private static async Task<Result.Error<ValidationError>> Endpoint(Email body)
     {
-        if(body.IsValid().Is(out Error error).Else(out var valid))
+        if(body.IsValid().IsError(out var error, out var valid))
         {
-            return error;
+            return error.Value;
         }
 
-        return await Run(valid);
+        return await Run(valid.NotNull());
     }
 
     private static async Task<Result> Run(Email.Valid valid)

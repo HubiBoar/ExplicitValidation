@@ -28,7 +28,7 @@ partial class Example
 		
 		public static implicit operator string(Definit.Validation.Example.Email value) => value.Value;
 		
-		public ValidationError? Validate(string? propertyName = null) => _rule.Validate(Value, propertyName);
+		public ValidationError? Validate(string? propertyName = null) => _rule.Validate(Value, propertyName ?? "Email");
 		
 		public Either<Valid, ValidationError> IsValid(string? propertyName = null) => Valid.Create(this, propertyName);
 		

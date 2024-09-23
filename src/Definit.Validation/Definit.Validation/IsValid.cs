@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using Definit.Results;
 
 namespace Definit.Validation;
 
@@ -23,7 +24,7 @@ public sealed class IsValidAttribute<T> : Attribute
 
 public interface IIsValid
 {
-    ValidationErrors? Validate();
+    ValidationError? Validate(string? propertyName = null);
 }
 
 public interface IIsValid<TValue> : IIsValid
@@ -33,15 +34,61 @@ public interface IIsValid<TValue> : IIsValid
     abstract static void Rule(Rule<TValue> rule);
 }
 
-public readonly record struct ValidationErrors
-(
-    ImmutableArray<(string Property, ValidationErrors.Property Errors)> Errors
-)
+public readonly struct ValidationError : IError
 {
     public readonly record struct Property
     (
-        ImmutableArray<(string Rule, string Message)> Errors
-    ); 
+        ImmutableArray<string> Messages
+    )
+    : IError
+    {
+        public override string ToString() => Formatting.ValidationError(this);
+    };
+
+    public ImmutableArray<(string Property, ValidationError.Property Value)> Errors { get; }
+
+    public ValidationError(ImmutableArray<(string Property, ValidationError.Property Value)> errors)
+    {
+        Errors = errors;
+    }
+
+    public ValidationError(string propertyName, ImmutableArray<ValidationError> errors)
+    {
+        Errors = Create($"{propertyName}.", errors);
+    }
+
+    public ValidationError(ImmutableArray<ValidationError> errors)
+    {
+        Errors = Create(string.Empty, errors);
+    }
+
+    private static ImmutableArray<(string Property, ValidationError.Property Value)> Create
+    (
+        string propertyName, 
+        ImmutableArray<ValidationError> errors
+    )
+    {
+        int errorsCount = errors.Length;
+        for(int i = 0; i < errors.Length; i++)
+        {
+            errorsCount += errors[i].Errors.Length;
+        }
+
+        var props = new (string, ValidationError.Property)[errorsCount];
+        for(int i = 0; i < errors.Length; i++)
+        {
+            var error = errors[i];
+            for(int a = 0; a < error.Errors.Length; a++)
+            {
+                var property = error.Errors[a];
+                props[i + a] = ($"{propertyName}{property.Property}", property.Value);
+            }
+        }
+
+        return ImmutableArray.Create(props);
+    }
+
+    public override string ToString() => Formatting.ValidationError(this);
 }
 
 public static class Rule
@@ -52,3 +99,40 @@ public static class Rule
     }
 }
 
+public static class Exx
+{
+    public record Class(Value Value1, Value Value2)
+    {
+        public ValidationError? Validate(string? propertyName = null)
+        {
+            var name = propertyName is null ? "Class" : propertyName; 
+
+            var errors = new ImmutableArray<ValidationError>();
+
+            if(Value1.Validate("Value1").IsError(out var error0))
+            {
+                errors.Add(error0.Value);
+            }
+
+            if(Value2.Validate("Value2").IsError(out var error1))
+            {
+                errors.Add(error1.Value);
+            }
+            
+            if(errors.Length > 0)
+            {
+                return new ValidationError(name, errors);
+            }
+
+            return null;
+        }
+    }
+
+    public record Value(string Val)
+    {
+        public ValidationError? Validate(string? propertyName = null)
+        {
+            return new Rule<string>().Validate(Val, propertyName ?? "Value");
+        }
+    }
+}

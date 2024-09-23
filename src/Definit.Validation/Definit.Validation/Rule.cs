@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using Definit.Results;
 
 namespace Definit.Validation;
 
@@ -6,7 +7,7 @@ public sealed record Rule<TValue>()
 {
     private readonly List<Func<TValue, (string Rule, string Message)?>> _rules = [];
 
-    public ValidationErrors.Property? Validate(TValue value)
+    public ValidationError.Property? Validate(TValue value)
     {
         List<(string Rule, string Message)> errors = [];
         foreach(var rule in _rules)
@@ -20,7 +21,17 @@ public sealed record Rule<TValue>()
 
         if(errors.Count > 0)
         {
-            return new (errors.ToImmutableArray());
+            return new (errors.Select(x => Formatting.Rule(x.Rule, x.Message)).ToImmutableArray());
+        }
+
+        return null;
+    }
+
+    public ValidationError? Validate(TValue value, string propertyName)
+    {
+        if(Validate(value).IsError(out var error))
+        {
+            return new ValidationError([(propertyName, error.Value)]);  
         }
 
         return null;

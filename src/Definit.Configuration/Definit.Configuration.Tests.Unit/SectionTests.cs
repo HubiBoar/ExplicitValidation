@@ -37,7 +37,7 @@ public class SectionTests
         var section = TestSection.Create(configuration);
 
         //Assert
-        ((bool)section.Is(out ValidationErrors _)).Should().BeTrue();
+        ((bool)section.Is(out ValidationError _)).Should().BeTrue();
     }
     
     [Fact]
@@ -56,7 +56,7 @@ public class SectionTests
         var section = TestSection.Create(configuration);
 
         //Assert
-        ((bool)section.Is(out ValidationErrors _)).Should().BeTrue();
+        ((bool)section.Is(out ValidationError _)).Should().BeTrue();
     }
     
     [Fact]

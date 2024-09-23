@@ -52,6 +52,7 @@ public class ObjectGenerator : IIncrementalGenerator
         var (code, info) = type.BuildTypeHierarchy
         (
             name => $"{name}: {IsValidName}",
+            "System.Collections.Immutable",
             "Definit.Results",
             "Definit.Validation"
         );
@@ -64,17 +65,22 @@ public class ObjectGenerator : IIncrementalGenerator
             .Where(x => IsValid(x.Type))
             .Select(x => (Name: x.Name, Type: x.Type.ToDisplayString()));
 
-        var propertiesDeclarations = string.Join("\n\t", properties.Select(x => $$"""public {{x.Type}}.Valid {{x.Name}} { get; }"""));
+        var propertiesDeclarations = string.Join("\n\t", properties
+            .Select(x => $$"""public {{x.Type}}.Valid {{x.Name}} { get; }"""));
+
         var constructorParams = string.Join(", ", properties.Select(x => $"{x.Type}.Valid {x.Name}"));
         var constructorAssignment = string.Join("\n\t\t", properties.Select(x => $"this.{x.Name} = {x.Name};"));
+
         var validation = string.Join("\n\n", properties.Select(x => $$"""
-                if(value.{{x.Name}}.IsValid().Is(out Error error_{{x.Name}}).Else(out var valid_{{x.Name}}))
+                var (valid_{{x.Name}}, error_{{x.Name}}) = value.{{x.Name}}.IsValid({{x.Name}});
+
+                if(error_{{x.Name}} is not null)
                 {
-                    errors.Add((error_{{x.Name}}.Message, "{{x.Name}}"));
+                    errors.Add(error_{{x.Name}}.Value);
                 }
         """));
 
-        var validCreation = string.Join(", ", properties.Select(x => $"valid_{x.Name}")).TrimEnd(',');
+        var validCreation = string.Join(", ", properties.Select(x => $"valid_{x.Name}.Value!")).TrimEnd(',');
 
         code.AddBlock($$"""
         public Result Validate() => IsValid();
@@ -93,15 +99,17 @@ public class ObjectGenerator : IIncrementalGenerator
                 {{constructorAssignment}}
             }
 
-            public static Either<Valid, Error> Create({{name}} value)
+            public static Either<Valid, ValidationError> Create({{name}} value, string? propertyName = null)
             {
-                List<(string Error, string PropertyName)> errors = [];
+                var name = propertyName is null ? "{{name}}" : propertyName; 
+
+                var errors = new ImmutableArray<ValidationError>();
                 
         {{validation}}
 
-                if(errors.Count > 0)
+                if(errors.Length > 0)
                 {
-                    return new Error(string.Join(" :: ", errors.Select(x => $"{x.PropertyName} => {x.Error}")));
+                    return new ValidationError(name, errors);
                 }
 
                 return new Valid(value, {{validCreation}});

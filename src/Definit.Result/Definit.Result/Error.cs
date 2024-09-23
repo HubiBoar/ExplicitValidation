@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Definit.Results;
 
 public interface IError<TSelf, TException> : IError<TSelf>
@@ -23,7 +25,12 @@ public interface IError<TSelf, TException> : IError<TSelf>
     }
 }
 
-public interface IError<TSelf>
+
+public interface IError
+{
+}
+
+public interface IError<TSelf> : IError
     where TSelf : struct, IError<TSelf>
 {
     public Error Error { get; init; }
@@ -59,9 +66,15 @@ public readonly record struct Error(string Message, string StackTrace) : IError<
     public static implicit operator Error(Exception ex) => new Error(ex);
 }
 
-
 public static class ErrorExtensions
 {
+    public static bool IsError<T>(this T? value, [NotNullWhen(true)] out T? val)
+        where T : struct
+    {
+        val = value;
+        return value is not null;
+    }
+
     public static (bool Matches, Either<T, Exception> Either) Matches<T>(this Exception exception)
         where T : Exception
     {

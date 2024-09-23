@@ -94,9 +94,9 @@ public class ValueGenerator : IIncrementalGenerator
 
         public static implicit operator {{valueType}}({{name}} value) => value.Value;
 
-        public Result Validate() => _rule.Validate(Value);
+        public ValidationError? Validate(string? propertyName = null) => _rule.Validate(Value, propertyName);
 
-        public Result<Valid> IsValid() => Valid.Create(this);
+        public Either<Valid, ValidationError> IsValid(string? propertyName = null) => Valid.Create(this, propertyName);
 
         public readonly struct Valid
         {
@@ -107,9 +107,9 @@ public class ValueGenerator : IIncrementalGenerator
                 Value = value;
             }
 
-            public static Either<Valid, ValidationError?> Create({{name}} value)
+            public static Either<Valid, Validationrror> Create({{name}} value, string? propertyName = null)
             {
-                var error = value.Validate();
+                var error = value.Validate(propertyName);
                 if(error is not null)
                 {
                     return error;

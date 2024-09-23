@@ -22,7 +22,7 @@ public interface ISectionName
 
 public static class ConfigHelper
 {
-    public static Result<TValue, ValidationErrors> GetValue<TValue>(IConfiguration configuration, string sectionName)
+    public static Result<TValue, ValidationError> GetValue<TValue>(IConfiguration configuration, string sectionName)
         where TValue : notnull
     {
         try
@@ -36,7 +36,7 @@ public static class ConfigHelper
             var value = section.Get<TValue>();
             if (value is null)
             {
-                return ValidationErrors.Null(DefinitType.GetTypeVerboseName<TValue>());
+                return ValidationError.Null(DefinitType.GetTypeVerboseName<TValue>());
             }
 
             return value;

@@ -6,16 +6,14 @@ public interface IError<TSelf, TException> : IError<TSelf>
     where TSelf : struct, IError<TSelf, TException>
     where TException : notnull, Exception
 {
-    public new Error Error { get; init; }
-
     static (bool Matches, TSelf Error) IError<TSelf>.Matches(Exception exception)
     {
         var (matches, error) = exception.Matches<TException>();
 
-        return (matches, new TSelf()
-        {
-            Error = exception
-        }); 
+        throw new NotImplementedException();
+       // return (matches, new TSelf()
+       // {
+       // }); 
     }
 }
 
@@ -26,13 +24,10 @@ public interface IError
 public interface IError<TSelf> : IError
     where TSelf : struct, IError<TSelf>
 {
-    public Error Error { get; }
-    public string Context { get; init; }
-
     public abstract static (bool Matches, TSelf Error) Matches(Exception exception); 
 }
 
-public readonly record struct Err<T>(string Context, Error Error) : IError<Err<T>, T>
+public readonly record struct Err<T>(string Context) : IError<Err<T>, T>
     where T : Exception;
 
 public readonly record struct Error(string Message, string StackTrace) : IError<Error>, IEitherBase
@@ -41,7 +36,6 @@ public readonly record struct Error(string Message, string StackTrace) : IError<
     public Error(string message) : this(message, Environment.StackTrace) {} 
     public Error(string prefix, Error error) : this($"{prefix} :: {error.Message}", error.StackTrace) {}
 
-    Error IError<Error>.Error => this;
     public string Context { get; init; } = string.Empty;
 
     public static Error FromError(Error error) => error;
@@ -74,7 +68,7 @@ public static class ErrorExtensions
     public static Error GetError<TError>(this TError error)
         where TError : struct, IError<TError>
     {
-        return error.Error; 
+        return error.GetDefinit.Results.IError<System.ArgumentException>.Error(); 
     }
 
     public static TError WithContext<TError>(this TError error, string context)

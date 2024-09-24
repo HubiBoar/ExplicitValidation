@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Text;
 using Definit.Utils.SourceGenerator;
 using Microsoft.CodeAnalysis;
 
@@ -52,15 +53,21 @@ public class EitherBaseGenerator : IIncrementalGenerator
         return Enumerable.Range(0, count).Select<int, Func<(string, string)>>(inx => () =>
         {
             var length = inx + 2;
-            var generic = Enumerable.Range(0, length).Select(x => $"T{x}").ToArray();
+            var generic = 
+                new GenericConstraints.Holders
+                (
+                    Enumerable
+                        .Range(0, length)
+                        .Select(x => GenericConstraints.Holder.Notnull($"T{x}"))
+                        .ToImmutableArray()
+                );
             
-            var genericArgs = string.Join(", ", generic.Select(x => x));
+            var genericArgs = string.Join(", ", generic.Value.Select(x => x.Name));
             var either = $"Either<{genericArgs}>";
             var (interior, extension, genericOrArgs) = EitherInterior
             (
                 generic,
                 generic,
-                string.Empty,
                 "Either",
                 either
             );
@@ -82,7 +89,7 @@ public class EitherBaseGenerator : IIncrementalGenerator
                 {{interior}}
             }
 
-            public static partial class EitherExtensions 
+            public static class EitherExtensions_{{length}} 
             {
                 {{extension}}
             }
@@ -97,35 +104,28 @@ public class EitherBaseGenerator : IIncrementalGenerator
 
     public static (string Interior, string Extensions, string GenericOrArgs) EitherInterior
     (
-        string[] genericParams,
-        string[] typeGenericParams,
-        string typeGenericConstraints,
+        GenericConstraints.Holders allGenericParams,
+        GenericConstraints.Holders typeGenericParams,
         string constructorName,
         string typeName
     )
     {
-        var generic = genericParams.Select(x => (Type: x, Name: $"{x}_arg")).ToArray();
-        var genericArgs = string.Join(", ", generic.Select(x => x.Type));
-        var typeGenericArgs = string.Join(", ", typeGenericParams);
-        var genericOrArgs = string.Join(", ", generic.Select(x => $"Or<{x.Type}>?"));
+        var genericOrArgs = string.Join(", ", allGenericParams.Value.Select(x => $"Or<{x.Name}>?"));
+        var genericArgs = string.Join(", ", allGenericParams.Value.Select(x => x.Name));
 
-        var constructors = string.Join("\n", generic
+        var constructors = string.Join("\n", allGenericParams.Value
             .Select((x, i) =>
             {
-                var args = Enumerable.Range(0, generic.Length).Select(_ => "null").ToArray();
+                var args = Enumerable.Range(0, allGenericParams.Value.Length).Select(_ => "null").ToArray();
                 args[i] = "value!";
 
                 var argsString = string.Join(", ", args);
 
-                return $"public {constructorName}({x.Type} value) => Value = ({argsString});";
+                return $"public {constructorName}({x.Name} value) => Value = ({argsString});";
             }));
 
-        var operators = string.Join("\n", generic
-            .Select(x => $"public static implicit operator {typeName}({x.Type} value) => new (value);"));
-
-        var outArgs = string.Join(",\n\t", generic.Select(x => $"out Or<{x.Type}>? {x.Name}"));
-        var returns = string.Join(", ", generic.Select(x => x.Name));
-        var nullValues = string.Join(" ", generic.Select(x => $"{x.Name} = null;"));
+        var operators = string.Join("\n", allGenericParams.Value
+            .Select(x => $"public static implicit operator {typeName}({x.Name} value) => new (value);"));
 
         var interior = $$"""
         public ({{genericOrArgs}}) Value { get; }
@@ -139,32 +139,95 @@ public class EitherBaseGenerator : IIncrementalGenerator
         {{operators}}
         """;
 
-        var extension = $$"""
-        public static void Deconstruct<{{typeGenericArgs}}>
-        (
-            this {{typeName}} result,
-            {{outArgs}}
-        ){{typeGenericConstraints}}
+        var extension = GenerateExtensions(allGenericParams, typeGenericParams, typeName);
+        
+        return (interior, extension, genericOrArgs);
+    }
+
+    private static string GenerateExtensions
+    (
+        GenericConstraints.Holders allGenericParams,
+        GenericConstraints.Holders typeGenericParams,
+        string typeName
+    )
+    {
+        var length = allGenericParams.Value.Length;
+        var generic = allGenericParams.Value.Select(x => (Type: x, Name: $"{x.Name}_arg")).ToArray();
+
+        var typeGenericArgs = string.Join(", ", typeGenericParams.Value.Select(x => x.Name));
+        var returns = string.Join(", ", generic.Select(x => x.Name));
+        var nullValues = string.Join(" ", generic.Select(x => $"{x.Name} = null;"));
+
+        var builder = new StringBuilder();
+        if(length <= 4)
         {
-            ({{returns}}) = result.Value;
+            var outArgs = string.Join(",\n\t", generic.Select(x => $"out {x.Type.Name}? {x.Name}"));
+            var states = GenerateAllStates(length);
+
+            foreach(var state in states)
+            {
+                var genericConstraints = string.Join("\n\t", state.Select((isClass, i) =>
+                {
+                    var constraint = isClass ? "class" : "struct"; 
+                    if(x && typeGenericParams[i].Constraints.Contain)
+                    {
+                        
+                    }
+                })); 
+
+                var deconstructor = $$"""
+                public static void Deconstruct<{{typeGenericArgs}}>
+                (
+                    this {{typeName}} result,
+                    {{outArgs}}
+                ){{constraints}}
+                {
+                    ({{returns}}) = result.Value;
+                }
+
+                public static void Deconstruct<{{typeGenericArgs}}>
+                (
+                    this {{typeName}}? result,
+                    {{outArgs}}
+                ){{constraints}}
+                {
+                    if(result is null)
+                    {
+                        {{nullValues}}
+                        return;
+                    }
+
+                    ({{returns}}) = result.Value.Value;
+                }
+                """;
+
+                builder
+                    .AppendLine()
+                    .AppendLine(deconstructor);
+            }
         }
 
-        public static void Deconstruct<{{typeGenericArgs}}>
-        (
-            this {{typeName}}? result,
-            {{outArgs}}
-        ){{typeGenericConstraints}}
+
+        return builder.ToString();
+    }
+
+    private static bool[][] GenerateAllStates(int size)
+    {
+        int totalStates = (int)Math.Pow(2, size);  
+        bool[][] result = new bool[totalStates][];
+
+        for (int i = 0; i < totalStates; i++)
         {
-            if(result is null)
+            bool[] currentState = new bool[size];
+            
+            for (int bit = 0; bit < size; bit++)
             {
-                {{nullValues}}
-                return;
+                currentState[bit] = (i & (1 << bit)) != 0;
             }
 
-            ({{returns}}) = result.Value.Value;
+            result[i] = currentState;
         }
-        """;
 
-        return (interior, extension, genericOrArgs);
+        return result;
     }
 }

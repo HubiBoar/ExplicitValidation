@@ -36,6 +36,16 @@ public static class GenericConstraints
         _                     => (null, null),
     };
 
+    public readonly struct Type
+    {
+        public string Name { get; }
+
+        public Type(string name)
+        {
+            Name = name;
+        }
+    }
+
     public readonly struct Holder
     {
         public string Name { get; }
@@ -45,6 +55,9 @@ public static class GenericConstraints
         public ImmutableArray<Type> Types { get; }
 
         public string AsString { get; } 
+
+        public Holder(string name) : this(name, Main.Empty, ImmutableArray<Type>.Empty){}
+        public Holder(string name, Main main) : this(name, main, ImmutableArray<Type>.Empty){}
 
         public Holder(string name, Main main, ImmutableArray<Type> types) : this()
         {
@@ -62,10 +75,10 @@ public static class GenericConstraints
 
         public override string ToString() => AsString;
 
-        public static Holder Class(string name) => new Holder(name, GenericConstraints.Main.Class, ImmutableArray<Type>.Empty);
-        public static Holder Struct(string name) => new Holder(name, GenericConstraints.Main.Struct, ImmutableArray<Type>.Empty);
-        public static Holder Notnull(string name) => new Holder(name, GenericConstraints.Main.Notnull, ImmutableArray<Type>.Empty);
-        public static Holder Empty(string name) => new Holder(name, GenericConstraints.Main.Empty, ImmutableArray<Type>.Empty);
+        public static Holder Class(string name)   => new Holder(name, GenericConstraints.Main.Class);
+        public static Holder Struct(string name)  => new Holder(name, GenericConstraints.Main.Struct);
+        public static Holder Notnull(string name) => new Holder(name, GenericConstraints.Main.Notnull);
+        public static Holder Empty(string name)   => new Holder(name);
     }
 
     public readonly struct Holders
@@ -80,30 +93,39 @@ public static class GenericConstraints
     
     public static Holder GetConstraints(this ITypeParameterSymbol symbol) 
     {
-        Main? main = null;
+        Main main = Main.Empty;
 
         if(symbol.HasValueTypeConstraint)
         {
             main = Main.Struct;
         }
-        else if(symbol.HasNotNullConstraint)
-        {
-            main = Main.Notnull;
-        }
-        else if(symbol.HasReferenceTypeConstraint)
-        {
-            main = Main.Class;
-        }
         else if(symbol.HasUnmanagedTypeConstraint)
         {
             main = Main.Unmanaged;
         }
+        else if(symbol.HasNotNullConstraint)
+        {
+            main = symbol.HasConstructorConstraint ? Main.NotnullNew : Main.Notnull;
+        }
+        else if(symbol.HasReferenceTypeConstraint)
+        {
+            if(symbol.ReferenceTypeConstraintNullableAnnotation is not NullableAnnotation.Annotated)
+            {
+                main = symbol.HasConstructorConstraint ? Main.ClassNew : Main.Class;
+            }
+            else
+            {
+                main = symbol.HasConstructorConstraint ? Main.ClassNullableNew : Main.ClassNullable;
+            }
+        }
+        else if(symbol.HasConstructorConstraint)
+        {
+            main = Main.New;
+        }
 
         var types = symbol.ConstraintTypes.Select(x => new GenericConstraints.Type(x.ToDisplayString())).ToImmutableArray();
 
-        New? @new = symbol.HasConstructorConstraint ? new New() : null;
-
-        return new Holder(symbol.ToDisplayString(), main, types, @new);
+        return new Holder(symbol.ToDisplayString(), main, types);
     }
 
     public static bool HasConstraints(this ITypeParameterSymbol symbol) =>  

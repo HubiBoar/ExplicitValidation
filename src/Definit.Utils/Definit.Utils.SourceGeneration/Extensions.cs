@@ -22,6 +22,16 @@ public static class GenericConstraints
         ClassNullableNew,
     }
 
+    public static bool IsNew(this Main main) => main switch
+    {
+        Main.New => true,
+        Main.ClassNew => true,
+        Main.NotnullNew => true,
+        _ => false
+    };
+
+    public static void Deconstruct(this Main main, out string? start, out string? end) => (start, end) = main.GetString();
+
     public static (string? Start, string? End) GetString(this Main main) => main switch
     {
         Main.Struct           => ("struct", null),
@@ -65,7 +75,7 @@ public static class GenericConstraints
             Main = main;
             Types = types;
 
-            var (start, end) = main.GetString();
+            var (start, end) = main;
             var typesString = string.Join(", ", types.Select(x => x.Name));
             var paramsString = string.Join(", ", new string?[] { start, typesString, end }
                     .Where(x => string.IsNullOrEmpty(x) == false));
@@ -85,10 +95,15 @@ public static class GenericConstraints
     {
         public ImmutableArray<Holder> Value { get; }
 
+        public string AsString { get; }
+
         public Holders(ImmutableArray<Holder> value)
         {
             Value = value;
+            AsString = "\n\t" + string.Join("\n\t", value.Select(x => x.ToString()));
         }
+
+        public override string ToString() => AsString;
     }
     
     public static Holder GetConstraints(this ITypeParameterSymbol symbol) 
@@ -167,11 +182,6 @@ public static class GenericConstraints
         }
 
         return method.TypeArguments.GetGenericConstraints();
-    }
-
-    public static string ConstraintsToString(this ImmutableArray<Holder> holders) 
-    {
-        return "\n\t" + string.Join("\n\t", holders.Select(x => x.ToString()));
     }
 }
 

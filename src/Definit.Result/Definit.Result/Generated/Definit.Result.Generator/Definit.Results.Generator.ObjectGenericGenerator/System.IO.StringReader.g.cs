@@ -17,6 +17,7 @@ public static class StringReader__Auto__Extensions
         public required System.IO.StringReader Value { get; init; }
         
 		public Either<Success, Error> Close()
+			
 		{
 		    try
 		    {
@@ -30,6 +31,7 @@ public static class StringReader__Auto__Extensions
 		}
 		
 		public Either<int, Error> Peek()
+			
 		{
 		    try
 		    {
@@ -42,6 +44,7 @@ public static class StringReader__Auto__Extensions
 		}
 		
 		public Either<int, Error> Read()
+			
 		{
 		    try
 		    {
@@ -54,6 +57,7 @@ public static class StringReader__Auto__Extensions
 		}
 		
 		public Either<int, Error> Read(char[] buffer, int index, int count)
+			
 		{
 		    try
 		    {
@@ -66,6 +70,7 @@ public static class StringReader__Auto__Extensions
 		}
 		
 		public Either<int, Error> Read(System.Span<char> buffer)
+			
 		{
 		    try
 		    {
@@ -78,6 +83,7 @@ public static class StringReader__Auto__Extensions
 		}
 		
 		public async Task<Either<int, Error>> ReadAsync(char[] buffer, int index, int count)
+			
 		{
 		    try
 		    {
@@ -90,6 +96,7 @@ public static class StringReader__Auto__Extensions
 		}
 		
 		public async ValueTask<Either<int, Error>> ReadAsync(System.Memory<char> buffer, System.Threading.CancellationToken cancellationToken)
+			
 		{
 		    try
 		    {
@@ -102,6 +109,7 @@ public static class StringReader__Auto__Extensions
 		}
 		
 		public Either<int, Error> ReadBlock(System.Span<char> buffer)
+			
 		{
 		    try
 		    {
@@ -114,6 +122,7 @@ public static class StringReader__Auto__Extensions
 		}
 		
 		public async Task<Either<int, Error>> ReadBlockAsync(char[] buffer, int index, int count)
+			
 		{
 		    try
 		    {
@@ -126,6 +135,7 @@ public static class StringReader__Auto__Extensions
 		}
 		
 		public async ValueTask<Either<int, Error>> ReadBlockAsync(System.Memory<char> buffer, System.Threading.CancellationToken cancellationToken)
+			
 		{
 		    try
 		    {
@@ -138,6 +148,7 @@ public static class StringReader__Auto__Extensions
 		}
 		
 		public Either<string?, Error> ReadLine()
+			
 		{
 		    try
 		    {
@@ -150,6 +161,7 @@ public static class StringReader__Auto__Extensions
 		}
 		
 		public async Task<Either<string?, Error>> ReadLineAsync()
+			
 		{
 		    try
 		    {
@@ -162,6 +174,7 @@ public static class StringReader__Auto__Extensions
 		}
 		
 		public async ValueTask<Either<string?, Error>> ReadLineAsync(System.Threading.CancellationToken cancellationToken)
+			
 		{
 		    try
 		    {
@@ -174,6 +187,7 @@ public static class StringReader__Auto__Extensions
 		}
 		
 		public Either<string, Error> ReadToEnd()
+			
 		{
 		    try
 		    {
@@ -186,6 +200,7 @@ public static class StringReader__Auto__Extensions
 		}
 		
 		public async Task<Either<string, Error>> ReadToEndAsync()
+			
 		{
 		    try
 		    {
@@ -198,6 +213,7 @@ public static class StringReader__Auto__Extensions
 		}
 		
 		public async Task<Either<string, Error>> ReadToEndAsync(System.Threading.CancellationToken cancellationToken)
+			
 		{
 		    try
 		    {

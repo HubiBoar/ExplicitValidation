@@ -62,7 +62,7 @@ public class ObjectGenerator : IIncrementalGenerator
             type = type.ConstructedFrom;
             wrapperGenericArgs = "<" + string.Join(", ", type.TypeArguments.Select(x => x.ToDisplayString())) + ">";
             wrapperName = $"{wrapperName}{wrapperGenericArgs}";
-            wrapperGenericConstraints = type.TypeArguments.GetGenericConstraints();
+            wrapperGenericConstraints = type.TypeArguments.GetGenericConstraints().ToString();
         }
 
         var typeName = type.Name;

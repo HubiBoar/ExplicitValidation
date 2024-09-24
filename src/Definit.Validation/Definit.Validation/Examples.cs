@@ -4,6 +4,17 @@ namespace Definit.Validation;
 
 internal static partial class Example
 {
+    public record Type<T>
+        where T : notnull 
+    {
+    }
+
+    public static void Get<T>(this Type<T> type, out T? value)
+        where T : struct
+    {
+        value = null;
+    }
+
     [IsValid<string>]
     private partial struct Email
     {

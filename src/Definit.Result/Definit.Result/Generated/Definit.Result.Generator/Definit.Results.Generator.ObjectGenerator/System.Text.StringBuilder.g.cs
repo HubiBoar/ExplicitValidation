@@ -17,6 +17,7 @@ public static class StringBuilder__Auto__Extensions
         public required System.Text.StringBuilder Value { get; init; }
         
 		public Either<System.Text.StringBuilder, Error> Append(bool value)
+			
 		{
 		    try
 		    {
@@ -29,6 +30,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> Append(byte value)
+			
 		{
 		    try
 		    {
@@ -41,6 +43,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> Append(char value)
+			
 		{
 		    try
 		    {
@@ -53,6 +56,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> Append(char value, int repeatCount)
+			
 		{
 		    try
 		    {
@@ -65,6 +69,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> Append(char[]? value)
+			
 		{
 		    try
 		    {
@@ -77,6 +82,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> Append(char[]? value, int startIndex, int charCount)
+			
 		{
 		    try
 		    {
@@ -89,6 +95,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> Append(decimal value)
+			
 		{
 		    try
 		    {
@@ -101,6 +108,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> Append(double value)
+			
 		{
 		    try
 		    {
@@ -113,6 +121,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> Append(System.IFormatProvider? provider, ref System.Text.StringBuilder.AppendInterpolatedStringHandler handler)
+			
 		{
 		    try
 		    {
@@ -125,6 +134,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> Append(short value)
+			
 		{
 		    try
 		    {
@@ -137,6 +147,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> Append(int value)
+			
 		{
 		    try
 		    {
@@ -149,6 +160,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> Append(long value)
+			
 		{
 		    try
 		    {
@@ -161,6 +173,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> Append(object? value)
+			
 		{
 		    try
 		    {
@@ -173,6 +186,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> Append(System.ReadOnlyMemory<char> value)
+			
 		{
 		    try
 		    {
@@ -185,6 +199,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> Append(System.ReadOnlySpan<char> value)
+			
 		{
 		    try
 		    {
@@ -197,6 +212,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> Append(sbyte value)
+			
 		{
 		    try
 		    {
@@ -209,6 +225,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> Append(float value)
+			
 		{
 		    try
 		    {
@@ -221,6 +238,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> Append(string? value)
+			
 		{
 		    try
 		    {
@@ -233,6 +251,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> Append(string? value, int startIndex, int count)
+			
 		{
 		    try
 		    {
@@ -245,6 +264,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> Append(System.Text.StringBuilder? value)
+			
 		{
 		    try
 		    {
@@ -257,6 +277,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> Append(System.Text.StringBuilder? value, int startIndex, int count)
+			
 		{
 		    try
 		    {
@@ -269,6 +290,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> Append(ref System.Text.StringBuilder.AppendInterpolatedStringHandler handler)
+			
 		{
 		    try
 		    {
@@ -281,6 +303,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> Append(ushort value)
+			
 		{
 		    try
 		    {
@@ -293,6 +316,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> Append(uint value)
+			
 		{
 		    try
 		    {
@@ -305,6 +329,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> Append(ulong value)
+			
 		{
 		    try
 		    {
@@ -317,6 +342,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> AppendFormat(System.IFormatProvider? provider, string format, object? arg0)
+			
 		{
 		    try
 		    {
@@ -329,6 +355,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> AppendFormat(System.IFormatProvider? provider, string format, object? arg0, object? arg1)
+			
 		{
 		    try
 		    {
@@ -341,6 +368,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> AppendFormat(System.IFormatProvider? provider, string format, object? arg0, object? arg1, object? arg2)
+			
 		{
 		    try
 		    {
@@ -353,6 +381,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> AppendFormat(System.IFormatProvider? provider, string format, params object?[] args)
+			
 		{
 		    try
 		    {
@@ -365,6 +394,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> AppendFormat(string format, object? arg0)
+			
 		{
 		    try
 		    {
@@ -377,6 +407,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> AppendFormat(string format, object? arg0, object? arg1)
+			
 		{
 		    try
 		    {
@@ -389,6 +420,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> AppendFormat(string format, object? arg0, object? arg1, object? arg2)
+			
 		{
 		    try
 		    {
@@ -401,6 +433,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> AppendFormat(string format, params object?[] args)
+			
 		{
 		    try
 		    {
@@ -413,6 +446,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> AppendFormat<TArg0>(System.IFormatProvider? provider, System.Text.CompositeFormat format, TArg0 arg0)
+			
 		{
 		    try
 		    {
@@ -425,6 +459,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> AppendFormat<TArg0, TArg1>(System.IFormatProvider? provider, System.Text.CompositeFormat format, TArg0 arg0, TArg1 arg1)
+			
 		{
 		    try
 		    {
@@ -437,6 +472,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> AppendFormat<TArg0, TArg1, TArg2>(System.IFormatProvider? provider, System.Text.CompositeFormat format, TArg0 arg0, TArg1 arg1, TArg2 arg2)
+			
 		{
 		    try
 		    {
@@ -449,6 +485,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> AppendFormat(System.IFormatProvider? provider, System.Text.CompositeFormat format, params object?[] args)
+			
 		{
 		    try
 		    {
@@ -461,6 +498,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> AppendFormat(System.IFormatProvider? provider, System.Text.CompositeFormat format, System.ReadOnlySpan<object?> args)
+			
 		{
 		    try
 		    {
@@ -473,6 +511,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> AppendJoin(char separator, params object?[] values)
+			
 		{
 		    try
 		    {
@@ -485,6 +524,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> AppendJoin(char separator, params string?[] values)
+			
 		{
 		    try
 		    {
@@ -497,6 +537,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> AppendJoin(string? separator, params object?[] values)
+			
 		{
 		    try
 		    {
@@ -509,6 +550,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> AppendJoin(string? separator, params string?[] values)
+			
 		{
 		    try
 		    {
@@ -521,6 +563,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> AppendJoin<T>(char separator, System.Collections.Generic.IEnumerable<T> values)
+			
 		{
 		    try
 		    {
@@ -533,6 +576,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> AppendJoin<T>(string? separator, System.Collections.Generic.IEnumerable<T> values)
+			
 		{
 		    try
 		    {
@@ -545,6 +589,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> AppendLine()
+			
 		{
 		    try
 		    {
@@ -557,6 +602,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> AppendLine(System.IFormatProvider? provider, ref System.Text.StringBuilder.AppendInterpolatedStringHandler handler)
+			
 		{
 		    try
 		    {
@@ -569,6 +615,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> AppendLine(string? value)
+			
 		{
 		    try
 		    {
@@ -581,6 +628,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> AppendLine(ref System.Text.StringBuilder.AppendInterpolatedStringHandler handler)
+			
 		{
 		    try
 		    {
@@ -593,6 +641,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> Clear()
+			
 		{
 		    try
 		    {
@@ -605,6 +654,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<Success, Error> CopyTo(int sourceIndex, char[] destination, int destinationIndex, int count)
+			
 		{
 		    try
 		    {
@@ -618,6 +668,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<Success, Error> CopyTo(int sourceIndex, System.Span<char> destination, int count)
+			
 		{
 		    try
 		    {
@@ -631,6 +682,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<int, Error> EnsureCapacity(int capacity)
+			
 		{
 		    try
 		    {
@@ -643,6 +695,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<bool, Error> Equals(System.ReadOnlySpan<char> span)
+			
 		{
 		    try
 		    {
@@ -655,6 +708,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<bool, Error> Equals(System.Text.StringBuilder? sb)
+			
 		{
 		    try
 		    {
@@ -667,6 +721,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder.ChunkEnumerator, Error> GetChunks()
+			
 		{
 		    try
 		    {
@@ -679,6 +734,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> Insert(int index, bool value)
+			
 		{
 		    try
 		    {
@@ -691,6 +747,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> Insert(int index, byte value)
+			
 		{
 		    try
 		    {
@@ -703,6 +760,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> Insert(int index, char value)
+			
 		{
 		    try
 		    {
@@ -715,6 +773,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> Insert(int index, char[]? value)
+			
 		{
 		    try
 		    {
@@ -727,6 +786,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> Insert(int index, char[]? value, int startIndex, int charCount)
+			
 		{
 		    try
 		    {
@@ -739,6 +799,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> Insert(int index, decimal value)
+			
 		{
 		    try
 		    {
@@ -751,6 +812,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> Insert(int index, double value)
+			
 		{
 		    try
 		    {
@@ -763,6 +825,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> Insert(int index, short value)
+			
 		{
 		    try
 		    {
@@ -775,6 +838,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> Insert(int index, int value)
+			
 		{
 		    try
 		    {
@@ -787,6 +851,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> Insert(int index, long value)
+			
 		{
 		    try
 		    {
@@ -799,6 +864,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> Insert(int index, object? value)
+			
 		{
 		    try
 		    {
@@ -811,6 +877,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> Insert(int index, System.ReadOnlySpan<char> value)
+			
 		{
 		    try
 		    {
@@ -823,6 +890,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> Insert(int index, sbyte value)
+			
 		{
 		    try
 		    {
@@ -835,6 +903,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> Insert(int index, float value)
+			
 		{
 		    try
 		    {
@@ -847,6 +916,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> Insert(int index, string? value)
+			
 		{
 		    try
 		    {
@@ -859,6 +929,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> Insert(int index, string? value, int count)
+			
 		{
 		    try
 		    {
@@ -871,6 +942,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> Insert(int index, ushort value)
+			
 		{
 		    try
 		    {
@@ -883,6 +955,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> Insert(int index, uint value)
+			
 		{
 		    try
 		    {
@@ -895,6 +968,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> Insert(int index, ulong value)
+			
 		{
 		    try
 		    {
@@ -907,6 +981,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> Remove(int startIndex, int length)
+			
 		{
 		    try
 		    {
@@ -919,6 +994,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> Replace(char oldChar, char newChar)
+			
 		{
 		    try
 		    {
@@ -931,6 +1007,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> Replace(char oldChar, char newChar, int startIndex, int count)
+			
 		{
 		    try
 		    {
@@ -943,6 +1020,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> Replace(string oldValue, string? newValue)
+			
 		{
 		    try
 		    {
@@ -955,6 +1033,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> Replace(string oldValue, string? newValue, int startIndex, int count)
+			
 		{
 		    try
 		    {
@@ -967,6 +1046,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public new Either<string, Error> ToString()
+			
 		{
 		    try
 		    {
@@ -979,6 +1059,7 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<string, Error> ToString(int startIndex, int length)
+			
 		{
 		    try
 		    {

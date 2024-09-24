@@ -17,6 +17,7 @@ public static class Task_string__Auto__Extensions
         public required System.Threading.Tasks.Task<string> Value { get; init; }
         
 		public Either<System.Runtime.CompilerServices.ConfiguredTaskAwaitable<string>, Error> ConfigureAwait(bool continueOnCapturedContext)
+			
 		{
 		    try
 		    {
@@ -29,6 +30,7 @@ public static class Task_string__Auto__Extensions
 		}
 		
 		public Either<System.Runtime.CompilerServices.ConfiguredTaskAwaitable<string>, Error> ConfigureAwait(System.Threading.Tasks.ConfigureAwaitOptions options)
+			
 		{
 		    try
 		    {
@@ -41,6 +43,7 @@ public static class Task_string__Auto__Extensions
 		}
 		
 		public async Task<Either<Success, Error>> ContinueWith(System.Action<System.Threading.Tasks.Task<string>, object?> continuationAction, object? state)
+			
 		{
 		    try
 		    {
@@ -54,6 +57,7 @@ public static class Task_string__Auto__Extensions
 		}
 		
 		public async Task<Either<Success, Error>> ContinueWith(System.Action<System.Threading.Tasks.Task<string>, object?> continuationAction, object? state, System.Threading.CancellationToken cancellationToken)
+			
 		{
 		    try
 		    {
@@ -67,6 +71,7 @@ public static class Task_string__Auto__Extensions
 		}
 		
 		public async Task<Either<Success, Error>> ContinueWith(System.Action<System.Threading.Tasks.Task<string>, object?> continuationAction, object? state, System.Threading.CancellationToken cancellationToken, System.Threading.Tasks.TaskContinuationOptions continuationOptions, System.Threading.Tasks.TaskScheduler scheduler)
+			
 		{
 		    try
 		    {
@@ -80,6 +85,7 @@ public static class Task_string__Auto__Extensions
 		}
 		
 		public async Task<Either<Success, Error>> ContinueWith(System.Action<System.Threading.Tasks.Task<string>, object?> continuationAction, object? state, System.Threading.Tasks.TaskContinuationOptions continuationOptions)
+			
 		{
 		    try
 		    {
@@ -93,6 +99,7 @@ public static class Task_string__Auto__Extensions
 		}
 		
 		public async Task<Either<Success, Error>> ContinueWith(System.Action<System.Threading.Tasks.Task<string>, object?> continuationAction, object? state, System.Threading.Tasks.TaskScheduler scheduler)
+			
 		{
 		    try
 		    {
@@ -106,6 +113,7 @@ public static class Task_string__Auto__Extensions
 		}
 		
 		public async Task<Either<Success, Error>> ContinueWith(System.Action<System.Threading.Tasks.Task<string>> continuationAction)
+			
 		{
 		    try
 		    {
@@ -119,6 +127,7 @@ public static class Task_string__Auto__Extensions
 		}
 		
 		public async Task<Either<Success, Error>> ContinueWith(System.Action<System.Threading.Tasks.Task<string>> continuationAction, System.Threading.CancellationToken cancellationToken)
+			
 		{
 		    try
 		    {
@@ -132,6 +141,7 @@ public static class Task_string__Auto__Extensions
 		}
 		
 		public async Task<Either<Success, Error>> ContinueWith(System.Action<System.Threading.Tasks.Task<string>> continuationAction, System.Threading.CancellationToken cancellationToken, System.Threading.Tasks.TaskContinuationOptions continuationOptions, System.Threading.Tasks.TaskScheduler scheduler)
+			
 		{
 		    try
 		    {
@@ -145,6 +155,7 @@ public static class Task_string__Auto__Extensions
 		}
 		
 		public async Task<Either<Success, Error>> ContinueWith(System.Action<System.Threading.Tasks.Task<string>> continuationAction, System.Threading.Tasks.TaskContinuationOptions continuationOptions)
+			
 		{
 		    try
 		    {
@@ -158,6 +169,7 @@ public static class Task_string__Auto__Extensions
 		}
 		
 		public async Task<Either<Success, Error>> ContinueWith(System.Action<System.Threading.Tasks.Task<string>> continuationAction, System.Threading.Tasks.TaskScheduler scheduler)
+			
 		{
 		    try
 		    {
@@ -171,6 +183,7 @@ public static class Task_string__Auto__Extensions
 		}
 		
 		public async Task<Either<TNewResult, Error>> ContinueWith<TNewResult>(System.Func<System.Threading.Tasks.Task<string>, object?, TNewResult> continuationFunction, object? state)
+			
 		{
 		    try
 		    {
@@ -183,6 +196,7 @@ public static class Task_string__Auto__Extensions
 		}
 		
 		public async Task<Either<TNewResult, Error>> ContinueWith<TNewResult>(System.Func<System.Threading.Tasks.Task<string>, object?, TNewResult> continuationFunction, object? state, System.Threading.CancellationToken cancellationToken)
+			
 		{
 		    try
 		    {
@@ -195,6 +209,7 @@ public static class Task_string__Auto__Extensions
 		}
 		
 		public async Task<Either<TNewResult, Error>> ContinueWith<TNewResult>(System.Func<System.Threading.Tasks.Task<string>, object?, TNewResult> continuationFunction, object? state, System.Threading.CancellationToken cancellationToken, System.Threading.Tasks.TaskContinuationOptions continuationOptions, System.Threading.Tasks.TaskScheduler scheduler)
+			
 		{
 		    try
 		    {
@@ -207,6 +222,7 @@ public static class Task_string__Auto__Extensions
 		}
 		
 		public async Task<Either<TNewResult, Error>> ContinueWith<TNewResult>(System.Func<System.Threading.Tasks.Task<string>, object?, TNewResult> continuationFunction, object? state, System.Threading.Tasks.TaskContinuationOptions continuationOptions)
+			
 		{
 		    try
 		    {
@@ -219,6 +235,7 @@ public static class Task_string__Auto__Extensions
 		}
 		
 		public async Task<Either<TNewResult, Error>> ContinueWith<TNewResult>(System.Func<System.Threading.Tasks.Task<string>, object?, TNewResult> continuationFunction, object? state, System.Threading.Tasks.TaskScheduler scheduler)
+			
 		{
 		    try
 		    {
@@ -231,6 +248,7 @@ public static class Task_string__Auto__Extensions
 		}
 		
 		public async Task<Either<TNewResult, Error>> ContinueWith<TNewResult>(System.Func<System.Threading.Tasks.Task<string>, TNewResult> continuationFunction)
+			
 		{
 		    try
 		    {
@@ -243,6 +261,7 @@ public static class Task_string__Auto__Extensions
 		}
 		
 		public async Task<Either<TNewResult, Error>> ContinueWith<TNewResult>(System.Func<System.Threading.Tasks.Task<string>, TNewResult> continuationFunction, System.Threading.CancellationToken cancellationToken)
+			
 		{
 		    try
 		    {
@@ -255,6 +274,7 @@ public static class Task_string__Auto__Extensions
 		}
 		
 		public async Task<Either<TNewResult, Error>> ContinueWith<TNewResult>(System.Func<System.Threading.Tasks.Task<string>, TNewResult> continuationFunction, System.Threading.CancellationToken cancellationToken, System.Threading.Tasks.TaskContinuationOptions continuationOptions, System.Threading.Tasks.TaskScheduler scheduler)
+			
 		{
 		    try
 		    {
@@ -267,6 +287,7 @@ public static class Task_string__Auto__Extensions
 		}
 		
 		public async Task<Either<TNewResult, Error>> ContinueWith<TNewResult>(System.Func<System.Threading.Tasks.Task<string>, TNewResult> continuationFunction, System.Threading.Tasks.TaskContinuationOptions continuationOptions)
+			
 		{
 		    try
 		    {
@@ -279,6 +300,7 @@ public static class Task_string__Auto__Extensions
 		}
 		
 		public async Task<Either<TNewResult, Error>> ContinueWith<TNewResult>(System.Func<System.Threading.Tasks.Task<string>, TNewResult> continuationFunction, System.Threading.Tasks.TaskScheduler scheduler)
+			
 		{
 		    try
 		    {
@@ -291,6 +313,7 @@ public static class Task_string__Auto__Extensions
 		}
 		
 		public Either<System.Runtime.CompilerServices.TaskAwaiter<string>, Error> GetAwaiter()
+			
 		{
 		    try
 		    {
@@ -303,6 +326,7 @@ public static class Task_string__Auto__Extensions
 		}
 		
 		public async Task<Either<string, Error>> WaitAsync(System.Threading.CancellationToken cancellationToken)
+			
 		{
 		    try
 		    {
@@ -315,6 +339,7 @@ public static class Task_string__Auto__Extensions
 		}
 		
 		public async Task<Either<string, Error>> WaitAsync(System.TimeSpan timeout)
+			
 		{
 		    try
 		    {
@@ -327,6 +352,7 @@ public static class Task_string__Auto__Extensions
 		}
 		
 		public async Task<Either<string, Error>> WaitAsync(System.TimeSpan timeout, System.Threading.CancellationToken cancellationToken)
+			
 		{
 		    try
 		    {
@@ -339,6 +365,7 @@ public static class Task_string__Auto__Extensions
 		}
 		
 		public async Task<Either<string, Error>> WaitAsync(System.TimeSpan timeout, System.TimeProvider timeProvider)
+			
 		{
 		    try
 		    {
@@ -351,6 +378,7 @@ public static class Task_string__Auto__Extensions
 		}
 		
 		public async Task<Either<string, Error>> WaitAsync(System.TimeSpan timeout, System.TimeProvider timeProvider, System.Threading.CancellationToken cancellationToken)
+			
 		{
 		    try
 		    {

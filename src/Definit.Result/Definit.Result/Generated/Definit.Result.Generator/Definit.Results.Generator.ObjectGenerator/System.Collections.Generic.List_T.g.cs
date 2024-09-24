@@ -8,15 +8,18 @@ namespace System.Collections.Generic;
 public static class List_T__Auto__Extensions
 {
     public static Wrapper<T> Results<T>(this System.Collections.Generic.List<T> value)
+	
     {
         return new Wrapper<T>() { Value = value };
     }
 
     public readonly struct Wrapper<T>
+	
     {
         public required System.Collections.Generic.List<T> Value { get; init; }
         
 		public Either<Success, Error> Add(T item)
+			
 		{
 		    try
 		    {
@@ -30,6 +33,7 @@ public static class List_T__Auto__Extensions
 		}
 		
 		public Either<Success, Error> AddRange(System.Collections.Generic.IEnumerable<T> collection)
+			
 		{
 		    try
 		    {
@@ -43,6 +47,7 @@ public static class List_T__Auto__Extensions
 		}
 		
 		public Either<System.Collections.ObjectModel.ReadOnlyCollection<T>, Error> AsReadOnly()
+			
 		{
 		    try
 		    {
@@ -55,6 +60,7 @@ public static class List_T__Auto__Extensions
 		}
 		
 		public Either<int, Error> BinarySearch(int index, int count, T item, System.Collections.Generic.IComparer<T>? comparer)
+			
 		{
 		    try
 		    {
@@ -67,6 +73,7 @@ public static class List_T__Auto__Extensions
 		}
 		
 		public Either<int, Error> BinarySearch(T item)
+			
 		{
 		    try
 		    {
@@ -79,6 +86,7 @@ public static class List_T__Auto__Extensions
 		}
 		
 		public Either<int, Error> BinarySearch(T item, System.Collections.Generic.IComparer<T>? comparer)
+			
 		{
 		    try
 		    {
@@ -91,6 +99,7 @@ public static class List_T__Auto__Extensions
 		}
 		
 		public Either<Success, Error> Clear()
+			
 		{
 		    try
 		    {
@@ -104,6 +113,7 @@ public static class List_T__Auto__Extensions
 		}
 		
 		public Either<bool, Error> Contains(T item)
+			
 		{
 		    try
 		    {
@@ -116,6 +126,7 @@ public static class List_T__Auto__Extensions
 		}
 		
 		public Either<System.Collections.Generic.List<TOutput>, Error> ConvertAll<TOutput>(System.Converter<T, TOutput> converter)
+			
 		{
 		    try
 		    {
@@ -128,6 +139,7 @@ public static class List_T__Auto__Extensions
 		}
 		
 		public Either<Success, Error> CopyTo(int index, T[] array, int arrayIndex, int count)
+			
 		{
 		    try
 		    {
@@ -141,6 +153,7 @@ public static class List_T__Auto__Extensions
 		}
 		
 		public Either<Success, Error> CopyTo(T[] array)
+			
 		{
 		    try
 		    {
@@ -154,6 +167,7 @@ public static class List_T__Auto__Extensions
 		}
 		
 		public Either<Success, Error> CopyTo(T[] array, int arrayIndex)
+			
 		{
 		    try
 		    {
@@ -167,6 +181,7 @@ public static class List_T__Auto__Extensions
 		}
 		
 		public Either<int, Error> EnsureCapacity(int capacity)
+			
 		{
 		    try
 		    {
@@ -179,6 +194,7 @@ public static class List_T__Auto__Extensions
 		}
 		
 		public Either<bool, Error> Exists(System.Predicate<T> match)
+			
 		{
 		    try
 		    {
@@ -191,6 +207,7 @@ public static class List_T__Auto__Extensions
 		}
 		
 		public Either<T?, Error> Find(System.Predicate<T> match)
+			
 		{
 		    try
 		    {
@@ -203,6 +220,7 @@ public static class List_T__Auto__Extensions
 		}
 		
 		public Either<System.Collections.Generic.List<T>, Error> FindAll(System.Predicate<T> match)
+			
 		{
 		    try
 		    {
@@ -215,6 +233,7 @@ public static class List_T__Auto__Extensions
 		}
 		
 		public Either<int, Error> FindIndex(int startIndex, int count, System.Predicate<T> match)
+			
 		{
 		    try
 		    {
@@ -227,6 +246,7 @@ public static class List_T__Auto__Extensions
 		}
 		
 		public Either<int, Error> FindIndex(int startIndex, System.Predicate<T> match)
+			
 		{
 		    try
 		    {
@@ -239,6 +259,7 @@ public static class List_T__Auto__Extensions
 		}
 		
 		public Either<int, Error> FindIndex(System.Predicate<T> match)
+			
 		{
 		    try
 		    {
@@ -251,6 +272,7 @@ public static class List_T__Auto__Extensions
 		}
 		
 		public Either<T?, Error> FindLast(System.Predicate<T> match)
+			
 		{
 		    try
 		    {
@@ -263,6 +285,7 @@ public static class List_T__Auto__Extensions
 		}
 		
 		public Either<int, Error> FindLastIndex(int startIndex, int count, System.Predicate<T> match)
+			
 		{
 		    try
 		    {
@@ -275,6 +298,7 @@ public static class List_T__Auto__Extensions
 		}
 		
 		public Either<int, Error> FindLastIndex(int startIndex, System.Predicate<T> match)
+			
 		{
 		    try
 		    {
@@ -287,6 +311,7 @@ public static class List_T__Auto__Extensions
 		}
 		
 		public Either<int, Error> FindLastIndex(System.Predicate<T> match)
+			
 		{
 		    try
 		    {
@@ -299,6 +324,7 @@ public static class List_T__Auto__Extensions
 		}
 		
 		public Either<Success, Error> ForEach(System.Action<T> action)
+			
 		{
 		    try
 		    {
@@ -312,6 +338,7 @@ public static class List_T__Auto__Extensions
 		}
 		
 		public Either<System.Collections.Generic.List<T>.Enumerator, Error> GetEnumerator()
+			
 		{
 		    try
 		    {
@@ -324,6 +351,7 @@ public static class List_T__Auto__Extensions
 		}
 		
 		public Either<System.Collections.Generic.List<T>, Error> GetRange(int index, int count)
+			
 		{
 		    try
 		    {
@@ -336,6 +364,7 @@ public static class List_T__Auto__Extensions
 		}
 		
 		public Either<int, Error> IndexOf(T item)
+			
 		{
 		    try
 		    {
@@ -348,6 +377,7 @@ public static class List_T__Auto__Extensions
 		}
 		
 		public Either<int, Error> IndexOf(T item, int index)
+			
 		{
 		    try
 		    {
@@ -360,6 +390,7 @@ public static class List_T__Auto__Extensions
 		}
 		
 		public Either<int, Error> IndexOf(T item, int index, int count)
+			
 		{
 		    try
 		    {
@@ -372,6 +403,7 @@ public static class List_T__Auto__Extensions
 		}
 		
 		public Either<Success, Error> Insert(int index, T item)
+			
 		{
 		    try
 		    {
@@ -385,6 +417,7 @@ public static class List_T__Auto__Extensions
 		}
 		
 		public Either<Success, Error> InsertRange(int index, System.Collections.Generic.IEnumerable<T> collection)
+			
 		{
 		    try
 		    {
@@ -398,6 +431,7 @@ public static class List_T__Auto__Extensions
 		}
 		
 		public Either<int, Error> LastIndexOf(T item)
+			
 		{
 		    try
 		    {
@@ -410,6 +444,7 @@ public static class List_T__Auto__Extensions
 		}
 		
 		public Either<int, Error> LastIndexOf(T item, int index)
+			
 		{
 		    try
 		    {
@@ -422,6 +457,7 @@ public static class List_T__Auto__Extensions
 		}
 		
 		public Either<int, Error> LastIndexOf(T item, int index, int count)
+			
 		{
 		    try
 		    {
@@ -434,6 +470,7 @@ public static class List_T__Auto__Extensions
 		}
 		
 		public Either<bool, Error> Remove(T item)
+			
 		{
 		    try
 		    {
@@ -446,6 +483,7 @@ public static class List_T__Auto__Extensions
 		}
 		
 		public Either<int, Error> RemoveAll(System.Predicate<T> match)
+			
 		{
 		    try
 		    {
@@ -458,6 +496,7 @@ public static class List_T__Auto__Extensions
 		}
 		
 		public Either<Success, Error> RemoveAt(int index)
+			
 		{
 		    try
 		    {
@@ -471,6 +510,7 @@ public static class List_T__Auto__Extensions
 		}
 		
 		public Either<Success, Error> RemoveRange(int index, int count)
+			
 		{
 		    try
 		    {
@@ -484,6 +524,7 @@ public static class List_T__Auto__Extensions
 		}
 		
 		public Either<Success, Error> Reverse()
+			
 		{
 		    try
 		    {
@@ -497,6 +538,7 @@ public static class List_T__Auto__Extensions
 		}
 		
 		public Either<Success, Error> Reverse(int index, int count)
+			
 		{
 		    try
 		    {
@@ -510,6 +552,7 @@ public static class List_T__Auto__Extensions
 		}
 		
 		public Either<System.Collections.Generic.List<T>, Error> Slice(int start, int length)
+			
 		{
 		    try
 		    {
@@ -522,6 +565,7 @@ public static class List_T__Auto__Extensions
 		}
 		
 		public Either<Success, Error> Sort()
+			
 		{
 		    try
 		    {
@@ -535,6 +579,7 @@ public static class List_T__Auto__Extensions
 		}
 		
 		public Either<Success, Error> Sort(System.Collections.Generic.IComparer<T>? comparer)
+			
 		{
 		    try
 		    {
@@ -548,6 +593,7 @@ public static class List_T__Auto__Extensions
 		}
 		
 		public Either<Success, Error> Sort(System.Comparison<T> comparison)
+			
 		{
 		    try
 		    {
@@ -561,6 +607,7 @@ public static class List_T__Auto__Extensions
 		}
 		
 		public Either<Success, Error> Sort(int index, int count, System.Collections.Generic.IComparer<T>? comparer)
+			
 		{
 		    try
 		    {
@@ -574,6 +621,7 @@ public static class List_T__Auto__Extensions
 		}
 		
 		public Either<T[], Error> ToArray()
+			
 		{
 		    try
 		    {
@@ -586,6 +634,7 @@ public static class List_T__Auto__Extensions
 		}
 		
 		public Either<Success, Error> TrimExcess()
+			
 		{
 		    try
 		    {
@@ -599,6 +648,7 @@ public static class List_T__Auto__Extensions
 		}
 		
 		public Either<bool, Error> TrueForAll(System.Predicate<T> match)
+			
 		{
 		    try
 		    {

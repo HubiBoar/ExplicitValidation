@@ -6,9 +6,11 @@ using System.Diagnostics.CodeAnalysis;
 namespace Definit.Resultss.Examples;
 
 partial class Examples
+	
 {
 	
 	private Definit.Results.Either<int, string, Definit.Resultss.Examples.NotFound> PrivateRun(int i)
+		
 	{
 	    try
 	    {
@@ -21,6 +23,7 @@ partial class Examples
 	}
 	
 	private Definit.Results.Error? PrivateRun2(string t)
+		
 	{
 	    try
 	    {
@@ -33,6 +36,7 @@ partial class Examples
 	}
 	
 	private Definit.Results.Either<string, Definit.Resultss.Examples.NotFound> PrivateRun(string t)
+		
 	{
 	    try
 	    {

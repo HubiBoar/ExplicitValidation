@@ -169,13 +169,40 @@ public class EitherBaseGenerator : IIncrementalGenerator
                 var genericConstraints = string.Join("\n\t", state.Select((isClass, i) =>
                 {
                     var genericParam = typeGenericParams.Value[i];
+                    var main = genericParam.Main;
 
-                    if(genericParam.Main is not null)
+                    if(isClass)
                     {
-                        return genericParam.ToString(); 
-                    }
+                        var cantBeClass = 
+                           main is GenericConstraints.Main.Struct
+                        || main is GenericConstraints.Main.Unmanaged;
+                         
+                        if(cantBeClass)
+                        {
+                            return genericParam.ToString();
+                        }
 
-                    var main = isClass ? 
+                        var newMain = main.IsNew() ? GenericConstraints.Main.ClassNew : GenericConstraints.Main.Class;
+
+                        return new GenericConstraints.Holder(genericParam.Name, newMain, genericParam.Types).AsString;                    
+                    }
+                    else
+                    {
+                        var canBeStruct = 
+                           main is GenericConstraints.Main.Struct
+                        || main is GenericConstraints.Main.New
+                        || main is GenericConstraints.Main.NotnullNew
+                        || main is GenericConstraints.Main.Notnull;
+                         
+                        if(canBeStruct == false)
+                        {
+                            return genericParam.ToString();
+                        }
+
+                        var newMain = GenericConstraints.Main.Struct;
+
+                        return new GenericConstraints.Holder(genericParam.Name, newMain, genericParam.Types).AsString;                    
+                    }
                 })); 
 
                 var deconstructor = $$"""
@@ -183,7 +210,7 @@ public class EitherBaseGenerator : IIncrementalGenerator
                 (
                     this {{typeName}} result,
                     {{outArgs}}
-                ){{constraints}}
+                ){{genericConstraints}}
                 {
                     ({{returns}}) = result.Value;
                 }
@@ -192,7 +219,7 @@ public class EitherBaseGenerator : IIncrementalGenerator
                 (
                     this {{typeName}}? result,
                     {{outArgs}}
-                ){{constraints}}
+                ){{genericConstraints}}
                 {
                     if(result is null)
                     {
@@ -209,7 +236,10 @@ public class EitherBaseGenerator : IIncrementalGenerator
                     .AppendLine(deconstructor);
             }
         }
-
+        else
+        {
+            //TODO
+        }
 
         return builder.ToString();
     }

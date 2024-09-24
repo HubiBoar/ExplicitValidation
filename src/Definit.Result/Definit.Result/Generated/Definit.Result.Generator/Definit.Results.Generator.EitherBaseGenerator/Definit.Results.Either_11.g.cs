@@ -4,7 +4,18 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Definit.Results;
 
-public readonly struct Either<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> : Either<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>.Base 
+public readonly struct Either<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> : Either<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>.Base
+	where T0 : notnull
+	where T1 : notnull
+	where T2 : notnull
+	where T3 : notnull
+	where T4 : notnull
+	where T5 : notnull
+	where T6 : notnull
+	where T7 : notnull
+	where T8 : notnull
+	where T9 : notnull
+	where T10 : notnull 
 {
     public interface Base : IEitherBase<(Or<T0>?, Or<T1>?, Or<T2>?, Or<T3>?, Or<T4>?, Or<T5>?, Or<T6>?, Or<T7>?, Or<T8>?, Or<T9>?, Or<T10>?)>;
 
@@ -39,49 +50,7 @@ public readonly struct Either<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> : Eit
 	public static implicit operator Either<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(T10 value) => new (value);
 }
 
-public static partial class EitherExtensions 
+public static class EitherExtensions_11 
 {
-    public static void Deconstruct<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>
-	(
-	    this Either<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> result,
-	    out Or<T0>? T0_arg,
-		out Or<T1>? T1_arg,
-		out Or<T2>? T2_arg,
-		out Or<T3>? T3_arg,
-		out Or<T4>? T4_arg,
-		out Or<T5>? T5_arg,
-		out Or<T6>? T6_arg,
-		out Or<T7>? T7_arg,
-		out Or<T8>? T8_arg,
-		out Or<T9>? T9_arg,
-		out Or<T10>? T10_arg
-	)
-	{
-	    (T0_arg, T1_arg, T2_arg, T3_arg, T4_arg, T5_arg, T6_arg, T7_arg, T8_arg, T9_arg, T10_arg) = result.Value;
-	}
-	
-	public static void Deconstruct<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>
-	(
-	    this Either<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>? result,
-	    out Or<T0>? T0_arg,
-		out Or<T1>? T1_arg,
-		out Or<T2>? T2_arg,
-		out Or<T3>? T3_arg,
-		out Or<T4>? T4_arg,
-		out Or<T5>? T5_arg,
-		out Or<T6>? T6_arg,
-		out Or<T7>? T7_arg,
-		out Or<T8>? T8_arg,
-		out Or<T9>? T9_arg,
-		out Or<T10>? T10_arg
-	)
-	{
-	    if(result is null)
-	    {
-	        T0_arg = null; T1_arg = null; T2_arg = null; T3_arg = null; T4_arg = null; T5_arg = null; T6_arg = null; T7_arg = null; T8_arg = null; T9_arg = null; T10_arg = null;
-	        return;
-	    }
-	
-	    (T0_arg, T1_arg, T2_arg, T3_arg, T4_arg, T5_arg, T6_arg, T7_arg, T8_arg, T9_arg, T10_arg) = result.Value.Value;
-	}
+    
 }

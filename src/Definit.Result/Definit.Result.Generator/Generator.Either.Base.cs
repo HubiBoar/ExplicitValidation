@@ -82,7 +82,7 @@ public class EitherBaseGenerator : IIncrementalGenerator
 
             namespace Definit.Results;
 
-            public readonly struct {{either}} : {{either}}.Base 
+            public readonly struct {{either}} : {{either}}.Base{{generic}} 
             {
                 public interface Base : IEitherBase<({{genericOrArgs}})>;
 
@@ -166,7 +166,7 @@ public class EitherBaseGenerator : IIncrementalGenerator
 
             foreach(var state in states)
             {
-                var genericConstraints = string.Join("\n\t", state.Select((isClass, i) =>
+                var genericConstraints = new GenericConstraints.Holders(state.Select((isClass, i) =>
                 {
                     var genericParam = typeGenericParams.Value[i];
                     var main = genericParam.Main;
@@ -179,12 +179,12 @@ public class EitherBaseGenerator : IIncrementalGenerator
                          
                         if(cantBeClass)
                         {
-                            return genericParam.ToString();
+                            return genericParam;
                         }
 
                         var newMain = main.IsNew() ? GenericConstraints.Main.ClassNew : GenericConstraints.Main.Class;
 
-                        return new GenericConstraints.Holder(genericParam.Name, newMain, genericParam.Types).AsString;                    
+                        return new GenericConstraints.Holder(genericParam.Name, newMain, genericParam.Types);
                     }
                     else
                     {
@@ -196,14 +196,14 @@ public class EitherBaseGenerator : IIncrementalGenerator
                          
                         if(canBeStruct == false)
                         {
-                            return genericParam.ToString();
+                            return genericParam;
                         }
 
                         var newMain = GenericConstraints.Main.Struct;
 
-                        return new GenericConstraints.Holder(genericParam.Name, newMain, genericParam.Types).AsString;                    
+                        return new GenericConstraints.Holder(genericParam.Name, newMain, genericParam.Types);
                     }
-                })); 
+                }).ToImmutableArray()); 
 
                 var deconstructor = $$"""
                 public static void Deconstruct<{{typeGenericArgs}}>

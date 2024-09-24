@@ -28,10 +28,9 @@ public readonly struct Either<T0, T1, T2> : Either<T0, T1, T2>.Base
 
 public static class EitherExtensions_3 
 {
-    
-	public static void Deconstruct<T0, T1, T2>
+    public static void Deconstruct<T0, T1, T2>
 	(
-	    this Either<T0, T1, T2> result,
+	    this Either<T0, T1, T2> either,
 	    out T0? T0_arg,
 		out T1? T1_arg,
 		out T2? T2_arg
@@ -40,12 +39,12 @@ public static class EitherExtensions_3
 		where T1 : struct
 		where T2 : struct
 	{
-	    (T0_arg, T1_arg, T2_arg) = result.Value;
+	    (T0_arg, T1_arg, T2_arg) = either.Value;
 	}
 	
 	public static void Deconstruct<T0, T1, T2>
 	(
-	    this Either<T0, T1, T2>? result,
+	    this Either<T0, T1, T2>? either,
 	    out T0? T0_arg,
 		out T1? T1_arg,
 		out T2? T2_arg
@@ -60,12 +59,12 @@ public static class EitherExtensions_3
 	        return;
 	    }
 	
-	    (T0_arg, T1_arg, T2_arg) = result.Value.Value;
+	    (T0_arg, T1_arg, T2_arg) = either.Value.Value;
 	}
 	
 	public static void Deconstruct<T0, T1, T2>
 	(
-	    this Either<T0, T1, T2> result,
+	    this Either<T0, T1, T2> either,
 	    out T0? T0_arg,
 		out T1? T1_arg,
 		out T2? T2_arg
@@ -74,12 +73,12 @@ public static class EitherExtensions_3
 		where T1 : struct
 		where T2 : struct
 	{
-	    (T0_arg, T1_arg, T2_arg) = result.Value;
+	    (T0_arg, T1_arg, T2_arg) = either.Value;
 	}
 	
 	public static void Deconstruct<T0, T1, T2>
 	(
-	    this Either<T0, T1, T2>? result,
+	    this Either<T0, T1, T2>? either,
 	    out T0? T0_arg,
 		out T1? T1_arg,
 		out T2? T2_arg
@@ -94,12 +93,12 @@ public static class EitherExtensions_3
 	        return;
 	    }
 	
-	    (T0_arg, T1_arg, T2_arg) = result.Value.Value;
+	    (T0_arg, T1_arg, T2_arg) = either.Value.Value;
 	}
 	
 	public static void Deconstruct<T0, T1, T2>
 	(
-	    this Either<T0, T1, T2> result,
+	    this Either<T0, T1, T2> either,
 	    out T0? T0_arg,
 		out T1? T1_arg,
 		out T2? T2_arg
@@ -108,12 +107,12 @@ public static class EitherExtensions_3
 		where T1 : class
 		where T2 : struct
 	{
-	    (T0_arg, T1_arg, T2_arg) = result.Value;
+	    (T0_arg, T1_arg, T2_arg) = either.Value;
 	}
 	
 	public static void Deconstruct<T0, T1, T2>
 	(
-	    this Either<T0, T1, T2>? result,
+	    this Either<T0, T1, T2>? either,
 	    out T0? T0_arg,
 		out T1? T1_arg,
 		out T2? T2_arg
@@ -128,12 +127,12 @@ public static class EitherExtensions_3
 	        return;
 	    }
 	
-	    (T0_arg, T1_arg, T2_arg) = result.Value.Value;
+	    (T0_arg, T1_arg, T2_arg) = either.Value.Value;
 	}
 	
 	public static void Deconstruct<T0, T1, T2>
 	(
-	    this Either<T0, T1, T2> result,
+	    this Either<T0, T1, T2> either,
 	    out T0? T0_arg,
 		out T1? T1_arg,
 		out T2? T2_arg
@@ -142,12 +141,12 @@ public static class EitherExtensions_3
 		where T1 : class
 		where T2 : struct
 	{
-	    (T0_arg, T1_arg, T2_arg) = result.Value;
+	    (T0_arg, T1_arg, T2_arg) = either.Value;
 	}
 	
 	public static void Deconstruct<T0, T1, T2>
 	(
-	    this Either<T0, T1, T2>? result,
+	    this Either<T0, T1, T2>? either,
 	    out T0? T0_arg,
 		out T1? T1_arg,
 		out T2? T2_arg
@@ -162,26 +161,12 @@ public static class EitherExtensions_3
 	        return;
 	    }
 	
-	    (T0_arg, T1_arg, T2_arg) = result.Value.Value;
+	    (T0_arg, T1_arg, T2_arg) = either.Value.Value;
 	}
 	
 	public static void Deconstruct<T0, T1, T2>
 	(
-	    this Either<T0, T1, T2> result,
-	    out T0? T0_arg,
-		out T1? T1_arg,
-		out T2? T2_arg
-	)
-		where T0 : struct
-		where T1 : struct
-		where T2 : class
-	{
-	    (T0_arg, T1_arg, T2_arg) = result.Value;
-	}
-	
-	public static void Deconstruct<T0, T1, T2>
-	(
-	    this Either<T0, T1, T2>? result,
+	    this Either<T0, T1, T2> either,
 	    out T0? T0_arg,
 		out T1? T1_arg,
 		out T2? T2_arg
@@ -190,37 +175,17 @@ public static class EitherExtensions_3
 		where T1 : struct
 		where T2 : class
 	{
-	    if(result is null)
-	    {
-	        T0_arg = null; T1_arg = null; T2_arg = null;
-	        return;
-	    }
-	
-	    (T0_arg, T1_arg, T2_arg) = result.Value.Value;
+	    (T0_arg, T1_arg, T2_arg) = either.Value;
 	}
 	
 	public static void Deconstruct<T0, T1, T2>
 	(
-	    this Either<T0, T1, T2> result,
+	    this Either<T0, T1, T2>? either,
 	    out T0? T0_arg,
 		out T1? T1_arg,
 		out T2? T2_arg
 	)
-		where T0 : class
-		where T1 : struct
-		where T2 : class
-	{
-	    (T0_arg, T1_arg, T2_arg) = result.Value;
-	}
-	
-	public static void Deconstruct<T0, T1, T2>
-	(
-	    this Either<T0, T1, T2>? result,
-	    out T0? T0_arg,
-		out T1? T1_arg,
-		out T2? T2_arg
-	)
-		where T0 : class
+		where T0 : struct
 		where T1 : struct
 		where T2 : class
 	{
@@ -230,12 +195,46 @@ public static class EitherExtensions_3
 	        return;
 	    }
 	
-	    (T0_arg, T1_arg, T2_arg) = result.Value.Value;
+	    (T0_arg, T1_arg, T2_arg) = either.Value.Value;
 	}
 	
 	public static void Deconstruct<T0, T1, T2>
 	(
-	    this Either<T0, T1, T2> result,
+	    this Either<T0, T1, T2> either,
+	    out T0? T0_arg,
+		out T1? T1_arg,
+		out T2? T2_arg
+	)
+		where T0 : class
+		where T1 : struct
+		where T2 : class
+	{
+	    (T0_arg, T1_arg, T2_arg) = either.Value;
+	}
+	
+	public static void Deconstruct<T0, T1, T2>
+	(
+	    this Either<T0, T1, T2>? either,
+	    out T0? T0_arg,
+		out T1? T1_arg,
+		out T2? T2_arg
+	)
+		where T0 : class
+		where T1 : struct
+		where T2 : class
+	{
+	    if(result is null)
+	    {
+	        T0_arg = null; T1_arg = null; T2_arg = null;
+	        return;
+	    }
+	
+	    (T0_arg, T1_arg, T2_arg) = either.Value.Value;
+	}
+	
+	public static void Deconstruct<T0, T1, T2>
+	(
+	    this Either<T0, T1, T2> either,
 	    out T0? T0_arg,
 		out T1? T1_arg,
 		out T2? T2_arg
@@ -244,12 +243,12 @@ public static class EitherExtensions_3
 		where T1 : class
 		where T2 : class
 	{
-	    (T0_arg, T1_arg, T2_arg) = result.Value;
+	    (T0_arg, T1_arg, T2_arg) = either.Value;
 	}
 	
 	public static void Deconstruct<T0, T1, T2>
 	(
-	    this Either<T0, T1, T2>? result,
+	    this Either<T0, T1, T2>? either,
 	    out T0? T0_arg,
 		out T1? T1_arg,
 		out T2? T2_arg
@@ -264,12 +263,12 @@ public static class EitherExtensions_3
 	        return;
 	    }
 	
-	    (T0_arg, T1_arg, T2_arg) = result.Value.Value;
+	    (T0_arg, T1_arg, T2_arg) = either.Value.Value;
 	}
 	
 	public static void Deconstruct<T0, T1, T2>
 	(
-	    this Either<T0, T1, T2> result,
+	    this Either<T0, T1, T2> either,
 	    out T0? T0_arg,
 		out T1? T1_arg,
 		out T2? T2_arg
@@ -278,12 +277,12 @@ public static class EitherExtensions_3
 		where T1 : class
 		where T2 : class
 	{
-	    (T0_arg, T1_arg, T2_arg) = result.Value;
+	    (T0_arg, T1_arg, T2_arg) = either.Value;
 	}
 	
 	public static void Deconstruct<T0, T1, T2>
 	(
-	    this Either<T0, T1, T2>? result,
+	    this Either<T0, T1, T2>? either,
 	    out T0? T0_arg,
 		out T1? T1_arg,
 		out T2? T2_arg
@@ -298,7 +297,6 @@ public static class EitherExtensions_3
 	        return;
 	    }
 	
-	    (T0_arg, T1_arg, T2_arg) = result.Value.Value;
+	    (T0_arg, T1_arg, T2_arg) = either.Value.Value;
 	}
-	
 }

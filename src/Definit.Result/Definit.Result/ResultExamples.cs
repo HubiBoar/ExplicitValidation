@@ -1,24 +1,24 @@
 using System.Text;
 using Definit.Results;
 
-[assembly: GenerateEither.Base(10)]
-[assembly: GenerateResult.Base(5, 5)]
-//[assembly: GenerateResult.Object(typeof(StringBuilder))]
-//[assembly: GenerateResult.Object<StringReader>]
-//[assembly: GenerateResult.Object(typeof(List<>))]
-//[assembly: GenerateResult.Object<Task<string>>]
+//[assembly: GenerateEither.Base(10)]
+//[assembly: GenerateResult.Base(5, 5)]
+[assembly: GenerateResult.Object(typeof(StringBuilder))]
+[assembly: GenerateResult.Object<StringReader>]
+[assembly: GenerateResult.Object(typeof(List<>))]
+[assembly: GenerateResult.Object<Task<string>>]
 
 namespace Definit.Resultss.Examples;
 
-//[GenerateResult]
+[GenerateResult]
 public partial struct ResultExample<T> : Result<T>.Error<NotFound>.Base
     where T : notnull;
 
-//[GenerateResult]
+[GenerateResult]
 public partial struct ResultExample2<T> : Result<T, string>.Error<NotFound>.Base
     where T : notnull;
 
-//[GenerateEither]
+[GenerateEither]
 public partial struct EitherExample2<T> : Either<T, string, int>.Base
     where T : notnull;
 
@@ -47,19 +47,19 @@ public partial class Examples
         return default!;
     }
 
-    //[GenerateResult.Method.Private]
+    [GenerateResult.Method.Private]
     private ResultExample2<int> _PrivateRun(int i)
     {
         return "";
     }
 
-    //[GenerateResult.Method.Private]
+    [GenerateResult.Method.Private]
     private Result _PrivateRun2(string t)
     {
         return Result.Success;
     }
 
-    //[GenerateResult.Method.Private]
+    [GenerateResult.Method.Private]
     private Result<string>.Error<NotFound> _PrivateRun(string t)
     {
         var result = GetResultExample2();
@@ -83,7 +83,7 @@ public partial class Examples
         return t;
     }
 
-    //[GenerateResult.Method.Public]
+    [GenerateResult.Method.Public]
     private static Task<Result<T>.Error<NotFound>> _PublicRun<T>(T t)
         where T : struct, IError<T>, IError
     {

@@ -152,19 +152,18 @@ public class EitherBaseGenerator : IIncrementalGenerator
     )
     {
         var length = allGenericParams.Value.Length;
-        var generic = allGenericParams.Value.Select(x => (Type: x, Name: $"{x.Name}_arg")).ToArray();
 
         var typeGenericArgs = string.Join(", ", typeGenericParams.Value.Select(x => x.Name));
-        var returns = string.Join(", ", generic.Select(x => x.Name));
-        var nullValues = string.Join(" ", generic.Select(x => $"{x.Name} = null;"));
 
-        var builder = new StringBuilder();
         if(length <= 4)
         {
+            var generic = allGenericParams.Value.Select(x => (Type: x, Name: $"{x.Name}_arg")).ToArray();
             var outArgs = string.Join(",\n\t", generic.Select(x => $"out {x.Type.Name}? {x.Name}"));
+            var returns = string.Join(", ", generic.Select(x => x.Name));
+            var nullValues = string.Join(" ", generic.Select(x => $"{x.Name} = null;"));
             var states = GenerateAllStates(length);
 
-            foreach(var state in states)
+            return string.Join("\n\n", states.Select(state => 
             {
                 var genericConstraints = new GenericConstraints.Holders(state.Select((isClass, i) =>
                 {
@@ -205,19 +204,19 @@ public class EitherBaseGenerator : IIncrementalGenerator
                     }
                 }).ToImmutableArray()); 
 
-                var deconstructor = $$"""
+                return $$"""
                 public static void Deconstruct<{{typeGenericArgs}}>
                 (
-                    this {{typeName}} result,
+                    this {{typeName}} either,
                     {{outArgs}}
                 ){{genericConstraints}}
                 {
-                    ({{returns}}) = result.Value;
+                    ({{returns}}) = either.Value;
                 }
 
                 public static void Deconstruct<{{typeGenericArgs}}>
                 (
-                    this {{typeName}}? result,
+                    this {{typeName}}? either,
                     {{outArgs}}
                 ){{genericConstraints}}
                 {
@@ -227,27 +226,94 @@ public class EitherBaseGenerator : IIncrementalGenerator
                         return;
                     }
 
-                    ({{returns}}) = result.Value.Value;
+                    ({{returns}}) = either.Value.Value;
                 }
                 """;
-
-                builder
-                    .AppendLine()
-                    .AppendLine(deconstructor);
-            }
+            }));
         }
         else
         {
-            //TODO
-        }
+            int roundedUp = (int)Math.Ceiling((double)length / 4); 
+            var parts = new int[roundedUp];
+            var total = length;
+            while(total > 0)
+            {
+                for(int i = 0; i < roundedUp; i++)
+                {
+                    parts[i]++; 
+                    total --;
+                    if(total == 0)
+                    {
+                        break;
+                    }
+                }
+            }
+            
+            int starter = 0;
+            var eitherGenerics = parts.Select(x =>
+            {
+                var indexes = Enumerable.Range(starter, x).ToArray();
+                var result = indexes.Select(i => allGenericParams.Value[i]).ToArray();             
+                starter += x;
+                return (Generics: result, ArgsIndexes: indexes);
+            })
+            .ToArray();
 
-        return builder.ToString();
+            var eitherGenericsArgs = eitherGenerics
+                .Select((x, i) => (Type: "Either<" + string.Join(", ", x.Generics.Select(e => e.Name)) + ">", Name: $"arg_{i}", Generic: x))
+                .ToArray();
+
+            var outArgs = string.Join(",\n\t", eitherGenericsArgs.Select((x) => $"out {x.Type}? {x.Name}"));
+            var nullValues = string.Join(" ", eitherGenericsArgs.Select(x => $"{x.Name} = null;"));
+            var genericConstraints = allGenericParams.ToString();
+            var results = Enumerable.Range(0, length).Select(x => $"out_{x}").ToArray();
+            var assignOut = string.Join(", ", results);
+
+            var returns = string.Join("\n\t", eitherGenericsArgs
+                .Select(x => $"{x.Name} = " + string.Join("", x
+                    .Generic
+                    .ArgsIndexes
+                    .Select(i => 
+                    {
+                        var result = results[i];
+                        return $"{result} is not null ? new ({result}.Value.Out) : ";
+                    }))
+                    + "null;" )); 
+
+            return $$"""
+            public static void Deconstruct<{{typeGenericArgs}}>
+            (
+                this {{typeName}} either,
+                {{outArgs}}
+            ){{genericConstraints}}
+            {
+                var ({{assignOut}}) = either.Value;
+                {{returns}}
+            }
+
+            public static void Deconstruct<{{typeGenericArgs}}>
+            (
+                this {{typeName}}? either,
+                {{outArgs}}
+            ){{genericConstraints}}
+            {
+                if(result is null)
+                {
+                    {{nullValues}}
+                    return;
+                }
+
+                var ({{assignOut}}) = either.Value.Value;
+                {{returns}}
+            }
+            """;
     }
+}
 
-    private static bool[][] GenerateAllStates(int size)
-    {
-        int totalStates = (int)Math.Pow(2, size);  
-        bool[][] result = new bool[totalStates][];
+private static bool[][] GenerateAllStates(int size)
+{
+    int totalStates = (int)Math.Pow(2, size);  
+    bool[][] result = new bool[totalStates][];
 
         for (int i = 0; i < totalStates; i++)
         {

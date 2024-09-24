@@ -34,5 +34,43 @@ public readonly struct Either<T0, T1, T2, T3, T4> : Either<T0, T1, T2, T3, T4>.B
 
 public static class EitherExtensions_5 
 {
-    
+    public static void Deconstruct<T0, T1, T2, T3, T4>
+	(
+	    this Either<T0, T1, T2, T3, T4> either,
+	    out Either<T0, T1, T2>? arg_0,
+		out Either<T3, T4>? arg_1
+	)
+		where T0 : notnull
+		where T1 : notnull
+		where T2 : notnull
+		where T3 : notnull
+		where T4 : notnull
+	{
+	    var (out_0, out_1, out_2, out_3, out_4) = either.Value;
+	    arg_0 = out_0 is not null ? new (out_0.Value.Out) : out_1 is not null ? new (out_1.Value.Out) : out_2 is not null ? new (out_2.Value.Out) : null;
+		arg_1 = out_3 is not null ? new (out_3.Value.Out) : out_4 is not null ? new (out_4.Value.Out) : null;
+	}
+	
+	public static void Deconstruct<T0, T1, T2, T3, T4>
+	(
+	    this Either<T0, T1, T2, T3, T4>? either,
+	    out Either<T0, T1, T2>? arg_0,
+		out Either<T3, T4>? arg_1
+	)
+		where T0 : notnull
+		where T1 : notnull
+		where T2 : notnull
+		where T3 : notnull
+		where T4 : notnull
+	{
+	    if(result is null)
+	    {
+	        arg_0 = null; arg_1 = null;
+	        return;
+	    }
+	
+	    var (out_0, out_1, out_2, out_3, out_4) = either.Value.Value;
+	    arg_0 = out_0 is not null ? new (out_0.Value.Out) : out_1 is not null ? new (out_1.Value.Out) : out_2 is not null ? new (out_2.Value.Out) : null;
+		arg_1 = out_3 is not null ? new (out_3.Value.Out) : out_4 is not null ? new (out_4.Value.Out) : null;
+	}
 }

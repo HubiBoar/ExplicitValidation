@@ -4,15 +4,26 @@ namespace Definit.Validation;
 
 internal static partial class Example
 {
-    public record Type<T>
-        where T : notnull 
+    public readonly record struct Type<T>(T Value)
     {
+        public static implicit operator T(Type<T> value) => throw new Exception();
     }
 
-    public static void Get<T>(this Type<T> type, out T? value)
-        where T : struct
+    public readonly record struct Either<T0, T1>
+        where T0 : notnull
+        where T1 : notnull
     {
-        value = null;
+        public Either(T0 value) {}
+        public Either(T1 value) {}
+        public static implicit operator Either<T0, T1>(T0 value) => throw new Exception();
+        public static implicit operator Either<T0, T1>(T1 value) => throw new Exception();
+    }
+
+    public static void Get<T0, T1>(Type<T0>? t0, Type<T1>? t1, out Either<T0, T1>? either)
+        where T0 : notnull
+        where T1 : notnull
+    {
+        either = t0 is not null ? new (t0.Value) : t1 is not null ? new (t1.Value) : null;
     }
 
     [IsValid<string>]

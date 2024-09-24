@@ -168,11 +168,14 @@ public class EitherBaseGenerator : IIncrementalGenerator
             {
                 var genericConstraints = string.Join("\n\t", state.Select((isClass, i) =>
                 {
-                    var constraint = isClass ? "class" : "struct"; 
-                    if(x && typeGenericParams[i].Constraints.Contain)
+                    var genericParam = typeGenericParams.Value[i];
+
+                    if(genericParam.Main is not null)
                     {
-                        
+                        return genericParam.ToString(); 
                     }
+
+                    var main = isClass ? 
                 })); 
 
                 var deconstructor = $$"""

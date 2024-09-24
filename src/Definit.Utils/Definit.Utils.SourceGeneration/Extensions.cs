@@ -5,77 +5,67 @@ namespace Definit.Utils.SourceGenerator;
 
 public static class GenericConstraints
 {
-    public interface IMain
+    public enum Main
     {
-        public string Name { get; }        
+        Empty,
 
-        public readonly struct Struct : IMain 
-        {
-            public string Name => "struct";
-        }
+        Struct,
+        Unmanaged,
 
-        public readonly struct Class : IMain
-        {
-            public string Name => "class";
-        }
+        Class,
+        Notnull,
+        ClassNullable,
 
-        public readonly struct Unmanaged : IMain
-        {
-            public string Name => "unmanaged";
-        }
-
-        public readonly struct Notnull : IMain
-        {
-            public string Name => "notnull";
-        }
+        New,
+        ClassNew,
+        NotnullNew,
+        ClassNullableNew,
     }
 
-    public readonly struct New
+    public static (string? Start, string? End) GetString(this Main main) => main switch
     {
-        public string Name => "new()";
-    }
-
-    public readonly struct Type
-    {
-        public string Name { get; }
-
-        public Type(string name) => Name = name;
-    }
+        Main.Struct           => ("struct", null),
+        Main.Unmanaged        => ("unmanaged", null),
+        Main.Class            => ("class", null),
+        Main.Notnull          => ("notnull", null),
+        Main.ClassNullable    => ("class?", null),
+        Main.New              => (null, "new()"),
+        Main.ClassNew         => ("class", "new()"),
+        Main.NotnullNew       => ("notnull", "new()"),
+        Main.ClassNullableNew => ("class?", "new()"),
+        _                     => (null, null),
+    };
 
     public readonly struct Holder
     {
         public string Name { get; }
 
-        public IMain? Main { get; }
+        public Main Main { get; }
 
         public ImmutableArray<Type> Types { get; }
 
-        public New? New { get; }
+        public string AsString { get; } 
 
-        private readonly string _string; 
-
-        public Holder(string name, IMain? main, ImmutableArray<Type> types, New? @new) : this()
+        public Holder(string name, Main main, ImmutableArray<Type> types) : this()
         {
             Name = name;
             Main = main;
             Types = types;
-            New = @new;
 
-            var mainString = main is null ? string.Empty : main.Name;
+            var (start, end) = main.GetString();
             var typesString = string.Join(", ", types.Select(x => x.Name));
-            var newString = @new is null ? string.Empty : @new.Value.Name;
-            var paramsString = string.Join(", ", new string[] { mainString, typesString, newString }
+            var paramsString = string.Join(", ", new string?[] { start, typesString, end }
                     .Where(x => string.IsNullOrEmpty(x) == false));
 
-            _string = string.IsNullOrEmpty(paramsString) ? string.Empty : $"where {Name} : {paramsString}"; 
+            AsString = string.IsNullOrEmpty(paramsString) ? string.Empty : $"where {Name} : {paramsString}"; 
         }
 
-        public override string ToString() => _string;
+        public override string ToString() => AsString;
 
-        public static Holder Class(string name) => new Holder(name, new IMain.Class(), ImmutableArray<Type>.Empty, null);
-        public static Holder Struct(string name) => new Holder(name, new IMain.Struct(), ImmutableArray<Type>.Empty, null);
-        public static Holder Notnull(string name) => new Holder(name, new IMain.Notnull(), ImmutableArray<Type>.Empty, null);
-        public static Holder Empty(string name) => new Holder(name, null, ImmutableArray<Type>.Empty, null);
+        public static Holder Class(string name) => new Holder(name, GenericConstraints.Main.Class, ImmutableArray<Type>.Empty);
+        public static Holder Struct(string name) => new Holder(name, GenericConstraints.Main.Struct, ImmutableArray<Type>.Empty);
+        public static Holder Notnull(string name) => new Holder(name, GenericConstraints.Main.Notnull, ImmutableArray<Type>.Empty);
+        public static Holder Empty(string name) => new Holder(name, GenericConstraints.Main.Empty, ImmutableArray<Type>.Empty);
     }
 
     public readonly struct Holders
@@ -90,23 +80,23 @@ public static class GenericConstraints
     
     public static Holder GetConstraints(this ITypeParameterSymbol symbol) 
     {
-        IMain? main = null;
+        Main? main = null;
 
         if(symbol.HasValueTypeConstraint)
         {
-            main = new IMain.Struct();
+            main = Main.Struct;
         }
         else if(symbol.HasNotNullConstraint)
         {
-            main = new IMain.Notnull();
+            main = Main.Notnull;
         }
         else if(symbol.HasReferenceTypeConstraint)
         {
-            main = new IMain.Class();
+            main = Main.Class;
         }
         else if(symbol.HasUnmanagedTypeConstraint)
         {
-            main = new IMain.Unmanaged();
+            main = Main.Unmanaged;
         }
 
         var types = symbol.ConstraintTypes.Select(x => new GenericConstraints.Type(x.ToDisplayString())).ToImmutableArray();

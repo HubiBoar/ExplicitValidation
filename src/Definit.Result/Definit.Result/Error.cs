@@ -22,7 +22,7 @@ public interface IError
 }
 
 public interface IError<TSelf> : IError
-    where TSelf : struct, IError<TSelf>
+    where TSelf : class?, IError<TSelf>, new()
 {
     public abstract static (bool Matches, TSelf Error) Matches(Exception exception); 
 }

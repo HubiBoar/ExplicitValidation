@@ -21,29 +21,43 @@ public static class Method
 
             public readonly struct Generic : IReturnType
             {
-                public INamedTypeSymbol Parameter { get; }
+                public ITypeParameterSymbol Parameter { get; }
 
-                public Generic(INamedTypeSymbol parameter) => Parameter = parameter;
+                public Generic(ITypeParameterSymbol parameter) => Parameter = parameter;
             }
         }
 
         public readonly struct Task : IReturnType
         {
-            public readonly struct Generic : IReturnType
+            public readonly struct Type : IReturnType
             {
-                public ITypeParameterSymbol Parameter { get; }
+                public INamedTypeSymbol Parameter { get; }
 
-                public Generic(ITypeParameterSymbol parameter) => Parameter = parameter;
+                public Type(INamedTypeSymbol parameter) => Parameter = parameter;
+
+                public readonly struct Generic : IReturnType
+                {
+                    public ITypeParameterSymbol Parameter { get; }
+
+                    public Generic(ITypeParameterSymbol parameter) => Parameter = parameter;
+                }
             }
         }
         
         public readonly struct ValueTask : IReturnType
         {
-            public readonly struct Generic : IReturnType
+            public readonly struct Type : IReturnType
             {
-                public ITypeParameterSymbol Parameter { get; }
+                public INamedTypeSymbol Parameter { get; }
 
-                public Generic(ITypeParameterSymbol parameter) => Parameter = parameter;
+                public Type(INamedTypeSymbol parameter) => Parameter = parameter;
+
+                public readonly struct Generic : IReturnType
+                {
+                    public ITypeParameterSymbol Parameter { get; }
+
+                    public Generic(ITypeParameterSymbol parameter) => Parameter = parameter;
+                }
             }
         }
     }
@@ -67,7 +81,7 @@ public static class Method
         };
     }
 
-    public static bool CanBeNull(this INamedTypeSymbol symbol)
+    public static bool CanBeNull(this ITypeSymbol symbol)
     {
         return symbol.NullableAnnotation is NullableAnnotation.Annotated;
     }
@@ -79,7 +93,11 @@ public static class Method
             return new Return.Void();
         }
 
-        var typeSymbol = (method.ReturnType as INamedTypeSymbol)!;  
+        if (method.ReturnType is INamedTypeSymbol typeSymbol == false)
+        {
+            return new Return.Type.Generic((method.ReturnType as ITypeParameterSymbol)!);
+        }
+
         var returnName = typeSymbol.ToDisplayString();
         var isTask = returnName.StartsWith(TaskType);
         var isValueTask = returnName.StartsWith(ValueTaskType);
@@ -88,8 +106,14 @@ public static class Method
         {
             if(typeSymbol.IsGenericType)
             {
-                var taskSymbol = (typeSymbol.TypeArguments.Single() as ITypeParameterSymbol)!;
-                return new Return.Task.Generic(taskSymbol);
+                var taskSymbol = typeSymbol.TypeArguments.Single();
+
+                if (taskSymbol is INamedTypeSymbol taskNamedSymbol == false)
+                {
+                    return new Return.Task.Type.Generic((taskSymbol as ITypeParameterSymbol)!);
+                }
+
+                return new Return.Task.Type(taskNamedSymbol);
             }
 
             return new Return.Task();
@@ -99,16 +123,17 @@ public static class Method
         {
             if(typeSymbol.IsGenericType)
             {
-                var taskSymbol = (typeSymbol.TypeArguments.Single() as ITypeParameterSymbol)!;
-                return new Return.ValueTask.Generic(taskSymbol);
+                var taskSymbol = typeSymbol.TypeArguments.Single();
+
+                if (taskSymbol is INamedTypeSymbol taskNamedSymbol == false)
+                {
+                    return new Return.ValueTask.Type.Generic((taskSymbol as ITypeParameterSymbol)!);
+                }
+
+                return new Return.ValueTask.Type(taskNamedSymbol);
             }
 
             return new Return.ValueTask();
-        }
-
-        if(typeSymbol.IsGenericType)
-        {
-            return new Return.Type.Generic(typeSymbol);
         }
 
         return new Return.Type(typeSymbol);

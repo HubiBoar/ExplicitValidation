@@ -8,13 +8,11 @@ namespace System.Collections.Generic;
 public static class List_T__Auto__Extensions
 {
     public static Wrapper<T> Results<T>(this System.Collections.Generic.List<T> value)
-	
     {
         return new Wrapper<T>() { Value = value };
     }
 
     public readonly struct Wrapper<T>
-	
     {
         public required System.Collections.Generic.List<T> Value { get; init; }
         
@@ -118,7 +116,6 @@ public static class List_T__Auto__Extensions
 		}
 		
 		public Either<System.Collections.Generic.List<TOutput>, Error> ConvertAll<TOutput>(System.Converter<T, TOutput> converter)
-			
 		{
 		    try
 			{
@@ -192,11 +189,21 @@ public static class List_T__Auto__Extensions
 			    return new Either<bool, Error>(Error.Matches(exception).Error);
 			}
 		}
-		// EXCEPTION
-		// T? System.Collections.Generic.List<T>.Find(System.Predicate<T>) System.NullReferenceException: Object reference not set to an instance of an object.
-		//    at Definit.Utils.SourceGenerator.Method.GetReturnType(IMethodSymbol method) in /workspaces/Definit/src/Definit.Utils/Definit.Utils.SourceGeneration/Methods.cs:line 83
-		//    at Definit.Results.Generator.ObjectGenerator.GetReturnType(IMethodSymbol method) in /workspaces/Definit/src/Definit.Result/Definit.Result.Generator/Generator.Result.Object.cs:line 279
-		//    at Definit.Results.Generator.ObjectGenerator.GenerateMethod(SourceProductionContext context, IMethodSymbol method, String typeName, Boolean allowUnsafe) in /workspaces/Definit/src/Definit.Result/Definit.Result.Generator/Generator.Result.Object.cs:line 154
+		
+		public Either<Maybe<T?>, Error> Find(System.Predicate<T> match)
+		{
+		    try
+			{
+			    var method_result = this.Value.Find(match);
+			    var maybe_result = Maybe.Create(method_result); 
+			
+			    return new Either<Maybe<T?>, Error>(maybe_result);
+			}
+			catch (Exception exception)
+			{
+			    return new Either<Maybe<T?>, Error>(Error.Matches(exception).Error);
+			}
+		}
 		
 		public Either<System.Collections.Generic.List<T>, Error> FindAll(System.Predicate<T> match)
 		{
@@ -245,11 +252,21 @@ public static class List_T__Auto__Extensions
 			    return new Either<int, Error>(Error.Matches(exception).Error);
 			}
 		}
-		// EXCEPTION
-		// T? System.Collections.Generic.List<T>.FindLast(System.Predicate<T>) System.NullReferenceException: Object reference not set to an instance of an object.
-		//    at Definit.Utils.SourceGenerator.Method.GetReturnType(IMethodSymbol method) in /workspaces/Definit/src/Definit.Utils/Definit.Utils.SourceGeneration/Methods.cs:line 83
-		//    at Definit.Results.Generator.ObjectGenerator.GetReturnType(IMethodSymbol method) in /workspaces/Definit/src/Definit.Result/Definit.Result.Generator/Generator.Result.Object.cs:line 279
-		//    at Definit.Results.Generator.ObjectGenerator.GenerateMethod(SourceProductionContext context, IMethodSymbol method, String typeName, Boolean allowUnsafe) in /workspaces/Definit/src/Definit.Result/Definit.Result.Generator/Generator.Result.Object.cs:line 154
+		
+		public Either<Maybe<T?>, Error> FindLast(System.Predicate<T> match)
+		{
+		    try
+			{
+			    var method_result = this.Value.FindLast(match);
+			    var maybe_result = Maybe.Create(method_result); 
+			
+			    return new Either<Maybe<T?>, Error>(maybe_result);
+			}
+			catch (Exception exception)
+			{
+			    return new Either<Maybe<T?>, Error>(Error.Matches(exception).Error);
+			}
+		}
 		
 		public Either<int, Error> FindLastIndex(int startIndex, int count, System.Predicate<T> match)
 		{
@@ -563,8 +580,7 @@ public static class List_T__Auto__Extensions
 		}
 		// EXCEPTION
 		// T[] System.Collections.Generic.List<T>.ToArray() System.NullReferenceException: Object reference not set to an instance of an object.
-		//    at Definit.Utils.SourceGenerator.Method.GetReturnType(IMethodSymbol method) in /workspaces/Definit/src/Definit.Utils/Definit.Utils.SourceGeneration/Methods.cs:line 83
-		//    at Definit.Results.Generator.ObjectGenerator.GetReturnType(IMethodSymbol method) in /workspaces/Definit/src/Definit.Result/Definit.Result.Generator/Generator.Result.Object.cs:line 279
+		//    at Definit.Results.Generator.ObjectGenerator.GetReturnType(IMethodSymbol method) in /workspaces/Definit/src/Definit.Result/Definit.Result.Generator/Generator.Result.Object.cs:line 294
 		//    at Definit.Results.Generator.ObjectGenerator.GenerateMethod(SourceProductionContext context, IMethodSymbol method, String typeName, Boolean allowUnsafe) in /workspaces/Definit/src/Definit.Result/Definit.Result.Generator/Generator.Result.Object.cs:line 154
 		
 		public Error? TrimExcess()

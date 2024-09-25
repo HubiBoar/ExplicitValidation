@@ -151,13 +151,7 @@ public class ObjectGenerator : IIncrementalGenerator
 
         try
         {
-            var result = GetReturnType(method); 
-            if(result is null)
-            {
-                return null;
-            }
-
-            var (returnType, returns, task) = result.Value;
+            var (returnType, returns, task) = GetReturnType(method); 
 
             var isUnsafe = method.IsUnsafe();
 
@@ -272,7 +266,7 @@ public class ObjectGenerator : IIncrementalGenerator
         Type
     }
 
-    private static (string ReturnType, Returns Returns, Task Async)? GetReturnType(IMethodSymbol method)
+    private static (string ReturnType, Returns Returns, Task Async) GetReturnType(IMethodSymbol method)
     {
         const string success = "Error?";
 
@@ -284,11 +278,6 @@ public class ObjectGenerator : IIncrementalGenerator
 
         if(returnType is Method.Return.Type type)
         {
-            if(IsResult(type.Parameter))
-            {
-                return null;
-            }
-
             var returnName = type.Parameter.ToDisplayString();
             if(type.Parameter.CanBeNull())
             {
@@ -302,11 +291,6 @@ public class ObjectGenerator : IIncrementalGenerator
 
         if(returnType is Method.Return.Type.Generic generic)
         {
-            if(IsResult(generic.Parameter))
-            {
-                return null;
-            }
-
             var returnName = generic.Parameter.ToDisplayString();
             if(generic.Parameter.CanBeNull())
             {
@@ -328,13 +312,8 @@ public class ObjectGenerator : IIncrementalGenerator
             return (success, Returns.Success, Task.ValueTask);
         }
 
-        if(returnType is Method.Return.Task.Generic task)
+        if(returnType is Method.Return.Task.Type task)
         {
-            if(IsResult(task.Parameter))
-            {
-                return null;
-            }
-
             var returnName = task.Parameter.ToDisplayString();
             if(task.Parameter.CanBeNull())
             {
@@ -346,13 +325,8 @@ public class ObjectGenerator : IIncrementalGenerator
             }
         }
 
-        if(returnType is Method.Return.ValueTask.Generic valueTask)
+        if(returnType is Method.Return.ValueTask.Type valueTask)
         {
-            if(IsResult(valueTask.Parameter))
-            {
-                return null;
-            }
-
             var returnName = task.Parameter.ToDisplayString();
             if(task.Parameter.CanBeNull())
             {
@@ -364,12 +338,33 @@ public class ObjectGenerator : IIncrementalGenerator
             }
         }
 
-        return null;
-
-        static bool IsResult(ITypeSymbol type)
+        if(returnType is Method.Return.Task.Type.Generic genericTask)
         {
-            return type.AllInterfaces.Any(x => x.ToDisplayString().StartsWith(ResultType));
+            var returnName = genericTask.Parameter.ToDisplayString();
+            if(genericTask.Parameter.CanBeNull())
+            {
+                return ($"Either<Maybe<{returnName}>, Error>", Returns.Maybe, Task.Task);
+            }
+            else
+            {
+                return ($"Either<{returnName}, Error>", Returns.Type, Task.Task);
+            }
         }
+
+        if(returnType is Method.Return.ValueTask.Type.Generic genericValueTask)
+        {
+            var returnName = genericTask.Parameter.ToDisplayString();
+            if(genericTask.Parameter.CanBeNull())
+            {
+                return ($"Either<Maybe<{returnName}>, Error>", Returns.Maybe, Task.ValueTask);
+            }
+            else
+            {
+                return ($"Either<{returnName}, Error>", Returns.Type, Task.ValueTask);
+            }
+        }
+
+        throw new ArgumentOutOfRangeException();
     }
 }
 

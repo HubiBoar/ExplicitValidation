@@ -152,8 +152,9 @@ public static class Generic
             Value = value;
             ArgumentNames = string.Join(", ", value.Select(x => x.Name));
             ArgumentNamesFull = string.IsNullOrEmpty(ArgumentNames) ? string.Empty : $"<{ArgumentNames}>";
-            ConstraintsString = value.Length == 0 ? string.Empty : "\n\t" + string.Join("\n\t", value
+            var constraints = value.Length == 0 ? string.Empty : string.Join("\n\t", value
                 .Select(x => x.ConstraintsString).Where(x => string.IsNullOrEmpty(x) == false));
+            ConstraintsString = string.IsNullOrEmpty(constraints) ? string.Empty : $"\n\t{constraints}";
         }
     }
 

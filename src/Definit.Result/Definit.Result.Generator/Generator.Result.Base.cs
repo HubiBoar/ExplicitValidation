@@ -51,30 +51,60 @@ public class ResultBaseGenerator : IIncrementalGenerator
 
         var resultCount = int.Parse(constructorArgs.First().Value!.ToString());
         var errorCount = int.Parse(constructorArgs.Last().Value!.ToString());
-  
+
         return Enumerable.Range(1, resultCount + 1).Select<int, Func<(string, string)>>(length => () =>
         {
-            var resultGenerics = Enumerable.Range(0, length).Select(x => $"T{x}").ToArray();
-            var genericArgs = string.Join(", ", resultGenerics);
+            var resultGenerics = new Generic.Arguments
+            (
+                Enumerable
+                    .Range(0, length)
+                    .Select(x => Generic.Argument.Notnull($"T{x}"))
+                    .ToImmutableArray()
+            );
+  
+            var genericArgs = resultGenerics.ArgumentNames;
             var resultName = $"Result<{genericArgs}>";
 
-            var errors = string.Join("\n\n\n\t", Enumerable.Range(1, errorCount).Select(y =>
+            var errors = string.Join("\n\n\n\t", Enumerable.Range(1, errorCount).Select(errorsLength =>
             {
-                var errorGenerics = Enumerable.Range(0, y).Select(x => $"TE{x}").ToArray();
-                var convertsFrom = resultGenerics.Concat(errorGenerics).ToArray();
-                var convertsFromArgs = string.Join(", ", convertsFrom);
+                var errorGenerics = new Generic.Arguments
+                (
+                    Enumerable
+                        .Range(0, errorsLength)
+                        .Select(x => Generic.Argument.Struct($"TE{x}", $"IError<TE{x}>"))
+                        .ToImmutableArray()
+                );
+
+                var convertsFrom = new Generic.Arguments
+                (
+                    resultGenerics,
+                    errorGenerics
+                );
+
+                var convertsFromArgs = convertsFrom.ArgumentNames;
                 var either = $"Either<{convertsFromArgs}>";
                 return string.Join("\n\t", GenerateErrorType(convertsFrom, either, errorGenerics, false).Split('\n'));
             })
             .ToArray());
 
-            var convertsFrom = resultGenerics.Concat(["Err"]).ToArray();
-            var convertsFromArgs = string.Join(", ", convertsFrom);
+            var convertsFrom = new Generic.Arguments
+            (
+                resultGenerics,
+                new Generic.Argument("Err")
+            );
+
+            var convertsFromArgs = convertsFrom.ArgumentNames;
             var either = $"Either<{convertsFromArgs}>";
             var interiorRaw = ResultInterior(convertsFrom, either, "Result", resultName, false); 
             var interior = string.Join("\n\t", interiorRaw.Split('\n'));
 
-            var fromException = string.Join("\n\t\t", GenerateFromException(["Err"], either).Split('\n')); 
+            var fromException = string.Join("\n\t\t", GenerateFromException
+                (
+                    new Generic.Arguments(new Generic.Argument("Err")),
+                    either
+                )
+                .Split('\n')
+            ); 
 
             var code = $$"""
             using Err = {{ErrorType}};
@@ -82,7 +112,7 @@ public class ResultBaseGenerator : IIncrementalGenerator
 
             namespace Definit.Results;
 
-            public readonly struct {{resultName}} : {{resultName}}.Base
+            public readonly struct {{resultName}} : {{resultName}}.Base{{resultGenerics}}
             {
                 public interface Base : IResultBase<{{either}}>
                 {
@@ -106,21 +136,37 @@ public class ResultBaseGenerator : IIncrementalGenerator
     {
         var resultName = "Result";
 
-        var errors = string.Join("\n\n\n\t", Enumerable.Range(1, errorCount).Select(y =>
+        var errors = string.Join("\n\n\n\t", Enumerable.Range(1, errorCount).Select(errorsLength =>
         {
-            var first = y == 1;
-            var errorGenerics = Enumerable.Range(0, y).Select(x => $"TE{x}").ToArray();
-            var convertsFromArgs = string.Join(", ", errorGenerics);
+            var first = errorsLength == 1;
+            var errorGenerics = new Generic.Arguments
+            (
+                Enumerable
+                    .Range(0, errorsLength)
+                    .Select(x => Generic.Argument.Struct($"TE{x}", $"IError<TE{x}>"))
+                    .ToImmutableArray()
+            );
+
+            var convertsFromArgs = errorGenerics.ArgumentNames;
             var either = first ? $"TE0?" : $"Either<Success, {convertsFromArgs}>";
             return string.Join("\n\t", GenerateErrorType(errorGenerics, either, errorGenerics, first).Split('\n'));
         })
         .ToArray());
 
         var either = "Err?";
-        var interiorRaw = ResultInterior(["Err"], either, "Result", resultName, true); 
+        var err = new Generic.Arguments(new Generic.Argument("Err"));
+        var interiorRaw = ResultInterior
+        (
+            err,
+            either, 
+            "Result", 
+            resultName, 
+            true
+        ); 
+
         var interior = string.Join("\n\t", interiorRaw.Split('\n'));
 
-        var fromException = string.Join("\n\t\t", GenerateFromException(["Err"], either).Split('\n')); 
+        var fromException = string.Join("\n\t\t", GenerateFromException(err, either).Split('\n')); 
 
         var code = $$"""
         using Err = {{ErrorType}};
@@ -177,21 +223,22 @@ public class ResultBaseGenerator : IIncrementalGenerator
         return (code, $"Definit.Results.Result_0");
     }
 
-    private static string GenerateFromException(string[] errorGenerics, string either)
+    private static string GenerateFromException(Generic.Arguments errorGenerics, string either)
     {
-        var errorHandling = string.Join("\n\n", errorGenerics.Select((x, i) => 
+        var errorHandling = string.Join("\n\n", errorGenerics.Value.Select((x, i) => 
         {
-            if(i == errorGenerics.Length -1)
+            var name = x.Name;
+            if(i == errorGenerics.Value.Length -1)
             {
-                return $"   return ErrorHelper.Matches<{x}>(exception).Error;";
+                return $"   return ErrorHelper.Matches<{name}>(exception).Error;";
             }
 
             return $$"""
-                var {{x}}_match = ErrorHelper.Matches<{{x}}>(exception);
+                var {{name}}_match = ErrorHelper.Matches<{{name}}>(exception);
 
-                if({{x}}_match.Matches)
+                if({{name}}_match.Matches)
                 {
-                    return {{x}}_match.Error;
+                    return {{name}}_match.Error;
                 }
             """;
         }));
@@ -206,16 +253,13 @@ public class ResultBaseGenerator : IIncrementalGenerator
 
     private static string GenerateErrorType
     (
-        string[] convertFrom,
+        Generic.Arguments convertFrom,
         string either,
-        string[] errorGenerics,
+        Generic.Arguments errorGenerics,
         bool convertFromSuccess
     )
     {
-        var genericConstraints = string.Join("\n\t",
-            errorGenerics.Select(x => $"where {x} : struct, IError<{x}>"));
-       
-        var errorGenericArgs = string.Join(", ", errorGenerics);
+        var errorGenericArgs = string.Join(", ", errorGenerics.ArgumentNames);
         var genericName = $"Error<{errorGenericArgs}>";
 
         var interior = ResultInterior
@@ -232,8 +276,7 @@ public class ResultBaseGenerator : IIncrementalGenerator
         var fromException = string.Join("\n\t\t", GenerateFromException(errorGenerics, either).Split('\n')); 
 
         return $$"""
-        public readonly struct {{genericName}} : {{genericName}}.Base 
-            {{genericConstraints}}
+        public readonly struct {{genericName}} : {{genericName}}.Base{{errorGenerics}}
         {
             public interface Base : IResultBase<{{either}}>
             {
@@ -247,15 +290,15 @@ public class ResultBaseGenerator : IIncrementalGenerator
 
     public static string ResultInterior
     (
-        string[] convertFrom,
+        Generic.Arguments convertFrom,
         string either,
         string constructorName,
         string typeName,
         bool convertFromSuccess
     )
     {
-        var operators = string.Join("\n", convertFrom
-            .Select(x => $"public static implicit operator {typeName}({x} value) => new (value);"));
+        var operators = string.Join("\n", convertFrom.Value
+            .Select(x => $"public static implicit operator {typeName}({x.Name} value) => new (value);"));
 
         var successOperator = convertFromSuccess
         ?

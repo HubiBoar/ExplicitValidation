@@ -80,7 +80,7 @@ public class MethodGenerator : IIncrementalGenerator
             var decName = method.Symbol.Name.Remove(0, 1);
 
             var decGeneric = method.Symbol.GetMethodGenericArgs();
-            var decGenericConstraints = method.Symbol.GetMethodGenericConstraints();
+            var decGenericConstraints = method.Symbol.GetMethodGenericArguments();
             var decParameters = string.Join(", ", method.Symbol.Parameters.Select(x => x.ToDisplayString()));
             var declaration = $"{method.Keyword}{decStatic}{decAsync} {decReturn} {decName}{decGeneric}({decParameters})";
 

@@ -36,7 +36,7 @@ public sealed class TypeInfo
 
         var generics = string.Join(", ", symbol.TypeArguments.Select(x => x.ToDisplayString()));
         generics = string.IsNullOrEmpty(generics) ? string.Empty : $"<{generics}>";
-        var constraints = symbol.TypeArguments.GetGenericConstraints();
+        var constraints = symbol.TypeArguments.GetGenericArguments();
 
         TypeName = $"partial {type} {Symbol.Name}{generics}{constraints}";
         

@@ -62,7 +62,7 @@ public class ObjectGenerator : IIncrementalGenerator
             type = type.ConstructedFrom;
             wrapperGenericArgs = "<" + string.Join(", ", type.TypeArguments.Select(x => x.ToDisplayString())) + ">";
             wrapperName = $"{wrapperName}{wrapperGenericArgs}";
-            wrapperGenericConstraints = type.TypeArguments.GetGenericConstraints().ToString();
+            wrapperGenericConstraints = type.TypeArguments.GetGenericArguments().ToString();
         }
 
         var typeName = type.Name;
@@ -169,7 +169,7 @@ public class ObjectGenerator : IIncrementalGenerator
             var parameters = string.Join(", ", method.Parameters.Select(x => x.ToDisplayString()));
 
             var decGeneric = method.GetMethodGenericArgs();
-            var decGenericConstraints = method.GetMethodGenericConstraints();
+            var decGenericConstraints = method.GetMethodGenericArguments();
 
             var parametersCall = method.GetCallingParameters();
             var awaitCall = isAsync ? "await " : "";

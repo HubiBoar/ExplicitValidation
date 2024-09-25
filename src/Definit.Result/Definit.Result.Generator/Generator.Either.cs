@@ -61,12 +61,12 @@ public class EitherGenerator : IIncrementalGenerator
         var name = info.Name;
         var constructorName = info.ConstructorName;
 
-        var genericArgs = interf.TypeArguments.GetGenericConstraints();
+        var genericArgs = interf.TypeArguments.GetGenericArguments();
 
         var (interior, extensions, _) = EitherBaseGenerator.EitherInterior
         (
             genericArgs,
-            symbol.TypeArguments.GetGenericConstraints(),
+            symbol.TypeArguments.GetGenericArguments(),
             constructorName, 
             name
         );

@@ -4,6 +4,11 @@ using System.Diagnostics.CodeAnalysis;
 namespace Definit.Results;
 
 public readonly struct Result<T0, T1, T2, T3, T4> : Result<T0, T1, T2, T3, T4>.Base
+	where T0 : notnull
+	where T1 : notnull
+	where T2 : notnull
+	where T3 : notnull
+	where T4 : notnull
 {
     public interface Base : IResultBase<Either<T0, T1, T2, T3, T4, Err>>
     {
@@ -32,8 +37,8 @@ public readonly struct Result<T0, T1, T2, T3, T4> : Result<T0, T1, T2, T3, T4>.B
 	public static implicit operator Result<T0, T1, T2, T3, T4>(Err value) => new (value);
 
 
-    public readonly struct Error<TE0> : Error<TE0>.Base 
-	    where TE0 : struct, IError<TE0>
+    public readonly struct Error<TE0> : Error<TE0>.Base
+		where TE0 : struct, IError<TE0>
 	{
 	    public interface Base : IResultBase<Either<T0, T1, T2, T3, T4, TE0>>
 	    {
@@ -63,8 +68,8 @@ public readonly struct Result<T0, T1, T2, T3, T4> : Result<T0, T1, T2, T3, T4>.B
 	}
 
 
-	public readonly struct Error<TE0, TE1> : Error<TE0, TE1>.Base 
-	    where TE0 : struct, IError<TE0>
+	public readonly struct Error<TE0, TE1> : Error<TE0, TE1>.Base
+		where TE0 : struct, IError<TE0>
 		where TE1 : struct, IError<TE1>
 	{
 	    public interface Base : IResultBase<Either<T0, T1, T2, T3, T4, TE0, TE1>>
@@ -103,8 +108,8 @@ public readonly struct Result<T0, T1, T2, T3, T4> : Result<T0, T1, T2, T3, T4>.B
 	}
 
 
-	public readonly struct Error<TE0, TE1, TE2> : Error<TE0, TE1, TE2>.Base 
-	    where TE0 : struct, IError<TE0>
+	public readonly struct Error<TE0, TE1, TE2> : Error<TE0, TE1, TE2>.Base
+		where TE0 : struct, IError<TE0>
 		where TE1 : struct, IError<TE1>
 		where TE2 : struct, IError<TE2>
 	{
@@ -152,8 +157,8 @@ public readonly struct Result<T0, T1, T2, T3, T4> : Result<T0, T1, T2, T3, T4>.B
 	}
 
 
-	public readonly struct Error<TE0, TE1, TE2, TE3> : Error<TE0, TE1, TE2, TE3>.Base 
-	    where TE0 : struct, IError<TE0>
+	public readonly struct Error<TE0, TE1, TE2, TE3> : Error<TE0, TE1, TE2, TE3>.Base
+		where TE0 : struct, IError<TE0>
 		where TE1 : struct, IError<TE1>
 		where TE2 : struct, IError<TE2>
 		where TE3 : struct, IError<TE3>
@@ -210,8 +215,8 @@ public readonly struct Result<T0, T1, T2, T3, T4> : Result<T0, T1, T2, T3, T4>.B
 	}
 
 
-	public readonly struct Error<TE0, TE1, TE2, TE3, TE4> : Error<TE0, TE1, TE2, TE3, TE4>.Base 
-	    where TE0 : struct, IError<TE0>
+	public readonly struct Error<TE0, TE1, TE2, TE3, TE4> : Error<TE0, TE1, TE2, TE3, TE4>.Base
+		where TE0 : struct, IError<TE0>
 		where TE1 : struct, IError<TE1>
 		where TE2 : struct, IError<TE2>
 		where TE3 : struct, IError<TE3>

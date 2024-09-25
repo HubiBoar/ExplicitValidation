@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using System.Text;
 using Definit.Utils.SourceGenerator;
 using Microsoft.CodeAnalysis;
 
@@ -8,6 +7,8 @@ namespace Definit.Results.Generator;
 [Generator]
 public class EitherBaseGenerator : IIncrementalGenerator
 {
+    private const int MaxDeconstructorsCount = 8;
+
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var provider = context.SyntaxProvider.ForAttributeWithMetadataName
@@ -54,15 +55,15 @@ public class EitherBaseGenerator : IIncrementalGenerator
         {
             var length = inx + 2;
             var generic = 
-                new GenericConstraints.Holders
+                new Generic.Arguments
                 (
                     Enumerable
                         .Range(0, length)
-                        .Select(x => GenericConstraints.Holder.Notnull($"T{x}"))
+                        .Select(x => Generic.Argument.Notnull($"T{x}"))
                         .ToImmutableArray()
                 );
             
-            var genericArgs = string.Join(", ", generic.Value.Select(x => x.Name));
+            var genericArgs = string.Join(", ", generic.ArgumentNames);
             var either = $"Either<{genericArgs}>";
             var (interior, extension, genericOrArgs) = EitherInterior
             (
@@ -104,14 +105,14 @@ public class EitherBaseGenerator : IIncrementalGenerator
 
     public static (string Interior, string Extensions, string GenericOrArgs) EitherInterior
     (
-        GenericConstraints.Holders allGenericParams,
-        GenericConstraints.Holders typeGenericParams,
+        Generic.Arguments allGenericParams,
+        Generic.Arguments typeGenericParams,
         string constructorName,
         string typeName
     )
     {
         var genericOrArgs = string.Join(", ", allGenericParams.Value.Select(x => $"Or<{x.Name}>?"));
-        var genericArgs = string.Join(", ", allGenericParams.Value.Select(x => x.Name));
+        var genericArgs = allGenericParams.ArgumentNames;
 
         var constructors = string.Join("\n", allGenericParams.Value
             .Select((x, i) =>
@@ -146,8 +147,8 @@ public class EitherBaseGenerator : IIncrementalGenerator
 
     private static string GenerateExtensions
     (
-        GenericConstraints.Holders allGenericParams,
-        GenericConstraints.Holders typeGenericParams,
+        Generic.Arguments allGenericParams,
+        Generic.Arguments typeGenericParams,
         string typeName
     )
     {
@@ -155,7 +156,7 @@ public class EitherBaseGenerator : IIncrementalGenerator
 
         var typeGenericArgs = string.Join(", ", typeGenericParams.Value.Select(x => x.Name));
 
-        if(length <= 4)
+        if(length <= MaxDeconstructorsCount)
         {
             var generic = allGenericParams.Value.Select(x => (Type: x, Name: $"{x.Name}_arg")).ToArray();
             var outArgs = string.Join(",\n\t", generic.Select(x => $"out {x.Type.Name}? {x.Name}"));
@@ -165,7 +166,7 @@ public class EitherBaseGenerator : IIncrementalGenerator
 
             return string.Join("\n\n", states.Select(state => 
             {
-                var genericConstraints = new GenericConstraints.Holders(state.Select((isClass, i) =>
+                var genericConstraints = new Generic.Arguments(state.Select((isClass, i) =>
                 {
                     var genericParam = typeGenericParams.Value[i];
                     var main = genericParam.Main;
@@ -173,34 +174,34 @@ public class EitherBaseGenerator : IIncrementalGenerator
                     if(isClass)
                     {
                         var cantBeClass = 
-                           main is GenericConstraints.Main.Struct
-                        || main is GenericConstraints.Main.Unmanaged;
+                           main is Generic.Main.Struct
+                        || main is Generic.Main.Unmanaged;
                          
                         if(cantBeClass)
                         {
                             return genericParam;
                         }
 
-                        var newMain = main.IsNew() ? GenericConstraints.Main.ClassNew : GenericConstraints.Main.Class;
+                        var newMain = main.IsNew() ? Generic.Main.ClassNew : Generic.Main.Class;
 
-                        return new GenericConstraints.Holder(genericParam.Name, newMain, genericParam.Types);
+                        return new Generic.Argument(genericParam.Name, newMain, genericParam.Types);
                     }
                     else
                     {
                         var canBeStruct = 
-                           main is GenericConstraints.Main.Struct
-                        || main is GenericConstraints.Main.New
-                        || main is GenericConstraints.Main.NotnullNew
-                        || main is GenericConstraints.Main.Notnull;
+                           main is Generic.Main.Struct
+                        || main is Generic.Main.New
+                        || main is Generic.Main.NotnullNew
+                        || main is Generic.Main.Notnull;
                          
                         if(canBeStruct == false)
                         {
                             return genericParam;
                         }
 
-                        var newMain = GenericConstraints.Main.Struct;
+                        var newMain = Generic.Main.Struct;
 
-                        return new GenericConstraints.Holder(genericParam.Name, newMain, genericParam.Types);
+                        return new Generic.Argument(genericParam.Name, newMain, genericParam.Types);
                     }
                 }).ToImmutableArray()); 
 
@@ -233,7 +234,7 @@ public class EitherBaseGenerator : IIncrementalGenerator
         }
         else
         {
-            int roundedUp = (int)Math.Ceiling((double)length / 4); 
+            int roundedUp = (int)Math.Ceiling((double)length / MaxDeconstructorsCount); 
             var parts = new int[roundedUp];
             var total = length;
             while(total > 0)

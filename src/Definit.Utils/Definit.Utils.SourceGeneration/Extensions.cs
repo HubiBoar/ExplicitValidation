@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Definit.Utils.SourceGenerator;
 
-public static class GenericConstraints
+public static class Generic
 {
     public enum Main
     {
@@ -56,7 +56,7 @@ public static class GenericConstraints
         }
     }
 
-    public readonly struct Holder
+    public readonly struct Argument
     {
         public string Name { get; }
 
@@ -66,10 +66,10 @@ public static class GenericConstraints
 
         public string AsString { get; } 
 
-        public Holder(string name) : this(name, Main.Empty, ImmutableArray<Type>.Empty){}
-        public Holder(string name, Main main) : this(name, main, ImmutableArray<Type>.Empty){}
+        public Argument(string name) : this(name, Main.Empty, ImmutableArray<Type>.Empty){}
+        public Argument(string name, Main main) : this(name, main, ImmutableArray<Type>.Empty){}
 
-        public Holder(string name, Main main, ImmutableArray<Type> types) : this()
+        public Argument(string name, Main main, ImmutableArray<Type> types) : this()
         {
             Name = name;
             Main = main;
@@ -85,28 +85,39 @@ public static class GenericConstraints
 
         public override string ToString() => AsString;
 
-        public static Holder Class(string name)   => new Holder(name, GenericConstraints.Main.Class);
-        public static Holder Struct(string name)  => new Holder(name, GenericConstraints.Main.Struct);
-        public static Holder Notnull(string name) => new Holder(name, GenericConstraints.Main.Notnull);
-        public static Holder Empty(string name)   => new Holder(name);
+        public static Argument Class(string name)   => new Argument(name, Generic.Main.Class);
+        public static Argument Struct(string name)  => new Argument(name, Generic.Main.Struct);
+        public static Argument Notnull(string name) => new Argument(name, Generic.Main.Notnull);
+        public static Argument Empty(string name)   => new Argument(name);
+        public static Argument Struct(string name, params string[] types)
+            => new Argument(name, Generic.Main.Struct, types.Select(x => new Type(x)).ToImmutableArray());
+        public static Argument Struct(string name, params Type[] types)
+            => new Argument(name, Generic.Main.Struct, types.ToImmutableArray());
     }
 
-    public readonly struct Holders
+    public readonly struct Arguments
     {
-        public ImmutableArray<Holder> Value { get; }
+        public ImmutableArray<Argument> Value { get; }
 
         public string AsString { get; }
+        public string ArgumentNames { get; }
 
-        public Holders(ImmutableArray<Holder> value)
+        public Arguments(Arguments arg, params Argument[] value) : this(arg.Value.Concat(value).ToImmutableArray()) {}
+        public Arguments(params Argument[] value) : this(value.ToImmutableArray()) {}
+        public Arguments(Arguments value, Arguments value2) : this(value.Value.Concat(value2.Value).ToImmutableArray()) {}
+        
+        public Arguments(ImmutableArray<Argument> value)
         {
             Value = value;
+            ArgumentNames = string.Join(", ", value.Select(x => x.Name));
             AsString = "\n\t" + string.Join("\n\t", value.Select(x => x.ToString()));
         }
+
 
         public override string ToString() => AsString;
     }
     
-    public static Holder GetConstraints(this ITypeParameterSymbol symbol) 
+    public static Argument GetGenericArgument(this ITypeParameterSymbol symbol) 
     {
         Main main = Main.Empty;
 
@@ -138,50 +149,41 @@ public static class GenericConstraints
             main = Main.New;
         }
 
-        var types = symbol.ConstraintTypes.Select(x => new GenericConstraints.Type(x.ToDisplayString())).ToImmutableArray();
+        var types = symbol.ConstraintTypes.Select(x => new Generic.Type(x.ToDisplayString())).ToImmutableArray();
 
-        return new Holder(symbol.ToDisplayString(), main, types);
+        return new Argument(symbol.ToDisplayString(), main, types);
     }
 
-    public static bool HasConstraints(this ITypeParameterSymbol symbol) =>  
-        symbol.ConstraintTypes.Length > 0
-        || symbol.HasValueTypeConstraint
-        || symbol.HasNotNullConstraint
-        || symbol.HasReferenceTypeConstraint
-        || symbol.HasUnmanagedTypeConstraint
-        || symbol.HasConstructorConstraint;
-
-    public static Holders GetGenericConstraints(this IEnumerable<ITypeSymbol> typeArguments)
+    public static Arguments GetGenericArguments(this IEnumerable<ITypeSymbol> typeArguments)
     {
         var parameters = 
             typeArguments
             .OfType<ITypeParameterSymbol>()
-            .Where(HasConstraints)
             .ToArray();
 
         if(parameters.Length == 0)
         {
-            return new Holders(ImmutableArray<GenericConstraints.Holder>.Empty);
+            return new Arguments(ImmutableArray<Generic.Argument>.Empty);
         }
 
-        return new Holders
+        return new Arguments
         (
             parameters
-                .Select(GetConstraints)
+                .Select(GetGenericArgument)
                 .ToImmutableArray()
         );
     }
 
-    public static Holders GetMethodGenericConstraints(this IMethodSymbol method)
+    public static Arguments GetMethodGenericArguments(this IMethodSymbol method)
     {
         var isGeneric = method.IsGenericMethod;
 
         if(isGeneric is false)
         {
-            return new Holders(ImmutableArray<GenericConstraints.Holder>.Empty);
+            return new Arguments(ImmutableArray<Generic.Argument>.Empty);
         }
 
-        return method.TypeArguments.GetGenericConstraints();
+        return method.TypeArguments.GetGenericArguments();
     }
 }
 

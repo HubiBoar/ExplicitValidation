@@ -49,9 +49,8 @@ public static class EitherExtensions_9
     public static void Deconstruct<T0, T1, T2, T3, T4, T5, T6, T7, T8>
 	(
 	    this Either<T0, T1, T2, T3, T4, T5, T6, T7, T8> either,
-	    out Either<T0, T1, T2>? arg_0,
-		out Either<T3, T4, T5>? arg_1,
-		out Either<T6, T7, T8>? arg_2
+	    out Either<T0, T1, T2, T3, T4>? arg_0,
+		out Either<T5, T6, T7, T8>? arg_1
 	)
 		where T0 : notnull
 		where T1 : notnull
@@ -64,17 +63,15 @@ public static class EitherExtensions_9
 		where T8 : notnull
 	{
 	    var (out_0, out_1, out_2, out_3, out_4, out_5, out_6, out_7, out_8) = either.Value;
-	    arg_0 = out_0 is not null ? new (out_0.Value.Out) : out_1 is not null ? new (out_1.Value.Out) : out_2 is not null ? new (out_2.Value.Out) : null;
-		arg_1 = out_3 is not null ? new (out_3.Value.Out) : out_4 is not null ? new (out_4.Value.Out) : out_5 is not null ? new (out_5.Value.Out) : null;
-		arg_2 = out_6 is not null ? new (out_6.Value.Out) : out_7 is not null ? new (out_7.Value.Out) : out_8 is not null ? new (out_8.Value.Out) : null;
+	    arg_0 = out_0 is not null ? new (out_0.Value.Out) : out_1 is not null ? new (out_1.Value.Out) : out_2 is not null ? new (out_2.Value.Out) : out_3 is not null ? new (out_3.Value.Out) : out_4 is not null ? new (out_4.Value.Out) : null;
+		arg_1 = out_5 is not null ? new (out_5.Value.Out) : out_6 is not null ? new (out_6.Value.Out) : out_7 is not null ? new (out_7.Value.Out) : out_8 is not null ? new (out_8.Value.Out) : null;
 	}
 	
 	public static void Deconstruct<T0, T1, T2, T3, T4, T5, T6, T7, T8>
 	(
 	    this Either<T0, T1, T2, T3, T4, T5, T6, T7, T8>? either,
-	    out Either<T0, T1, T2>? arg_0,
-		out Either<T3, T4, T5>? arg_1,
-		out Either<T6, T7, T8>? arg_2
+	    out Either<T0, T1, T2, T3, T4>? arg_0,
+		out Either<T5, T6, T7, T8>? arg_1
 	)
 		where T0 : notnull
 		where T1 : notnull
@@ -88,13 +85,12 @@ public static class EitherExtensions_9
 	{
 	    if(result is null)
 	    {
-	        arg_0 = null; arg_1 = null; arg_2 = null;
+	        arg_0 = null; arg_1 = null;
 	        return;
 	    }
 	
 	    var (out_0, out_1, out_2, out_3, out_4, out_5, out_6, out_7, out_8) = either.Value.Value;
-	    arg_0 = out_0 is not null ? new (out_0.Value.Out) : out_1 is not null ? new (out_1.Value.Out) : out_2 is not null ? new (out_2.Value.Out) : null;
-		arg_1 = out_3 is not null ? new (out_3.Value.Out) : out_4 is not null ? new (out_4.Value.Out) : out_5 is not null ? new (out_5.Value.Out) : null;
-		arg_2 = out_6 is not null ? new (out_6.Value.Out) : out_7 is not null ? new (out_7.Value.Out) : out_8 is not null ? new (out_8.Value.Out) : null;
+	    arg_0 = out_0 is not null ? new (out_0.Value.Out) : out_1 is not null ? new (out_1.Value.Out) : out_2 is not null ? new (out_2.Value.Out) : out_3 is not null ? new (out_3.Value.Out) : out_4 is not null ? new (out_4.Value.Out) : null;
+		arg_1 = out_5 is not null ? new (out_5.Value.Out) : out_6 is not null ? new (out_6.Value.Out) : out_7 is not null ? new (out_7.Value.Out) : out_8 is not null ? new (out_8.Value.Out) : null;
 	}
 }

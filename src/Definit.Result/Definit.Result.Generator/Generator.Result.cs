@@ -61,7 +61,7 @@ public class ResultGenerator : IIncrementalGenerator
 
         var eitherType = interf.TypeArguments.Single() as INamedTypeSymbol; 
 
-        var genericArgs = eitherType!.TypeArguments.Select(x => x.ToDisplayString()).ToArray();
+        var genericArgs = eitherType!.TypeArguments.GetGenericArguments();
 
         var name = info.Name;
         var constructorName = info.ConstructorName;

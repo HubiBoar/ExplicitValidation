@@ -83,7 +83,7 @@ public static class EitherExtensions_9
 		where T7 : notnull
 		where T8 : notnull
 	{
-	    if(result is null)
+	    if(either is null)
 	    {
 	        arg_0 = null; arg_1 = null;
 	        return;

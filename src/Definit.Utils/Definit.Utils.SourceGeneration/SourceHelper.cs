@@ -53,6 +53,7 @@ public sealed class TypeInfo
     }
 }
 
+
 public static class SourceHelper
 {
     public static void Run
@@ -74,7 +75,7 @@ public static class SourceHelper
                 }
                 catch (Exception ex)
                 {
-                    var code = "// \t" +string.Join("\n\t // ", ex.ToString().Split('\n'));
+                    var code = ex.ReportException(context, ex.ToString());
 
                     context.AddSource($"EXCEPTION.{index}.g.cs", code);
                 }
@@ -84,7 +85,7 @@ public static class SourceHelper
         }
         catch (Exception ex)
         {
-            var code = "// \t" + string.Join("\n\t // ", ex.ToString().Split('\n'));
+            var code = ex.ReportException(context, ex.ToString());
 
             context.AddSource($"EXCEPTION_TOP.g.cs", code);
         }
@@ -124,6 +125,22 @@ public static class SourceHelper
         }
 
         return (code, typeInfo);
+    }
+
+    public static string ReportException(this Exception exception, SourceProductionContext context, string description)
+    {
+        var desc = new DiagnosticDescriptor
+        (
+            "ROG0001",
+            "Exception on method creation",
+            description,
+            "Error",
+            DiagnosticSeverity.Error,
+            true
+        );
+        
+        context.ReportDiagnostic(Diagnostic.Create(desc, Location.None));
+        return $"// EXCEPTION\n// {string.Join("\n// ", description.Split('\n'))}";
     }
 }
 

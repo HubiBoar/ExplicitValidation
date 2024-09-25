@@ -87,8 +87,8 @@ public static class EitherExtensions_2
 	        T0_arg = null; T1_arg = null;
 	        return;
 	    }
-
-        var (T0_out, T1_out) = either.Value.Value;
+	
+	    var (T0_out, T1_out) = either.Value.Value;
 	    T0_arg = T0_out?.Out ?? null;
 		T1_arg = T1_out?.Out ?? null;
 	}

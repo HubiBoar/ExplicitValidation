@@ -20,7 +20,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.Append(value))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.Append(value))!);
 			}
 			catch (Exception exception)
 			{
@@ -32,7 +32,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.Append(value))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.Append(value))!);
 			}
 			catch (Exception exception)
 			{
@@ -44,7 +44,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.Append(value))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.Append(value))!);
 			}
 			catch (Exception exception)
 			{
@@ -56,7 +56,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.Append(value, repeatCount))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.Append(value, repeatCount))!);
 			}
 			catch (Exception exception)
 			{
@@ -68,7 +68,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.Append(value))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.Append(value))!);
 			}
 			catch (Exception exception)
 			{
@@ -80,7 +80,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.Append(value, startIndex, charCount))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.Append(value, startIndex, charCount))!);
 			}
 			catch (Exception exception)
 			{
@@ -92,7 +92,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.Append(value))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.Append(value))!);
 			}
 			catch (Exception exception)
 			{
@@ -104,7 +104,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.Append(value))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.Append(value))!);
 			}
 			catch (Exception exception)
 			{
@@ -116,7 +116,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.Append(provider, ref handler))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.Append(provider, ref handler))!);
 			}
 			catch (Exception exception)
 			{
@@ -128,7 +128,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.Append(value))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.Append(value))!);
 			}
 			catch (Exception exception)
 			{
@@ -140,7 +140,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.Append(value))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.Append(value))!);
 			}
 			catch (Exception exception)
 			{
@@ -152,7 +152,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.Append(value))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.Append(value))!);
 			}
 			catch (Exception exception)
 			{
@@ -164,7 +164,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.Append(value))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.Append(value))!);
 			}
 			catch (Exception exception)
 			{
@@ -176,7 +176,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.Append(value))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.Append(value))!);
 			}
 			catch (Exception exception)
 			{
@@ -188,7 +188,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.Append(value))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.Append(value))!);
 			}
 			catch (Exception exception)
 			{
@@ -200,7 +200,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.Append(value))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.Append(value))!);
 			}
 			catch (Exception exception)
 			{
@@ -212,7 +212,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.Append(value))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.Append(value))!);
 			}
 			catch (Exception exception)
 			{
@@ -224,7 +224,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.Append(value))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.Append(value))!);
 			}
 			catch (Exception exception)
 			{
@@ -236,7 +236,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.Append(value, startIndex, count))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.Append(value, startIndex, count))!);
 			}
 			catch (Exception exception)
 			{
@@ -248,7 +248,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.Append(value))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.Append(value))!);
 			}
 			catch (Exception exception)
 			{
@@ -260,7 +260,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.Append(value, startIndex, count))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.Append(value, startIndex, count))!);
 			}
 			catch (Exception exception)
 			{
@@ -272,7 +272,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.Append(ref handler))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.Append(ref handler))!);
 			}
 			catch (Exception exception)
 			{
@@ -284,7 +284,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.Append(value))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.Append(value))!);
 			}
 			catch (Exception exception)
 			{
@@ -296,7 +296,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.Append(value))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.Append(value))!);
 			}
 			catch (Exception exception)
 			{
@@ -308,7 +308,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.Append(value))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.Append(value))!);
 			}
 			catch (Exception exception)
 			{
@@ -320,7 +320,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.AppendFormat(provider, format, arg0))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.AppendFormat(provider, format, arg0))!);
 			}
 			catch (Exception exception)
 			{
@@ -332,7 +332,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.AppendFormat(provider, format, arg0, arg1))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.AppendFormat(provider, format, arg0, arg1))!);
 			}
 			catch (Exception exception)
 			{
@@ -344,7 +344,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.AppendFormat(provider, format, arg0, arg1, arg2))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.AppendFormat(provider, format, arg0, arg1, arg2))!);
 			}
 			catch (Exception exception)
 			{
@@ -356,7 +356,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.AppendFormat(provider, format, args))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.AppendFormat(provider, format, args))!);
 			}
 			catch (Exception exception)
 			{
@@ -368,7 +368,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.AppendFormat(format, arg0))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.AppendFormat(format, arg0))!);
 			}
 			catch (Exception exception)
 			{
@@ -380,7 +380,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.AppendFormat(format, arg0, arg1))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.AppendFormat(format, arg0, arg1))!);
 			}
 			catch (Exception exception)
 			{
@@ -392,7 +392,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.AppendFormat(format, arg0, arg1, arg2))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.AppendFormat(format, arg0, arg1, arg2))!);
 			}
 			catch (Exception exception)
 			{
@@ -404,7 +404,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.AppendFormat(format, args))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.AppendFormat(format, args))!);
 			}
 			catch (Exception exception)
 			{
@@ -416,7 +416,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.AppendFormat(provider, format, arg0))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.AppendFormat(provider, format, arg0))!);
 			}
 			catch (Exception exception)
 			{
@@ -428,7 +428,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.AppendFormat(provider, format, arg0, arg1))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.AppendFormat(provider, format, arg0, arg1))!);
 			}
 			catch (Exception exception)
 			{
@@ -440,7 +440,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.AppendFormat(provider, format, arg0, arg1, arg2))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.AppendFormat(provider, format, arg0, arg1, arg2))!);
 			}
 			catch (Exception exception)
 			{
@@ -452,7 +452,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.AppendFormat(provider, format, args))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.AppendFormat(provider, format, args))!);
 			}
 			catch (Exception exception)
 			{
@@ -464,7 +464,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.AppendFormat(provider, format, args))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.AppendFormat(provider, format, args))!);
 			}
 			catch (Exception exception)
 			{
@@ -476,7 +476,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.AppendJoin(separator, values))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.AppendJoin(separator, values))!);
 			}
 			catch (Exception exception)
 			{
@@ -488,7 +488,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.AppendJoin(separator, values))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.AppendJoin(separator, values))!);
 			}
 			catch (Exception exception)
 			{
@@ -500,7 +500,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.AppendJoin(separator, values))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.AppendJoin(separator, values))!);
 			}
 			catch (Exception exception)
 			{
@@ -512,7 +512,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.AppendJoin(separator, values))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.AppendJoin(separator, values))!);
 			}
 			catch (Exception exception)
 			{
@@ -524,7 +524,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.AppendJoin(separator, values))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.AppendJoin(separator, values))!);
 			}
 			catch (Exception exception)
 			{
@@ -536,7 +536,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.AppendJoin(separator, values))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.AppendJoin(separator, values))!);
 			}
 			catch (Exception exception)
 			{
@@ -548,7 +548,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.AppendLine())!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.AppendLine())!);
 			}
 			catch (Exception exception)
 			{
@@ -560,7 +560,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.AppendLine(provider, ref handler))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.AppendLine(provider, ref handler))!);
 			}
 			catch (Exception exception)
 			{
@@ -572,7 +572,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.AppendLine(value))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.AppendLine(value))!);
 			}
 			catch (Exception exception)
 			{
@@ -584,7 +584,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.AppendLine(ref handler))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.AppendLine(ref handler))!);
 			}
 			catch (Exception exception)
 			{
@@ -596,7 +596,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.Clear())!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.Clear())!);
 			}
 			catch (Exception exception)
 			{
@@ -634,7 +634,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<int, Error>((this.Value.EnsureCapacity(capacity))!)
+			    return new Either<int, Error>((this.Value.EnsureCapacity(capacity))!);
 			}
 			catch (Exception exception)
 			{
@@ -646,7 +646,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<bool, Error>((this.Value.Equals(span))!)
+			    return new Either<bool, Error>((this.Value.Equals(span))!);
 			}
 			catch (Exception exception)
 			{
@@ -658,7 +658,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<bool, Error>((this.Value.Equals(sb))!)
+			    return new Either<bool, Error>((this.Value.Equals(sb))!);
 			}
 			catch (Exception exception)
 			{
@@ -670,7 +670,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder.ChunkEnumerator, Error>((this.Value.GetChunks())!)
+			    return new Either<System.Text.StringBuilder.ChunkEnumerator, Error>((this.Value.GetChunks())!);
 			}
 			catch (Exception exception)
 			{
@@ -682,7 +682,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.Insert(index, value))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.Insert(index, value))!);
 			}
 			catch (Exception exception)
 			{
@@ -694,7 +694,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.Insert(index, value))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.Insert(index, value))!);
 			}
 			catch (Exception exception)
 			{
@@ -706,7 +706,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.Insert(index, value))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.Insert(index, value))!);
 			}
 			catch (Exception exception)
 			{
@@ -718,7 +718,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.Insert(index, value))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.Insert(index, value))!);
 			}
 			catch (Exception exception)
 			{
@@ -730,7 +730,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.Insert(index, value, startIndex, charCount))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.Insert(index, value, startIndex, charCount))!);
 			}
 			catch (Exception exception)
 			{
@@ -742,7 +742,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.Insert(index, value))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.Insert(index, value))!);
 			}
 			catch (Exception exception)
 			{
@@ -754,7 +754,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.Insert(index, value))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.Insert(index, value))!);
 			}
 			catch (Exception exception)
 			{
@@ -766,7 +766,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.Insert(index, value))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.Insert(index, value))!);
 			}
 			catch (Exception exception)
 			{
@@ -778,7 +778,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.Insert(index, value))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.Insert(index, value))!);
 			}
 			catch (Exception exception)
 			{
@@ -790,7 +790,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.Insert(index, value))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.Insert(index, value))!);
 			}
 			catch (Exception exception)
 			{
@@ -802,7 +802,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.Insert(index, value))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.Insert(index, value))!);
 			}
 			catch (Exception exception)
 			{
@@ -814,7 +814,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.Insert(index, value))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.Insert(index, value))!);
 			}
 			catch (Exception exception)
 			{
@@ -826,7 +826,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.Insert(index, value))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.Insert(index, value))!);
 			}
 			catch (Exception exception)
 			{
@@ -838,7 +838,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.Insert(index, value))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.Insert(index, value))!);
 			}
 			catch (Exception exception)
 			{
@@ -850,7 +850,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.Insert(index, value))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.Insert(index, value))!);
 			}
 			catch (Exception exception)
 			{
@@ -862,7 +862,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.Insert(index, value, count))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.Insert(index, value, count))!);
 			}
 			catch (Exception exception)
 			{
@@ -874,7 +874,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.Insert(index, value))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.Insert(index, value))!);
 			}
 			catch (Exception exception)
 			{
@@ -886,7 +886,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.Insert(index, value))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.Insert(index, value))!);
 			}
 			catch (Exception exception)
 			{
@@ -898,7 +898,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.Insert(index, value))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.Insert(index, value))!);
 			}
 			catch (Exception exception)
 			{
@@ -910,7 +910,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.Remove(startIndex, length))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.Remove(startIndex, length))!);
 			}
 			catch (Exception exception)
 			{
@@ -922,7 +922,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.Replace(oldChar, newChar))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.Replace(oldChar, newChar))!);
 			}
 			catch (Exception exception)
 			{
@@ -934,7 +934,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.Replace(oldChar, newChar, startIndex, count))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.Replace(oldChar, newChar, startIndex, count))!);
 			}
 			catch (Exception exception)
 			{
@@ -946,7 +946,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.Replace(oldValue, newValue))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.Replace(oldValue, newValue))!);
 			}
 			catch (Exception exception)
 			{
@@ -958,7 +958,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Text.StringBuilder, Error>((this.Value.Replace(oldValue, newValue, startIndex, count))!)
+			    return new Either<System.Text.StringBuilder, Error>((this.Value.Replace(oldValue, newValue, startIndex, count))!);
 			}
 			catch (Exception exception)
 			{
@@ -970,7 +970,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<string, Error>((this.Value.ToString())!)
+			    return new Either<string, Error>((this.Value.ToString())!);
 			}
 			catch (Exception exception)
 			{
@@ -982,7 +982,7 @@ public static class StringBuilder__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<string, Error>((this.Value.ToString(startIndex, length))!)
+			    return new Either<string, Error>((this.Value.ToString(startIndex, length))!);
 			}
 			catch (Exception exception)
 			{

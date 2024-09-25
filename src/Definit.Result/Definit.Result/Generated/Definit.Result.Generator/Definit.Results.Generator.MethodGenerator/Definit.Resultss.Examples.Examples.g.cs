@@ -7,8 +7,7 @@ namespace Definit.Resultss.Examples;
 
 partial class Examples
 {
-	
-	private Definit.Results.Either<int, string, Definit.Resultss.Examples.NotFound> PrivateRun(int i)Definit.Utils.SourceGenerator.Generic+Elements
+	private Definit.Results.Either<int, string, Definit.Resultss.Examples.NotFound> PrivateRun(int i)
 	{
 	    try
 	    {
@@ -20,7 +19,7 @@ partial class Examples
 	    }
 	}
 	
-	private Definit.Results.Error? PrivateRun2(string t)Definit.Utils.SourceGenerator.Generic+Elements
+	private Definit.Results.Error? PrivateRun2(string t)
 	{
 	    try
 	    {
@@ -32,7 +31,7 @@ partial class Examples
 	    }
 	}
 	
-	private Definit.Results.Either<string, Definit.Resultss.Examples.NotFound> PrivateRun(string t)Definit.Utils.SourceGenerator.Generic+Elements
+	private Definit.Results.Either<string, Definit.Resultss.Examples.NotFound> PrivateRun(string t)
 	{
 	    try
 	    {
@@ -44,7 +43,8 @@ partial class Examples
 	    }
 	}
 	
-	public static async System.Threading.Tasks.Task<Definit.Results.Either<T, Definit.Resultss.Examples.NotFound>> PublicRun<T>(T t)Definit.Utils.SourceGenerator.Generic+Elements
+	public static async System.Threading.Tasks.Task<Definit.Results.Either<T, Definit.Resultss.Examples.NotFound>> PublicRun<T>(T t)
+		where T : struct, Definit.Results.IError<T>, Definit.Results.IError
 	{
 	    try
 	    {
@@ -55,5 +55,4 @@ partial class Examples
 	        return ResultHelper.ToReturn<Definit.Results.Result<T>.Error<Definit.Resultss.Examples.NotFound>, Definit.Results.Either<T, Definit.Resultss.Examples.NotFound>>(exception);
 	    }
 	}
-	
 }

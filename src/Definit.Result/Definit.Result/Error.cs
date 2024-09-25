@@ -9,8 +9,6 @@ public interface IError<TSelf, TException> : IError<TSelf>
     static (bool Matches, TSelf Error) IError<TSelf>.Matches(Exception exception)
     {
         var (matches, error) = exception.Matches<TException>();
-
-        throw new NotImplementedException();
        // return (matches, new TSelf()
        // {
        // }); 
@@ -63,12 +61,6 @@ public static class ErrorExtensions
         }
 
         return (false, exception);
-    }
-
-    public static Error GetError<TError>(this TError error)
-        where TError : struct, IError<TError>
-    {
-        return error.GetDefinit.Results.IError<System.ArgumentException>.Error(); 
     }
 
     public static TError WithContext<TError>(this TError error, string context)

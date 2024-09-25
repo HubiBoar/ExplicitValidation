@@ -46,7 +46,7 @@ public static class List_T__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Collections.ObjectModel.ReadOnlyCollection<T>, Error>((this.Value.AsReadOnly())!)
+			    return new Either<System.Collections.ObjectModel.ReadOnlyCollection<T>, Error>((this.Value.AsReadOnly())!);
 			}
 			catch (Exception exception)
 			{
@@ -58,7 +58,7 @@ public static class List_T__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<int, Error>((this.Value.BinarySearch(index, count, item, comparer))!)
+			    return new Either<int, Error>((this.Value.BinarySearch(index, count, item, comparer))!);
 			}
 			catch (Exception exception)
 			{
@@ -70,7 +70,7 @@ public static class List_T__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<int, Error>((this.Value.BinarySearch(item))!)
+			    return new Either<int, Error>((this.Value.BinarySearch(item))!);
 			}
 			catch (Exception exception)
 			{
@@ -82,7 +82,7 @@ public static class List_T__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<int, Error>((this.Value.BinarySearch(item, comparer))!)
+			    return new Either<int, Error>((this.Value.BinarySearch(item, comparer))!);
 			}
 			catch (Exception exception)
 			{
@@ -107,7 +107,7 @@ public static class List_T__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<bool, Error>((this.Value.Contains(item))!)
+			    return new Either<bool, Error>((this.Value.Contains(item))!);
 			}
 			catch (Exception exception)
 			{
@@ -119,7 +119,7 @@ public static class List_T__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Collections.Generic.List<TOutput>, Error>((this.Value.ConvertAll(converter))!)
+			    return new Either<System.Collections.Generic.List<TOutput>, Error>((this.Value.ConvertAll(converter))!);
 			}
 			catch (Exception exception)
 			{
@@ -170,7 +170,7 @@ public static class List_T__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<int, Error>((this.Value.EnsureCapacity(capacity))!)
+			    return new Either<int, Error>((this.Value.EnsureCapacity(capacity))!);
 			}
 			catch (Exception exception)
 			{
@@ -182,7 +182,7 @@ public static class List_T__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<bool, Error>((this.Value.Exists(match))!)
+			    return new Either<bool, Error>((this.Value.Exists(match))!);
 			}
 			catch (Exception exception)
 			{
@@ -194,8 +194,8 @@ public static class List_T__Auto__Extensions
 		{
 		    try
 			{
-			    var method_result = this.Value.Find(match);
-			    var maybe_result = Maybe.Create(method_result); 
+			    T? method_result = this.Value.Find(match);
+			    var maybe_result = new Maybe<T?>(method_result); 
 			
 			    return new Either<Maybe<T?>, Error>(maybe_result);
 			}
@@ -209,7 +209,7 @@ public static class List_T__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Collections.Generic.List<T>, Error>((this.Value.FindAll(match))!)
+			    return new Either<System.Collections.Generic.List<T>, Error>((this.Value.FindAll(match))!);
 			}
 			catch (Exception exception)
 			{
@@ -221,7 +221,7 @@ public static class List_T__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<int, Error>((this.Value.FindIndex(startIndex, count, match))!)
+			    return new Either<int, Error>((this.Value.FindIndex(startIndex, count, match))!);
 			}
 			catch (Exception exception)
 			{
@@ -233,7 +233,7 @@ public static class List_T__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<int, Error>((this.Value.FindIndex(startIndex, match))!)
+			    return new Either<int, Error>((this.Value.FindIndex(startIndex, match))!);
 			}
 			catch (Exception exception)
 			{
@@ -245,7 +245,7 @@ public static class List_T__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<int, Error>((this.Value.FindIndex(match))!)
+			    return new Either<int, Error>((this.Value.FindIndex(match))!);
 			}
 			catch (Exception exception)
 			{
@@ -257,8 +257,8 @@ public static class List_T__Auto__Extensions
 		{
 		    try
 			{
-			    var method_result = this.Value.FindLast(match);
-			    var maybe_result = Maybe.Create(method_result); 
+			    T? method_result = this.Value.FindLast(match);
+			    var maybe_result = new Maybe<T?>(method_result); 
 			
 			    return new Either<Maybe<T?>, Error>(maybe_result);
 			}
@@ -272,7 +272,7 @@ public static class List_T__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<int, Error>((this.Value.FindLastIndex(startIndex, count, match))!)
+			    return new Either<int, Error>((this.Value.FindLastIndex(startIndex, count, match))!);
 			}
 			catch (Exception exception)
 			{
@@ -284,7 +284,7 @@ public static class List_T__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<int, Error>((this.Value.FindLastIndex(startIndex, match))!)
+			    return new Either<int, Error>((this.Value.FindLastIndex(startIndex, match))!);
 			}
 			catch (Exception exception)
 			{
@@ -296,7 +296,7 @@ public static class List_T__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<int, Error>((this.Value.FindLastIndex(match))!)
+			    return new Either<int, Error>((this.Value.FindLastIndex(match))!);
 			}
 			catch (Exception exception)
 			{
@@ -321,7 +321,7 @@ public static class List_T__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Collections.Generic.List<T>.Enumerator, Error>((this.Value.GetEnumerator())!)
+			    return new Either<System.Collections.Generic.List<T>.Enumerator, Error>((this.Value.GetEnumerator())!);
 			}
 			catch (Exception exception)
 			{
@@ -333,7 +333,7 @@ public static class List_T__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Collections.Generic.List<T>, Error>((this.Value.GetRange(index, count))!)
+			    return new Either<System.Collections.Generic.List<T>, Error>((this.Value.GetRange(index, count))!);
 			}
 			catch (Exception exception)
 			{
@@ -345,7 +345,7 @@ public static class List_T__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<int, Error>((this.Value.IndexOf(item))!)
+			    return new Either<int, Error>((this.Value.IndexOf(item))!);
 			}
 			catch (Exception exception)
 			{
@@ -357,7 +357,7 @@ public static class List_T__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<int, Error>((this.Value.IndexOf(item, index))!)
+			    return new Either<int, Error>((this.Value.IndexOf(item, index))!);
 			}
 			catch (Exception exception)
 			{
@@ -369,7 +369,7 @@ public static class List_T__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<int, Error>((this.Value.IndexOf(item, index, count))!)
+			    return new Either<int, Error>((this.Value.IndexOf(item, index, count))!);
 			}
 			catch (Exception exception)
 			{
@@ -407,7 +407,7 @@ public static class List_T__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<int, Error>((this.Value.LastIndexOf(item))!)
+			    return new Either<int, Error>((this.Value.LastIndexOf(item))!);
 			}
 			catch (Exception exception)
 			{
@@ -419,7 +419,7 @@ public static class List_T__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<int, Error>((this.Value.LastIndexOf(item, index))!)
+			    return new Either<int, Error>((this.Value.LastIndexOf(item, index))!);
 			}
 			catch (Exception exception)
 			{
@@ -431,7 +431,7 @@ public static class List_T__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<int, Error>((this.Value.LastIndexOf(item, index, count))!)
+			    return new Either<int, Error>((this.Value.LastIndexOf(item, index, count))!);
 			}
 			catch (Exception exception)
 			{
@@ -443,7 +443,7 @@ public static class List_T__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<bool, Error>((this.Value.Remove(item))!)
+			    return new Either<bool, Error>((this.Value.Remove(item))!);
 			}
 			catch (Exception exception)
 			{
@@ -455,7 +455,7 @@ public static class List_T__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<int, Error>((this.Value.RemoveAll(match))!)
+			    return new Either<int, Error>((this.Value.RemoveAll(match))!);
 			}
 			catch (Exception exception)
 			{
@@ -519,7 +519,7 @@ public static class List_T__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Collections.Generic.List<T>, Error>((this.Value.Slice(start, length))!)
+			    return new Either<System.Collections.Generic.List<T>, Error>((this.Value.Slice(start, length))!);
 			}
 			catch (Exception exception)
 			{
@@ -578,10 +578,18 @@ public static class List_T__Auto__Extensions
 			    return Error.Matches(exception).Error;
 			}
 		}
-		// EXCEPTION
-		// T[] System.Collections.Generic.List<T>.ToArray() System.NullReferenceException: Object reference not set to an instance of an object.
-		//    at Definit.Results.Generator.ObjectGenerator.GetReturnType(IMethodSymbol method) in /workspaces/Definit/src/Definit.Result/Definit.Result.Generator/Generator.Result.Object.cs:line 294
-		//    at Definit.Results.Generator.ObjectGenerator.GenerateMethod(SourceProductionContext context, IMethodSymbol method, String typeName, Boolean allowUnsafe) in /workspaces/Definit/src/Definit.Result/Definit.Result.Generator/Generator.Result.Object.cs:line 154
+		
+		public Either<T[], Error> ToArray()
+		{
+		    try
+			{
+			    return new Either<T[], Error>((this.Value.ToArray())!);
+			}
+			catch (Exception exception)
+			{
+			    return new Either<T[], Error>(Error.Matches(exception).Error);
+			}
+		}
 		
 		public Error? TrimExcess()
 		{
@@ -600,7 +608,7 @@ public static class List_T__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<bool, Error>((this.Value.TrueForAll(match))!)
+			    return new Either<bool, Error>((this.Value.TrueForAll(match))!);
 			}
 			catch (Exception exception)
 			{

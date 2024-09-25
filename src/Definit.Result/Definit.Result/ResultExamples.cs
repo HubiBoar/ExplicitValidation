@@ -24,46 +24,12 @@ public partial struct EitherExample2<T> : Either<T, string, int>.Base
 
 public readonly record struct NotFound() : IError<NotFound, KeyNotFoundException>;
 
-public static class Extensions
-{
-}
-
 public partial class Examples
 {
-    private static int Get(string str)
-    {
-        ErrorHelper.Matches<NotFound>(new Exception());
-
-        var ((v, _), i) = GetEither<string>(); 
-
-        return default!;
-    }
-
-    private static Either<T, T> Get3<T>(T value)
-        where T : unmanaged
-    {
-        throw new Exception();
-    }
-
-    private static ResultExample2<string> GetResultExample2()
-    {
-        return default!;
-    }
-
-    private static Either<Maybe<T>, string> GetEither<T>()
-    {
-        return default!;
-    }
-
-    private static string GetString()
-    {
-        return default!;
-    }
-
     [GenerateResult.Method.Private]
     private ResultExample2<int> _PrivateRun(int i)
     {
-        return "";
+        return string.Empty;
     }
 
     [GenerateResult.Method.Private]
@@ -75,24 +41,6 @@ public partial class Examples
     [GenerateResult.Method.Private]
     private Result<string>.Error<NotFound> _PrivateRun(string t)
     {
-        var result = GetResultExample2();
-
-        var ((str, isNull), error) = Result.Try(GetString);
-
-        ((str, isNull), var i) = GetEither();
-
-        if(str is null)
-        {
-            return new NotFound();
-        }
-
-        (i, error) = Result.Try(() => Get(str));
-
-        if(i is not null)
-        {
-            return i.Value.Out.ToString();
-        }
-
         return t;
     }
 

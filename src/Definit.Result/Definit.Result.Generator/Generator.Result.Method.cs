@@ -65,9 +65,7 @@ public class MethodGenerator : IIncrementalGenerator
             "System.Diagnostics.CodeAnalysis"
         );
 
-        var builder = new StringBuilder();
-
-        foreach(var method in type.Methods)
+        var methods = string.Join("\n\n", type.Methods.Select(method =>
         {
             var returnType = GetResultType(method.Symbol)!.Value;
             var isAsync = returnType.IsTask;
@@ -88,8 +86,8 @@ public class MethodGenerator : IIncrementalGenerator
             var parametersCall = method.Symbol.GetCallingParameters();
             var methodCall = $"{awaitCall}{method.Symbol.Name}({parametersCall})";
 
-            builder.AppendLine().AppendLine($$"""
-            {{declaration}}{{decGenericConstraints}}
+            return $$"""
+            {{declaration}}{{decGenericConstraints.ConstraintsString}}
             {
                 try
                 {
@@ -100,10 +98,10 @@ public class MethodGenerator : IIncrementalGenerator
                     return ResultHelper.ToReturn<{{returnResult}}, {{returnEither}}>(exception);
                 }
             }
-            """);
-        }
+            """;
+        }));
 
-        code.AddBlock(builder.ToString());
+        code.AddBlock(methods);
 
         return (code.ToString(), info.Name);
     }

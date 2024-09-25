@@ -151,7 +151,7 @@ public class ObjectGenerator : IIncrementalGenerator
 
         try
         {
-            var (returnType, returns, task) = GetReturnType(method); 
+            var (returnType, internalType, returns, task) = GetReturnType(method); 
 
             var isUnsafe = method.IsUnsafe();
 
@@ -197,8 +197,8 @@ public class ObjectGenerator : IIncrementalGenerator
                 $$"""
                 try
                 {
-                    var method_result = {{methodCall}};
-                    var maybe_result = Maybe.Create(method_result); 
+                    {{internalType}} method_result = {{methodCall}};
+                    var maybe_result = new Maybe<{{internalType}}>(method_result); 
 
                     return new {{returnType}}(maybe_result);
                 }
@@ -211,7 +211,7 @@ public class ObjectGenerator : IIncrementalGenerator
                 _ => $$"""
                 try
                 {
-                    return new {{returnType}}(({{methodCall}})!)
+                    return new {{returnType}}(({{methodCall}})!);
                 }
                 catch (Exception exception)
                 {
@@ -237,18 +237,8 @@ public class ObjectGenerator : IIncrementalGenerator
         catch (Exception exception)
         {
             var description = $"{method.ReturnType.ToDisplayString()} {method.ToDisplayString()} {exception.ToString()}";
-            var desc = new DiagnosticDescriptor
-            (
-                "ROG0001",
-                "Exception on method creation",
-                description,
-                "Error",
-                DiagnosticSeverity.Error,
-                true
-            );
-            
-            context.ReportDiagnostic(Diagnostic.Create(desc, Location.None));
-            return $"// EXCEPTION\n// {string.Join("\n// ", description.Split('\n'))}";
+
+            return exception.ReportException(context, description);
         }
     }
 
@@ -266,102 +256,54 @@ public class ObjectGenerator : IIncrementalGenerator
         Type
     }
 
-    private static (string ReturnType, Returns Returns, Task Async) GetReturnType(IMethodSymbol method)
+    private static (string ReturnType, string? InternalType, Returns Returns, Task Async) GetReturnType(IMethodSymbol method)
     {
         const string success = "Error?";
 
         var returnType = method.GetReturnType();
         if(returnType is Method.Return.Void)
         {
-            return (success, Returns.Success, Task.None);
+            return (success, null, Returns.Success, Task.None);
         }
 
         if(returnType is Method.Return.Type type)
         {
-            var returnName = type.Parameter.ToDisplayString();
-            if(type.Parameter.CanBeNull())
+            if(type.CanBeNull)
             {
-                return ($"Either<Maybe<{returnName}>, Error>", Returns.Maybe, Task.None);
+                return ($"Either<Maybe<{type.Name}>, Error>", type.Name, Returns.Maybe, Task.None);
             }
-            else
-            {
-                return ($"Either<{returnName}, Error>", Returns.Type, Task.None);
-            }
-        }
 
-        if(returnType is Method.Return.Type.Generic generic)
-        {
-            var returnName = generic.Parameter.ToDisplayString();
-            if(generic.Parameter.CanBeNull())
-            {
-                return ($"Either<Maybe<{returnName}>, Error>", Returns.Maybe, Task.None);
-            }
-            else
-            {
-                return ($"Either<{returnName}, Error>", Returns.Type, Task.None);
-            }
+            return ($"Either<{type.Name}, Error>", type.Name, Returns.Type, Task.None);
         }
 
         if(returnType is Method.Return.Task)
         {
-            return (success, Returns.Success, Task.Task);
+            return (success, null, Returns.Success, Task.Task);
         }
 
         if(returnType is Method.Return.ValueTask)
         {
-            return (success, Returns.Success, Task.ValueTask);
+            return (success, null, Returns.Success, Task.ValueTask);
         }
 
         if(returnType is Method.Return.Task.Type task)
         {
-            var returnName = task.Parameter.ToDisplayString();
-            if(task.Parameter.CanBeNull())
+            if(task.CanBeNull)
             {
-                return ($"Either<Maybe<{returnName}>, Error>", Returns.Maybe, Task.Task);
+                return ($"Either<Maybe<{task.Name}>, Error>", task.Name, Returns.Maybe, Task.Task);
             }
-            else
-            {
-                return ($"Either<{returnName}, Error>", Returns.Type, Task.Task);
-            }
+
+            return ($"Either<{task.Name}, Error>", task.Name, Returns.Type, Task.Task);
         }
 
         if(returnType is Method.Return.ValueTask.Type valueTask)
         {
-            var returnName = task.Parameter.ToDisplayString();
-            if(task.Parameter.CanBeNull())
+            if(valueTask.CanBeNull)
             {
-                return ($"Either<Maybe<{returnName}>, Error>", Returns.Maybe, Task.ValueTask);
+                return ($"Either<Maybe<{valueTask.Name}>, Error>", valueTask.Name, Returns.Maybe, Task.ValueTask);
             }
-            else
-            {
-                return ($"Either<{returnName}, Error>", Returns.Type, Task.ValueTask);
-            }
-        }
 
-        if(returnType is Method.Return.Task.Type.Generic genericTask)
-        {
-            var returnName = genericTask.Parameter.ToDisplayString();
-            if(genericTask.Parameter.CanBeNull())
-            {
-                return ($"Either<Maybe<{returnName}>, Error>", Returns.Maybe, Task.Task);
-            }
-            else
-            {
-                return ($"Either<{returnName}, Error>", Returns.Type, Task.Task);
-            }
-        }
-
-        if(returnType is Method.Return.ValueTask.Type.Generic genericValueTask)
-        {
-            var returnName = genericTask.Parameter.ToDisplayString();
-            if(genericTask.Parameter.CanBeNull())
-            {
-                return ($"Either<Maybe<{returnName}>, Error>", Returns.Maybe, Task.ValueTask);
-            }
-            else
-            {
-                return ($"Either<{returnName}, Error>", Returns.Type, Task.ValueTask);
-            }
+            return ($"Either<{valueTask.Name}, Error>", valueTask.Name, Returns.Type, Task.ValueTask);
         }
 
         throw new ArgumentOutOfRangeException();

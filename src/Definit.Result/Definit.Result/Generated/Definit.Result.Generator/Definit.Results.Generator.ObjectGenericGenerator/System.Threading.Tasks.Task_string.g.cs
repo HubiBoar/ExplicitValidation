@@ -20,7 +20,7 @@ public static class Task_string__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Runtime.CompilerServices.ConfiguredTaskAwaitable<string>, Error>((this.Value.ConfigureAwait(continueOnCapturedContext))!)
+			    return new Either<System.Runtime.CompilerServices.ConfiguredTaskAwaitable<string>, Error>((this.Value.ConfigureAwait(continueOnCapturedContext))!);
 			}
 			catch (Exception exception)
 			{
@@ -32,7 +32,7 @@ public static class Task_string__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Runtime.CompilerServices.ConfiguredTaskAwaitable<string>, Error>((this.Value.ConfigureAwait(options))!)
+			    return new Either<System.Runtime.CompilerServices.ConfiguredTaskAwaitable<string>, Error>((this.Value.ConfigureAwait(options))!);
 			}
 			catch (Exception exception)
 			{
@@ -174,8 +174,8 @@ public static class Task_string__Auto__Extensions
 		{
 		    try
 			{
-			    var method_result = await this.Value.ContinueWith(continuationFunction, state);
-			    var maybe_result = Maybe.Create(method_result); 
+			    TNewResult method_result = await this.Value.ContinueWith(continuationFunction, state);
+			    var maybe_result = new Maybe<TNewResult>(method_result); 
 			
 			    return new Either<Maybe<TNewResult>, Error>(maybe_result);
 			}
@@ -189,8 +189,8 @@ public static class Task_string__Auto__Extensions
 		{
 		    try
 			{
-			    var method_result = await this.Value.ContinueWith(continuationFunction, state, cancellationToken);
-			    var maybe_result = Maybe.Create(method_result); 
+			    TNewResult method_result = await this.Value.ContinueWith(continuationFunction, state, cancellationToken);
+			    var maybe_result = new Maybe<TNewResult>(method_result); 
 			
 			    return new Either<Maybe<TNewResult>, Error>(maybe_result);
 			}
@@ -204,8 +204,8 @@ public static class Task_string__Auto__Extensions
 		{
 		    try
 			{
-			    var method_result = await this.Value.ContinueWith(continuationFunction, state, cancellationToken, continuationOptions, scheduler);
-			    var maybe_result = Maybe.Create(method_result); 
+			    TNewResult method_result = await this.Value.ContinueWith(continuationFunction, state, cancellationToken, continuationOptions, scheduler);
+			    var maybe_result = new Maybe<TNewResult>(method_result); 
 			
 			    return new Either<Maybe<TNewResult>, Error>(maybe_result);
 			}
@@ -219,8 +219,8 @@ public static class Task_string__Auto__Extensions
 		{
 		    try
 			{
-			    var method_result = await this.Value.ContinueWith(continuationFunction, state, continuationOptions);
-			    var maybe_result = Maybe.Create(method_result); 
+			    TNewResult method_result = await this.Value.ContinueWith(continuationFunction, state, continuationOptions);
+			    var maybe_result = new Maybe<TNewResult>(method_result); 
 			
 			    return new Either<Maybe<TNewResult>, Error>(maybe_result);
 			}
@@ -234,8 +234,8 @@ public static class Task_string__Auto__Extensions
 		{
 		    try
 			{
-			    var method_result = await this.Value.ContinueWith(continuationFunction, state, scheduler);
-			    var maybe_result = Maybe.Create(method_result); 
+			    TNewResult method_result = await this.Value.ContinueWith(continuationFunction, state, scheduler);
+			    var maybe_result = new Maybe<TNewResult>(method_result); 
 			
 			    return new Either<Maybe<TNewResult>, Error>(maybe_result);
 			}
@@ -249,8 +249,8 @@ public static class Task_string__Auto__Extensions
 		{
 		    try
 			{
-			    var method_result = await this.Value.ContinueWith(continuationFunction);
-			    var maybe_result = Maybe.Create(method_result); 
+			    TNewResult method_result = await this.Value.ContinueWith(continuationFunction);
+			    var maybe_result = new Maybe<TNewResult>(method_result); 
 			
 			    return new Either<Maybe<TNewResult>, Error>(maybe_result);
 			}
@@ -264,8 +264,8 @@ public static class Task_string__Auto__Extensions
 		{
 		    try
 			{
-			    var method_result = await this.Value.ContinueWith(continuationFunction, cancellationToken);
-			    var maybe_result = Maybe.Create(method_result); 
+			    TNewResult method_result = await this.Value.ContinueWith(continuationFunction, cancellationToken);
+			    var maybe_result = new Maybe<TNewResult>(method_result); 
 			
 			    return new Either<Maybe<TNewResult>, Error>(maybe_result);
 			}
@@ -279,8 +279,8 @@ public static class Task_string__Auto__Extensions
 		{
 		    try
 			{
-			    var method_result = await this.Value.ContinueWith(continuationFunction, cancellationToken, continuationOptions, scheduler);
-			    var maybe_result = Maybe.Create(method_result); 
+			    TNewResult method_result = await this.Value.ContinueWith(continuationFunction, cancellationToken, continuationOptions, scheduler);
+			    var maybe_result = new Maybe<TNewResult>(method_result); 
 			
 			    return new Either<Maybe<TNewResult>, Error>(maybe_result);
 			}
@@ -294,8 +294,8 @@ public static class Task_string__Auto__Extensions
 		{
 		    try
 			{
-			    var method_result = await this.Value.ContinueWith(continuationFunction, continuationOptions);
-			    var maybe_result = Maybe.Create(method_result); 
+			    TNewResult method_result = await this.Value.ContinueWith(continuationFunction, continuationOptions);
+			    var maybe_result = new Maybe<TNewResult>(method_result); 
 			
 			    return new Either<Maybe<TNewResult>, Error>(maybe_result);
 			}
@@ -309,8 +309,8 @@ public static class Task_string__Auto__Extensions
 		{
 		    try
 			{
-			    var method_result = await this.Value.ContinueWith(continuationFunction, scheduler);
-			    var maybe_result = Maybe.Create(method_result); 
+			    TNewResult method_result = await this.Value.ContinueWith(continuationFunction, scheduler);
+			    var maybe_result = new Maybe<TNewResult>(method_result); 
 			
 			    return new Either<Maybe<TNewResult>, Error>(maybe_result);
 			}
@@ -324,7 +324,7 @@ public static class Task_string__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<System.Runtime.CompilerServices.TaskAwaiter<string>, Error>((this.Value.GetAwaiter())!)
+			    return new Either<System.Runtime.CompilerServices.TaskAwaiter<string>, Error>((this.Value.GetAwaiter())!);
 			}
 			catch (Exception exception)
 			{
@@ -336,7 +336,7 @@ public static class Task_string__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<string, Error>((await this.Value.WaitAsync(cancellationToken))!)
+			    return new Either<string, Error>((await this.Value.WaitAsync(cancellationToken))!);
 			}
 			catch (Exception exception)
 			{
@@ -348,7 +348,7 @@ public static class Task_string__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<string, Error>((await this.Value.WaitAsync(timeout))!)
+			    return new Either<string, Error>((await this.Value.WaitAsync(timeout))!);
 			}
 			catch (Exception exception)
 			{
@@ -360,7 +360,7 @@ public static class Task_string__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<string, Error>((await this.Value.WaitAsync(timeout, cancellationToken))!)
+			    return new Either<string, Error>((await this.Value.WaitAsync(timeout, cancellationToken))!);
 			}
 			catch (Exception exception)
 			{
@@ -372,7 +372,7 @@ public static class Task_string__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<string, Error>((await this.Value.WaitAsync(timeout, timeProvider))!)
+			    return new Either<string, Error>((await this.Value.WaitAsync(timeout, timeProvider))!);
 			}
 			catch (Exception exception)
 			{
@@ -384,7 +384,7 @@ public static class Task_string__Auto__Extensions
 		{
 		    try
 			{
-			    return new Either<string, Error>((await this.Value.WaitAsync(timeout, timeProvider, cancellationToken))!)
+			    return new Either<string, Error>((await this.Value.WaitAsync(timeout, timeProvider, cancellationToken))!);
 			}
 			catch (Exception exception)
 			{

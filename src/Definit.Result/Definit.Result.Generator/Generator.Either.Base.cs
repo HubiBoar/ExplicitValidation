@@ -308,7 +308,7 @@ public class EitherBaseGenerator : IIncrementalGenerator
                 {{outArgs}}
             ){{genericConstraints}}
             {
-                if(result is null)
+                if(either is null)
                 {
                     {{nullValues}}
                     return;

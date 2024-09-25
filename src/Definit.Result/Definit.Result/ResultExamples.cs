@@ -24,14 +24,17 @@ public partial struct EitherExample2<T> : Either<T, string, int>.Base
 
 public readonly record struct NotFound() : IError<NotFound, KeyNotFoundException>;
 
+public static class Extensions
+{
+}
+
 public partial class Examples
 {
     private static int Get(string str)
     {
         ErrorHelper.Matches<NotFound>(new Exception());
 
-        int? v = null; 
-        var g = Get3(v);
+        var ((v, _), i) = GetEither<string>(); 
 
         return default!;
     }
@@ -47,7 +50,7 @@ public partial class Examples
         return default!;
     }
 
-    private static Either<string, int> GetEither()
+    private static Either<Maybe<T>, string> GetEither<T>()
     {
         return default!;
     }

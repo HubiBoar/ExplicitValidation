@@ -12,9 +12,7 @@ public readonly struct Or<T>
 
     public Or(T value) => Out = value;
 
-    public static implicit operator T(Or<T> value) => value.Out;
     public static implicit operator Or<T>([DisallowNull] T value) => new(value);
-    public static implicit operator T([DisallowNull] Or<T>? value) => value.Value.Out;   
 }
 
 public static class Maybe
@@ -146,5 +144,42 @@ public static class MaybeExtensions
         }
 
         Maybe<T>.Deconstruct<T>(maybe.Value, out value, out nul); 
+    }
+
+    public static void Deconstruct<T>(this Or<Maybe<T?>>? or, out T? value, out Null? nul)
+        where T : struct
+    {
+        if(or is null)
+        {
+            value = null;
+            nul = null;
+            return;
+        }
+        Maybe<T?>.Deconstruct<T>(or.Value.Out, out value, out nul); 
+    }
+
+    public static void Deconstruct<T>(this Or<Maybe<T>>? or, out T? value, out Null? nul)
+        where T : struct
+    {
+        if(or is null)
+        {
+            value = null;
+            nul = null;
+            return;
+        }
+
+        Maybe<T>.Deconstruct<T>(or.Value.Out, out value, out nul); 
+    }
+
+    public static void Deconstruct<T>(this Or<Maybe<T>>? or, out T? value, out Null? nul)
+        where T : class?
+    {
+        if(or is null)
+        {
+            value = null;
+            nul = null;
+            return;
+        }
+        Maybe<T>.Deconstruct<T>(or.Value.Out, out value, out nul); 
     }
 }

@@ -158,10 +158,11 @@ public class EitherBaseGenerator : IIncrementalGenerator
 
         if(length <= MaxDeconstructorsCount)
         {
-            var generic = allGenericParams.Value.Select(x => (Type: x, Name: $"{x.Name}_arg")).ToArray();
-            var outArgs = string.Join(",\n\t", generic.Select(x => $"out {x.Type.Name}? {x.Name}"));
-            var returns = string.Join(", ", generic.Select(x => x.Name));
-            var nullValues = string.Join(" ", generic.Select(x => $"{x.Name} = null;"));
+            var generic = allGenericParams.Value.Select(x => (Type: x, Return: $"{x.Name}_arg", Assign: $"{x.Name}_out")).ToArray();
+            var outArgs = string.Join(",\n\t", generic.Select(x => $"out {x.Type.Name}? {x.Return}"));
+            var returns = string.Join(", ", generic.Select(x => x.Assign));
+            var assignments = string.Join("\n\t", generic.Select(x => $"{x.Return} = {x.Assign}?.Out ?? null;"));
+            var nullValues = string.Join(" ", generic.Select(x => $"{x.Return} = null;"));
             var states = GenerateAllStates(length);
 
             return string.Join("\n\n", states.Select(state => 
@@ -205,6 +206,45 @@ public class EitherBaseGenerator : IIncrementalGenerator
                     }
                 }).ToImmutableArray()); 
 
+                var maybeGenericConstraints = new Generic.Arguments(state.Select((isClass, i) =>
+                {
+                    var genericParam = typeGenericParams.Value[i];
+                    var main = genericParam.Constraint;
+
+                    if(isClass)
+                    {
+                        var cantBeClass = 
+                           main is Generic.Constraint.Struct
+                        || main is Generic.Constraint.Unmanaged;
+                         
+                        if(cantBeClass)
+                        {
+                            return genericParam;
+                        }
+
+                        var newMain = main.IsNew() ? Generic.Constraint.ClassNullableNew : Generic.Constraint.ClassNullable;
+
+                        return new Generic.Argument(genericParam.Name, newMain, false, genericParam.Types);
+                    }
+                    else
+                    {
+                        var canBeStruct = 
+                           main is Generic.Constraint.Struct
+                        || main is Generic.Constraint.New
+                        || main is Generic.Constraint.NotnullNew
+                        || main is Generic.Constraint.Notnull;
+                         
+                        if(canBeStruct == false)
+                        {
+                            return genericParam;
+                        }
+
+                        var newMain = Generic.Constraint.Struct;
+
+                        return new Generic.Argument(genericParam.Name, newMain, false, genericParam.Types);
+                    }
+                }).ToImmutableArray()); 
+
                 return $$"""
                 public static void Deconstruct<{{typeGenericArgs}}>
                 (
@@ -212,7 +252,8 @@ public class EitherBaseGenerator : IIncrementalGenerator
                     {{outArgs}}
                 ){{genericConstraints}}
                 {
-                    ({{returns}}) = either.Value;
+                    var ({{returns}}) = either.Value;
+                    {{assignments}}
                 }
 
                 public static void Deconstruct<{{typeGenericArgs}}>
@@ -221,14 +262,32 @@ public class EitherBaseGenerator : IIncrementalGenerator
                     {{outArgs}}
                 ){{genericConstraints}}
                 {
-                    if(result is null)
+                    if(either is null)
                     {
                         {{nullValues}}
                         return;
                     }
 
-                    ({{returns}}) = either.Value.Value;
+                    var ({{returns}}) = either.Value.Value;
+                    {{assignments}}
                 }
+
+                public static void Deconstruct<{{typeGenericArgs}}>
+                (
+                    this {{typeName}}? either,
+                    {{outArgs}}
+                ){{genericConstraints}}
+                {
+                    if(either is null)
+                    {
+                        {{nullValues}}
+                        return;
+                    }
+
+                    var ({{returns}}) = either.Value.Value;
+                    {{assignments}}
+                }
+
                 """;
             }));
         }

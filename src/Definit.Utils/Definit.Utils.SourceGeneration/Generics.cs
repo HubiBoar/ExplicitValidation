@@ -66,7 +66,7 @@ public static class Generic
 
         public bool HasNullAnnotation { get; }
 
-        public string AsString { get; } 
+        public string ConstraintsString { get; } 
 
         public Argument(string name) : this(name, Constraint.Empty, false, ImmutableArray<Type>.Empty){}
         public Argument(string name, Constraint main) : this(name, main, false, ImmutableArray<Type>.Empty){}
@@ -82,10 +82,8 @@ public static class Generic
             var paramsString = string.Join(", ", new string?[] { start, typesString, end }
                     .Where(x => string.IsNullOrEmpty(x) == false));
 
-            AsString = string.IsNullOrEmpty(paramsString) ? string.Empty : $"where {Name} : {paramsString}"; 
+            ConstraintsString = string.IsNullOrEmpty(paramsString) ? string.Empty : $"where {Name} : {paramsString}"; 
         }
-
-        public override string ToString() => AsString;
 
         public static Argument Class(string name)   => new Argument(name, Generic.Constraint.Class);
         public static Argument Struct(string name)  => new Argument(name, Generic.Constraint.Struct);
@@ -97,28 +95,68 @@ public static class Generic
             => new Argument(name, Generic.Constraint.Struct, false, types.ToImmutableArray());
     }
 
-    public readonly struct Arguments
+    public readonly struct Element
     {
-        public ImmutableArray<Argument> Value { get; }
+        public string Name { get; }
+        public string ConstraintsString { get; }
 
-        public string AsString { get; }
+        public (Type? Type, Argument? Argument) Value { get; }
+        public void Deconstruct(out Type? type, out Argument? argument) => (type, argument) = Value;
+
+        public Element(Type value)
+        {
+            Value = (value, null);
+            Name = value.Name;
+            ConstraintsString = string.Empty;
+        }
+
+        public Element(Argument value)
+        {
+            Value = (null, value);
+            Name = value.Name;
+            ConstraintsString = value.ConstraintsString;
+        }
+
+        public static implicit operator Element(Type value) => new (value);
+        public static implicit operator Element(Argument value) => new (value);
+
+        public T Match<T>(Func<Type, T> t0, Func<Argument, T> t1)
+        {
+            var (type, argument) = Value;
+            if(type is not null)
+            {
+                return t0(type.Value);
+            }
+            else
+            {
+                return t1(argument!.Value);
+            }
+        }
+    }
+
+    public readonly struct Elements
+    {
+        public ImmutableArray<Element> Value { get; }
+
+        public string ArgumentNamesFull { get; }
         public string ArgumentNames { get; }
+        public string ConstraintsString { get; }
 
-        public Arguments(Arguments arg, params Argument[] value) : this(arg.Value.Concat(value).ToImmutableArray()) {}
-        public Arguments(params Argument[] value) : this(value.ToImmutableArray()) {}
-        public Arguments(Arguments value, Arguments value2) : this(value.Value.Concat(value2.Value).ToImmutableArray()) {}
+        public Elements(Elements arg, params Element[] value) : this(arg.Value.Concat(value).ToImmutableArray()) {}
+        public Elements(params Element[] value) : this(value.ToImmutableArray()) {}
+        public Elements(Elements value, Elements value2) : this(value.Value.Concat(value2.Value).ToImmutableArray()) {}
         
-        public Arguments(ImmutableArray<Argument> value)
+        public Elements(ImmutableArray<Argument> value) : this(value.Select<Argument, Element>(x => x).ToImmutableArray()) {}
+        public Elements(ImmutableArray<Element> value)
         {
             Value = value;
             ArgumentNames = string.Join(", ", value.Select(x => x.Name));
-            AsString = value.Length == 0 ? string.Empty : "\n\t" + string.Join("\n\t", value.Select(x => x.ToString()));
+            ArgumentNamesFull = string.IsNullOrEmpty(ArgumentNames) ? string.Empty : $"<{ArgumentNames}>";
+            ConstraintsString = value.Length == 0 ? string.Empty : "\n\t" + string.Join("\n\t", value
+                .Select(x => x.ConstraintsString).Where(x => string.IsNullOrEmpty(x) == false));
         }
-
-
-        public override string ToString() => AsString;
     }
-    
+
     public static Argument GetGenericArgument(this ITypeParameterSymbol symbol) 
     {
         Constraint constraint = Constraint.Empty;
@@ -157,20 +195,25 @@ public static class Generic
 
         return new Argument(symbol.ToDisplayString(), constraint, hasNullableAnnotation, types);
     }
-
-    public static Arguments GetGenericArguments(this IEnumerable<ITypeSymbol> typeArguments)
+    
+    public static Element GetGenericArgument(this ITypeSymbol type) 
     {
-        var parameters = 
-            typeArguments
-            .OfType<ITypeParameterSymbol>()
-            .ToArray();
-
-        if(parameters.Length == 0)
+        if(type is ITypeParameterSymbol symbol)
         {
-            return new Arguments(ImmutableArray<Generic.Argument>.Empty);
+            return symbol.GetGenericArgument();
         }
 
-        return new Arguments
+        return new Type(type.ToDisplayString());
+    }
+
+    public static Elements GetGenericArguments(this ImmutableArray<ITypeSymbol> parameters)
+    {
+        if(parameters.Length == 0)
+        {
+            return new Elements(ImmutableArray<Generic.Element>.Empty);
+        }
+
+        return new Elements
         (
             parameters
                 .Select(GetGenericArgument)
@@ -178,13 +221,13 @@ public static class Generic
         );
     }
 
-    public static Arguments GetMethodGenericArguments(this IMethodSymbol method)
+    public static Elements GetMethodGenericArguments(this IMethodSymbol method)
     {
         var isGeneric = method.IsGenericMethod;
 
         if(isGeneric is false)
         {
-            return new Arguments(ImmutableArray<Generic.Argument>.Empty);
+            return new Elements(ImmutableArray<Generic.Element>.Empty);
         }
 
         return method.TypeArguments.GetGenericArguments();

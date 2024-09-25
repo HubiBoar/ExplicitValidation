@@ -34,11 +34,9 @@ public sealed class TypeInfo
             _                        => "struct"
         };
 
-        var generics = string.Join(", ", symbol.TypeArguments.Select(x => x.ToDisplayString()));
-        generics = string.IsNullOrEmpty(generics) ? string.Empty : $"<{generics}>";
-        var constraints = symbol.TypeArguments.GetGenericArguments();
+        var generics = symbol.TypeArguments.GetGenericArguments();
 
-        TypeName = $"partial {type} {Symbol.Name}{generics}{constraints}";
+        TypeName = $"partial {type} {Symbol.Name}{generics.ArgumentNamesFull}{generics.ConstraintsString}";
         
         var parents = new Stack<TypeInfo>();
 

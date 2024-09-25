@@ -427,7 +427,6 @@ public static class StringBuilder__Auto__Extensions
 		
 		public Either<System.Text.StringBuilder, Error> AppendFormat<TArg0, TArg1>(System.IFormatProvider? provider, System.Text.CompositeFormat format, TArg0 arg0, TArg1 arg1)
 			
-			
 		{
 		    try
 			{
@@ -440,8 +439,6 @@ public static class StringBuilder__Auto__Extensions
 		}
 		
 		public Either<System.Text.StringBuilder, Error> AppendFormat<TArg0, TArg1, TArg2>(System.IFormatProvider? provider, System.Text.CompositeFormat format, TArg0 arg0, TArg1 arg1, TArg2 arg2)
-			
-			
 			
 		{
 		    try

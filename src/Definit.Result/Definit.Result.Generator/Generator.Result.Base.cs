@@ -54,7 +54,7 @@ public class ResultBaseGenerator : IIncrementalGenerator
 
         return Enumerable.Range(1, resultCount + 1).Select<int, Func<(string, string)>>(length => () =>
         {
-            var resultGenerics = new Generic.Arguments
+            var resultGenerics = new Generic.Elements
             (
                 Enumerable
                     .Range(0, length)
@@ -67,7 +67,7 @@ public class ResultBaseGenerator : IIncrementalGenerator
 
             var errors = string.Join("\n\n\n\t", Enumerable.Range(1, errorCount).Select(errorsLength =>
             {
-                var errorGenerics = new Generic.Arguments
+                var errorGenerics = new Generic.Elements
                 (
                     Enumerable
                         .Range(0, errorsLength)
@@ -75,7 +75,7 @@ public class ResultBaseGenerator : IIncrementalGenerator
                         .ToImmutableArray()
                 );
 
-                var convertsFrom = new Generic.Arguments
+                var convertsFrom = new Generic.Elements
                 (
                     resultGenerics,
                     errorGenerics
@@ -87,7 +87,7 @@ public class ResultBaseGenerator : IIncrementalGenerator
             })
             .ToArray());
 
-            var convertsFrom = new Generic.Arguments
+            var convertsFrom = new Generic.Elements
             (
                 resultGenerics,
                 new Generic.Argument("Err")
@@ -100,7 +100,7 @@ public class ResultBaseGenerator : IIncrementalGenerator
 
             var fromException = string.Join("\n\t\t", GenerateFromException
                 (
-                    new Generic.Arguments(new Generic.Argument("Err")),
+                    new Generic.Elements(new Generic.Argument("Err")),
                     either
                 )
                 .Split('\n')
@@ -112,7 +112,7 @@ public class ResultBaseGenerator : IIncrementalGenerator
 
             namespace Definit.Results;
 
-            public readonly struct {{resultName}} : {{resultName}}.Base{{resultGenerics}}
+            public readonly struct {{resultName}} : {{resultName}}.Base{{resultGenerics.ConstraintsString}}
             {
                 public interface Base : IResultBase<{{either}}>
                 {
@@ -139,7 +139,7 @@ public class ResultBaseGenerator : IIncrementalGenerator
         var errors = string.Join("\n\n\n\t", Enumerable.Range(1, errorCount).Select(errorsLength =>
         {
             var first = errorsLength == 1;
-            var errorGenerics = new Generic.Arguments
+            var errorGenerics = new Generic.Elements
             (
                 Enumerable
                     .Range(0, errorsLength)
@@ -154,7 +154,7 @@ public class ResultBaseGenerator : IIncrementalGenerator
         .ToArray());
 
         var either = "Err?";
-        var err = new Generic.Arguments(new Generic.Argument("Err"));
+        var err = new Generic.Elements(new Generic.Argument("Err"));
         var interiorRaw = ResultInterior
         (
             err,
@@ -223,7 +223,7 @@ public class ResultBaseGenerator : IIncrementalGenerator
         return (code, $"Definit.Results.Result_0");
     }
 
-    private static string GenerateFromException(Generic.Arguments errorGenerics, string either)
+    private static string GenerateFromException(Generic.Elements errorGenerics, string either)
     {
         var errorHandling = string.Join("\n\n", errorGenerics.Value.Select((x, i) => 
         {
@@ -253,9 +253,9 @@ public class ResultBaseGenerator : IIncrementalGenerator
 
     private static string GenerateErrorType
     (
-        Generic.Arguments convertFrom,
+        Generic.Elements convertFrom,
         string either,
-        Generic.Arguments errorGenerics,
+        Generic.Elements errorGenerics,
         bool convertFromSuccess
     )
     {
@@ -276,7 +276,7 @@ public class ResultBaseGenerator : IIncrementalGenerator
         var fromException = string.Join("\n\t\t", GenerateFromException(errorGenerics, either).Split('\n')); 
 
         return $$"""
-        public readonly struct {{genericName}} : {{genericName}}.Base{{errorGenerics}}
+        public readonly struct {{genericName}} : {{genericName}}.Base{{errorGenerics.ConstraintsString}}
         {
             public interface Base : IResultBase<{{either}}>
             {
@@ -290,7 +290,7 @@ public class ResultBaseGenerator : IIncrementalGenerator
 
     public static string ResultInterior
     (
-        Generic.Arguments convertFrom,
+        Generic.Elements convertFrom,
         string either,
         string constructorName,
         string typeName,

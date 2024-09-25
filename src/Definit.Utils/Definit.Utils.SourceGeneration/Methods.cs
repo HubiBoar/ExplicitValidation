@@ -35,7 +35,7 @@ public static class Method
 
         public readonly struct Task : IReturnType
         {
-            public readonly struct Type : IReturnType
+            public readonly struct Type : IReturnInfo
             {
                 public string Name { get; }
                 public bool CanBeNull { get; }
@@ -52,7 +52,7 @@ public static class Method
         
         public readonly struct ValueTask : IReturnType
         {
-            public readonly struct Type : IReturnType
+            public readonly struct Type : IReturnInfo
             {
                 public string Name { get; }
                 public bool CanBeNull { get; }

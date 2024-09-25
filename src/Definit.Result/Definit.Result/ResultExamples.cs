@@ -7,6 +7,7 @@ using Definit.Results;
 [assembly: GenerateResult.Object<StringReader>]
 [assembly: GenerateResult.Object(typeof(List<>))]
 [assembly: GenerateResult.Object<Task<string>>]
+[assembly: GenerateResult.Object<Definit.Resultss.Examples.Examples>]
 
 namespace Definit.Resultss.Examples;
 
@@ -26,6 +27,11 @@ public readonly record struct NotFound() : IError<NotFound, KeyNotFoundException
 
 public partial class Examples
 {
+    public ResultExample2<int> PublicRun(int i)
+    {
+        return string.Empty;
+    }
+
     [GenerateResult.Method.Private]
     private ResultExample2<int> _PrivateRun(int i)
     {

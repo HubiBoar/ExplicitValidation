@@ -268,12 +268,8 @@ public class ObjectGenerator : IIncrementalGenerator
 
         if(returnType is Method.Return.Type type)
         {
-            if(type.CanBeNull)
-            {
-                return ($"Either<Maybe<{type.Name}>, Error>", type.Name, Returns.Maybe, Task.None);
-            }
-
-            return ($"Either<{type.Name}, Error>", type.Name, Returns.Type, Task.None);
+            var (name, returns) = ToResult(type);
+            return (name, type.Name, returns, Task.None);
         }
 
         if(returnType is Method.Return.Task)
@@ -288,22 +284,33 @@ public class ObjectGenerator : IIncrementalGenerator
 
         if(returnType is Method.Return.Task.Type task)
         {
-            if(task.CanBeNull)
-            {
-                return ($"Either<Maybe<{task.Name}>, Error>", task.Name, Returns.Maybe, Task.Task);
-            }
-
-            return ($"Either<{task.Name}, Error>", task.Name, Returns.Type, Task.Task);
+            var (name, returns) = ToResult(task);
+            return (name, task.Name, returns, Task.Task);
         }
 
         if(returnType is Method.Return.ValueTask.Type valueTask)
         {
-            if(valueTask.CanBeNull)
+            var (name, returns) = ToResult(valueTask);
+            return (name, valueTask.Name, returns, Task.ValueTask);
+        }
+
+        static (string Name, Returns Returns) ToResult(Method.IReturnInfo info)
+        {
+            var name = info.CanBeNull ? $"Either<Maybe<{info.Name}>, Error>" : $"Either<{info.Name}, Error>";
+            var returns = info.CanBeNull ? Returns.Maybe : Returns.Type;
+            if(info.Symbol is INamedTypeSymbol type)
             {
-                return ($"Either<Maybe<{valueTask.Name}>, Error>", valueTask.Name, Returns.Maybe, Task.ValueTask);
+                var either = type.AllInterfaces.SingleOrDefault(x => x.ToDisplayString().StartsWith(ResultType))
+                    ?.TypeArguments
+                    .Single()
+                    .ToDisplayString()
+                    ??
+                    name;
+
+                return (either, returns); 
             }
 
-            return ($"Either<{valueTask.Name}, Error>", valueTask.Name, Returns.Type, Task.ValueTask);
+            return (name, returns); 
         }
 
         throw new ArgumentOutOfRangeException();

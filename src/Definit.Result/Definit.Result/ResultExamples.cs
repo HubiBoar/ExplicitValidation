@@ -29,7 +29,17 @@ public partial class Examples
     private static int Get(string str)
     {
         ErrorHelper.Matches<NotFound>(new Exception());
+
+        int? v = null; 
+        var g = Get3(v);
+
         return default!;
+    }
+
+    private static Either<T, T> Get3<T>(T value)
+        where T : unmanaged
+    {
+        throw new Exception();
     }
 
     private static ResultExample2<string> GetResultExample2()

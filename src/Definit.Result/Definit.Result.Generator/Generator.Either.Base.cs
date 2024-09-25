@@ -169,39 +169,39 @@ public class EitherBaseGenerator : IIncrementalGenerator
                 var genericConstraints = new Generic.Arguments(state.Select((isClass, i) =>
                 {
                     var genericParam = typeGenericParams.Value[i];
-                    var main = genericParam.Main;
+                    var main = genericParam.Constraint;
 
                     if(isClass)
                     {
                         var cantBeClass = 
-                           main is Generic.Main.Struct
-                        || main is Generic.Main.Unmanaged;
+                           main is Generic.Constraint.Struct
+                        || main is Generic.Constraint.Unmanaged;
                          
                         if(cantBeClass)
                         {
                             return genericParam;
                         }
 
-                        var newMain = main.IsNew() ? Generic.Main.ClassNew : Generic.Main.Class;
+                        var newMain = main.IsNew() ? Generic.Constraint.ClassNew : Generic.Constraint.Class;
 
-                        return new Generic.Argument(genericParam.Name, newMain, genericParam.Types);
+                        return new Generic.Argument(genericParam.Name, newMain, false, genericParam.Types);
                     }
                     else
                     {
                         var canBeStruct = 
-                           main is Generic.Main.Struct
-                        || main is Generic.Main.New
-                        || main is Generic.Main.NotnullNew
-                        || main is Generic.Main.Notnull;
+                           main is Generic.Constraint.Struct
+                        || main is Generic.Constraint.New
+                        || main is Generic.Constraint.NotnullNew
+                        || main is Generic.Constraint.Notnull;
                          
                         if(canBeStruct == false)
                         {
                             return genericParam;
                         }
 
-                        var newMain = Generic.Main.Struct;
+                        var newMain = Generic.Constraint.Struct;
 
-                        return new Generic.Argument(genericParam.Name, newMain, genericParam.Types);
+                        return new Generic.Argument(genericParam.Name, newMain, false, genericParam.Types);
                     }
                 }).ToImmutableArray()); 
 

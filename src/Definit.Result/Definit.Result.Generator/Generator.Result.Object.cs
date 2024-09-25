@@ -9,8 +9,6 @@ namespace Definit.Results.Generator;
 public class ObjectGenerator : IIncrementalGenerator
 {
     private const string ResultType = "Definit.Results.IResultBase";
-    private const string TaskType = "System.Threading.Tasks.Task";
-    private const string ValueTaskType = "System.Threading.Tasks.ValueTask";
     private const string Success = "Definit.Results.Success";
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -148,6 +146,9 @@ public class ObjectGenerator : IIncrementalGenerator
         bool allowUnsafe
     )
     {
+        const string TaskPrefix = "System.Threading.Tasks.Task";
+        const string ValueTaskPrefix = "System.Threading.Tasks.ValueTask";
+
         try
         {
             var result = GetReturnType(method); 
@@ -156,7 +157,7 @@ public class ObjectGenerator : IIncrementalGenerator
                 return null;
             }
 
-            var (returnType, returnsSuccess, taskPrefix) = result.Value;
+            var (returnType, returns, task) = result.Value;
 
             var isUnsafe = method.IsUnsafe();
 
@@ -165,7 +166,14 @@ public class ObjectGenerator : IIncrementalGenerator
                 return null;
             }
 
-            var isAsync = taskPrefix is not null;
+            var isAsync = task is not Task.None;
+            var taskPrefix = task switch
+            {
+                Task.ValueTask => ValueTaskPrefix,
+                Task.Task => TaskPrefix,
+                _ => string.Empty
+            };
+
             var parameters = string.Join(", ", method.Parameters.Select(x => x.ToDisplayString()));
 
             var decGeneric = method.GetMethodGenericArgs();
@@ -174,16 +182,51 @@ public class ObjectGenerator : IIncrementalGenerator
             var parametersCall = method.GetCallingParameters();
             var awaitCall = isAsync ? "await " : "";
             var methodCall = $"{awaitCall}this.Value.{method.Name}({string.Join(", ", parametersCall)})";
-            var returnCall = returnsSuccess ? 
-            $"""
-            {methodCall};
-            return new {returnType}(Result.Success);
-            """
-            :
-            $"return new {returnType}(({methodCall})!);";
+            var returnCall = returns switch
+            {
+                Returns.Success =>
 
-            returnCall = string.Join("\n\t\t", returnCall.Split('\n'));
+                $$"""
+                try
+                {
+                    {{methodCall}};
+                    return (Error?)null;
+                }
+                catch (Exception exception)
+                {
+                    return Error.Matches(exception).Error;
+                }
+                """, 
 
+                Returns.Maybe => 
+
+                $$"""
+                try
+                {
+                    var method_result = {{methodCall}};
+                    var maybe_result = Maybe.Create(method_result); 
+
+                    return new {{returnType}}(maybe_result);
+                }
+                catch (Exception exception)
+                {
+                    return new {{returnType}}(Error.Matches(exception).Error);
+                }
+                """,
+
+                _ => $$"""
+                try
+                {
+                    return new {{returnType}}(({{methodCall}})!)
+                }
+                catch (Exception exception)
+                {
+                    return new {{returnType}}(Error.Matches(exception).Error);
+                }
+                """,
+            };
+
+            returnCall = string.Join("\n\t", returnCall.Split('\n'));
             var returnDeclaration = isAsync ? $"async {taskPrefix}<{returnType}>" : $"{returnType}";
 
             var decNew = method.Name == "ToString" && method.Parameters.Length == 0 ? "new " : "";
@@ -193,14 +236,7 @@ public class ObjectGenerator : IIncrementalGenerator
 
             public {{decUnsafe}}{{decNew}}{{returnDeclaration}} {{method.Name}}{{decGeneric}}({{parameters}}){{decGenericConstraints}}
             {
-                try
-                {
-                    {{returnCall}}
-                }
-                catch (Exception exception)
-                {
-                    return new {{returnType}}(Error.Matches(exception).Error);
-                }
+                {{returnCall}}
             }
             """;
         }
@@ -222,46 +258,113 @@ public class ObjectGenerator : IIncrementalGenerator
         }
     }
 
-    private static (string ReturnType, bool ReturnsSuccess, string? TaskPrefix)? GetReturnType(IMethodSymbol method)
+    private enum Task
     {
-        if(method.ReturnsVoid)
+        None,
+        Task,
+        ValueTask
+    }
+
+    private enum Returns
+    {
+        Success,
+        Maybe,
+        Type
+    }
+
+    private static (string ReturnType, Returns Returns, Task Async)? GetReturnType(IMethodSymbol method)
+    {
+        const string success = "Error?";
+
+        var returnType = method.GetReturnType();
+        if(returnType is Method.Return.Void)
         {
-            return ($"Either<Success, Error>", true, null);
+            return (success, Returns.Success, Task.None);
         }
 
-        if(IsResult(method.ReturnType))
+        if(returnType is Method.Return.Type type)
         {
-            return null;
+            if(IsResult(type.Parameter))
+            {
+                return null;
+            }
+
+            var returnName = type.Parameter.ToDisplayString();
+            if(type.Parameter.CanBeNull())
+            {
+                return ($"Either<Maybe<{returnName}>, Error>", Returns.Maybe, Task.None);
+            }
+            else
+            {
+                return ($"Either<{returnName}, Error>", Returns.Type, Task.None);
+            }
         }
 
-        var returnName = method.ReturnType.ToDisplayString(); 
-        var isTask = returnName.StartsWith(TaskType);
-        var isValueTask = returnName.StartsWith(ValueTaskType);
-
-        if(isTask is false && isValueTask is false)
+        if(returnType is Method.Return.Type.Generic generic)
         {
-            return ($"Either<{returnName}, Error>", false, null);
+            if(IsResult(generic.Parameter))
+            {
+                return null;
+            }
+
+            var returnName = generic.Parameter.ToDisplayString();
+            if(generic.Parameter.CanBeNull())
+            {
+                return ($"Either<Maybe<{returnName}>, Error>", Returns.Maybe, Task.None);
+            }
+            else
+            {
+                return ($"Either<{returnName}, Error>", Returns.Type, Task.None);
+            }
         }
 
-        var taskPrefix = isTask ? "Task" : "ValueTask";
-
-        var typeSymbol = (method.ReturnType as INamedTypeSymbol)!;  
-
-        if(typeSymbol.IsGenericType == false)
+        if(returnType is Method.Return.Task)
         {
-            return ($"Either<Success, Error>", true, taskPrefix);
+            return (success, Returns.Success, Task.Task);
         }
 
-        var taskSymbol = typeSymbol.TypeArguments.Single();
-
-        if(IsResult(taskSymbol))
+        if(returnType is Method.Return.ValueTask)
         {
-            return null;
+            return (success, Returns.Success, Task.ValueTask);
         }
 
-        returnName = taskSymbol.ToDisplayString();
+        if(returnType is Method.Return.Task.Generic task)
+        {
+            if(IsResult(task.Parameter))
+            {
+                return null;
+            }
 
-        return ($"Either<{returnName}, Error>", false, taskPrefix);
+            var returnName = task.Parameter.ToDisplayString();
+            if(task.Parameter.CanBeNull())
+            {
+                return ($"Either<Maybe<{returnName}>, Error>", Returns.Maybe, Task.Task);
+            }
+            else
+            {
+                return ($"Either<{returnName}, Error>", Returns.Type, Task.Task);
+            }
+        }
+
+        if(returnType is Method.Return.ValueTask.Generic valueTask)
+        {
+            if(IsResult(valueTask.Parameter))
+            {
+                return null;
+            }
+
+            var returnName = task.Parameter.ToDisplayString();
+            if(task.Parameter.CanBeNull())
+            {
+                return ($"Either<Maybe<{returnName}>, Error>", Returns.Maybe, Task.ValueTask);
+            }
+            else
+            {
+                return ($"Either<{returnName}, Error>", Returns.Type, Task.ValueTask);
+            }
+        }
+
+        return null;
 
         static bool IsResult(ITypeSymbol type)
         {

@@ -56,18 +56,4 @@ public static class GeneratorExtensions
     {
         return method.Parameters.Select(x => x.Type).Any(x => x.TypeKind == TypeKind.Pointer);
     }
-
-    public static string GetMethodGenericArgs(this IMethodSymbol method)
-    {
-        var isGeneric = method.IsGenericMethod;
-
-        if(isGeneric is false)
-        {
-            return string.Empty;
-        }
-
-        var genericParams = string.Join(", ", method.TypeArguments.Select(x => x.ToDisplayString()));
-
-        return $"<{genericParams}>";
-    }
 }

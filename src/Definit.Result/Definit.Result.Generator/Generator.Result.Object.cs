@@ -8,7 +8,6 @@ namespace Definit.Results.Generator;
 [Generator]
 public class ObjectGenerator : IIncrementalGenerator
 {
-    private const string ResultType = "Definit.Results.IResultBase";
     private const string Success = "Definit.Results.Success";
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -45,12 +44,9 @@ public class ObjectGenerator : IIncrementalGenerator
     public static (string Code, string ClassName) Generate
     (
         SourceProductionContext context,
-        INamedTypeSymbol type, 
-        bool allowUnsafe
+        INamedTypeSymbol type 
     )
     {
-        var methods = new StringBuilder();
-        
         var wrapperName = $"Wrapper";
         var wrapperGenericArgs = string.Empty;
         var wrapperGenericConstraints = string.Empty;
@@ -58,9 +54,12 @@ public class ObjectGenerator : IIncrementalGenerator
         if(type.IsUnboundGenericType)
         {
             type = type.ConstructedFrom;
-            wrapperGenericArgs = "<" + string.Join(", ", type.TypeArguments.Select(x => x.ToDisplayString())) + ">";
+            var generics = type.TypeArguments.GetGenericArguments();
+
+            wrapperGenericArgs = generics.ArgumentNamesFull;
+            wrapperGenericConstraints = generics.ConstraintsString;
+
             wrapperName = $"{wrapperName}{wrapperGenericArgs}";
-            wrapperGenericConstraints = type.TypeArguments.GetGenericArguments().ConstraintsString;
         }
 
         var typeName = type.Name;
@@ -79,14 +78,11 @@ public class ObjectGenerator : IIncrementalGenerator
                 && x.IsExtern == false 
                 && x.MethodKind == MethodKind.Ordinary
                 && x.DeclaredAccessibility == Accessibility.Public)
-            .Select(x => GenerateMethod(context, x, type.ToDisplayString(), allowUnsafe))
+            .Select(x => GenerateMethod(context, x))
             .Where(x => x is not null)
             .ToArray();
 
-        foreach(var method in typeMethods) 
-        {
-            methods.AppendLine(method);
-        }
+        var methods = string.Join("\n\n", typeMethods); 
 
         var allMethods = string.Join("\n\t\t", methods.ToString().Split('\n'));
 
@@ -108,6 +104,7 @@ public class ObjectGenerator : IIncrementalGenerator
             public readonly struct {{wrapperName}}{{wrapperGenericConstraints}}
             {
                 public required {{type.ToDisplayString()}} Value { get; init; }
+
                 {{allMethods}}
             }
         }
@@ -132,188 +129,135 @@ public class ObjectGenerator : IIncrementalGenerator
     )
     {
         var type = (INamedTypeSymbol)attribute.ConstructorArguments.Single().Value!;
-        var value = attribute.NamedArguments.SingleOrDefault(x => x.Key == "AllowUnsafe").Value.Value;
-        bool allowUnsafe = value is null ? false : bool.Parse(value.ToString());
 
-        return Generate(context, type, allowUnsafe);
+        return Generate(context, type);
     }
 
-    private static string? GenerateMethod
+    public static string? GenerateMethod
     (
         SourceProductionContext context,
-        IMethodSymbol method,
-        string typeName, 
-        bool allowUnsafe
+        IMethodSymbol method
     )
     {
-        const string TaskPrefix = "System.Threading.Tasks.Task";
-        const string ValueTaskPrefix = "System.Threading.Tasks.ValueTask";
-
         try
         {
-            var (returnType, internalType, returns, task) = GetReturnType(method); 
+            const string taskPrefix = "System.Threading.Tasks.Task";
+            const string valueTaskPrefix = "System.Threading.Tasks.ValueTask";
 
-            var isUnsafe = method.IsUnsafe();
-
-            if(allowUnsafe == false && isUnsafe)
+            if(method.IsUnsafe() || method.Name == "ToString")
             {
                 return null;
             }
 
-            var isAsync = task is not Task.None;
-            var taskPrefix = task switch
-            {
-                Task.ValueTask => ValueTaskPrefix,
-                Task.Task => TaskPrefix,
-                _ => string.Empty
-            };
-
+            var name = method.Name;
             var parameters = string.Join(", ", method.Parameters.Select(x => x.ToDisplayString()));
+            var returnType = method.GetReturnType();
+            var call = string.Join(", ", method.GetCallingParameters());
+            var methodCall = $"this.Value.{name}({call})";
+            var generics = method.GetMethodGenericArguments();
+            var genericArguments = generics.ArgumentNamesFull;
+            var genericConstraints = generics.ConstraintsString;
 
-            var decGeneric = method.GetMethodGenericArgs();
-            var decGenericConstraints = method.GetMethodGenericArguments();
-
-            var parametersCall = method.GetCallingParameters();
-            var awaitCall = isAsync ? "await " : "";
-            var methodCall = $"{awaitCall}this.Value.{method.Name}({string.Join(", ", parametersCall)})";
-            var returnCall = returns switch
+            if(returnType is Method.Return.Void)
             {
-                Returns.Success =>
-
-                $$"""
-                try
-                {
-                    {{methodCall}};
-                    return (Error?)null;
-                }
-                catch (Exception exception)
-                {
-                    return Error.Matches(exception).Error;
-                }
-                """, 
-
-                Returns.Maybe => 
-
-                $$"""
-                try
-                {
-                    {{internalType}} method_result = {{methodCall}};
-                    var maybe_result = new Maybe<{{internalType}}>(method_result); 
-
-                    return new {{returnType}}(maybe_result);
-                }
-                catch (Exception exception)
-                {
-                    return new {{returnType}}(Error.Matches(exception).Error);
-                }
-                """,
-
-                _ => $$"""
-                try
-                {
-                    return new {{returnType}}(({{methodCall}})!);
-                }
-                catch (Exception exception)
-                {
-                    return new {{returnType}}(Error.Matches(exception).Error);
-                }
-                """,
-            };
-
-            returnCall = string.Join("\n\t", returnCall.Split('\n'));
-            var returnDeclaration = isAsync ? $"async {taskPrefix}<{returnType}>" : $"{returnType}";
-
-            var decNew = method.Name == "ToString" && method.Parameters.Length == 0 ? "new " : "";
-            var decUnsafe = isUnsafe ? "unsafe " : "";
-
-            return $$"""
-
-            public {{decUnsafe}}{{decNew}}{{returnDeclaration}} {{method.Name}}{{decGeneric}}({{parameters}}){{decGenericConstraints.ConstraintsString}}
-            {
-                {{returnCall}}
+                return Result("Error?", methodCall);
             }
-            """;
+
+            if(returnType is Method.Return.Task)
+            {
+                return Result($"async {taskPrefix}<Error?>", $"await {methodCall}");
+            }
+
+            if(returnType is Method.Return.ValueTask)
+            {
+                return Result($"async {taskPrefix}<Error?>", $"await {methodCall}");
+            }
+
+            if(returnType is Method.Return.Type type)
+            {
+                var returns = ToResult(type);
+                return ResultInfo(returns, type.Name, returns, type.CanBeNull, methodCall);
+            }
+
+            if(returnType is Method.Return.Task.Type task)
+            {
+                var returns = ToResult(task);
+                return ResultInfo(returns, task.Name, $"async {taskPrefix}<{returns}>", task.CanBeNull, $"await {methodCall}");
+            }
+
+            if(returnType is Method.Return.ValueTask.Type valueTask)
+            {
+                var returns = ToResult(valueTask);
+                return ResultInfo(returns, valueTask.Name, $"async {valueTaskPrefix}<{returns}>", valueTask.CanBeNull, $"await {methodCall}");
+            }
+
+            string Result(string methodReturns, string method)
+            {
+                return $$"""
+                public {{methodReturns}} {{name}}{{genericArguments}}({{parameters}}){{genericConstraints}} 
+                {
+                    try
+                    {
+                        {{method}};
+                        return (Error?)null;
+                    }
+                    catch (Exception exception)
+                    {
+                        return Error.Matches(exception).Error;
+                    }
+                }
+                """;
+            }
+
+            string ResultInfo(string either, string internalType, string methodReturns, bool canBeNull, string method)
+            {
+                return canBeNull switch
+                {
+                    false => $$"""
+                    public {{methodReturns}} {{name}}{{genericArguments}}({{parameters}}){{genericConstraints}} 
+                    {
+                        try
+                        {
+                            return new {{either}}({{method}});
+                        }
+                        catch (Exception exception)
+                        {
+                            return new {{either}}(Error.Matches(exception).Error);
+                        }
+                    }
+                    """,
+                    true => $$"""
+                    public {{methodReturns}} {{name}}{{genericArguments}}({{parameters}}){{genericConstraints}} 
+                    {
+                        try
+                        {
+                            return new {{either}}(new Maybe<{{internalType}}>({{method}}));
+                        }
+                        catch (Exception exception)
+                        {
+                            return new {{either}}(Error.Matches(exception).Error);
+                        }
+                    }
+                    """,
+                };
+            }
+
+            static string ToResult(Method.IReturnInfo info)
+            {
+                var either = info.Symbol.GetEitherFromResult(); 
+
+                return either ?? (info.CanBeNull ? $"Either<Maybe<{info.Name}>, Error>" : $"Either<{info.Name}, Error>");
+            }
+
+            return null;
         }
         catch (Exception exception)
         {
-            var description = $"{method.ReturnType.ToDisplayString()} {method.ToDisplayString()} {exception.ToString()}";
+            var typeName = $"{method.ContainingType?.ToDisplayString()} :: " ?? string.Empty;
+            var description = $"{typeName}{method.ReturnType.ToDisplayString()} :: {method.ToDisplayString()} :: {exception.ToString()}";
 
             return exception.ReportException(context, description);
         }
-    }
-
-    private enum Task
-    {
-        None,
-        Task,
-        ValueTask
-    }
-
-    private enum Returns
-    {
-        Success,
-        Maybe,
-        Type
-    }
-
-    private static (string ReturnType, string? InternalType, Returns Returns, Task Async) GetReturnType(IMethodSymbol method)
-    {
-        const string success = "Error?";
-
-        var returnType = method.GetReturnType();
-        if(returnType is Method.Return.Void)
-        {
-            return (success, null, Returns.Success, Task.None);
-        }
-
-        if(returnType is Method.Return.Type type)
-        {
-            var (name, returns) = ToResult(type);
-            return (name, type.Name, returns, Task.None);
-        }
-
-        if(returnType is Method.Return.Task)
-        {
-            return (success, null, Returns.Success, Task.Task);
-        }
-
-        if(returnType is Method.Return.ValueTask)
-        {
-            return (success, null, Returns.Success, Task.ValueTask);
-        }
-
-        if(returnType is Method.Return.Task.Type task)
-        {
-            var (name, returns) = ToResult(task);
-            return (name, task.Name, returns, Task.Task);
-        }
-
-        if(returnType is Method.Return.ValueTask.Type valueTask)
-        {
-            var (name, returns) = ToResult(valueTask);
-            return (name, valueTask.Name, returns, Task.ValueTask);
-        }
-
-        static (string Name, Returns Returns) ToResult(Method.IReturnInfo info)
-        {
-            var name = info.CanBeNull ? $"Either<Maybe<{info.Name}>, Error>" : $"Either<{info.Name}, Error>";
-            var returns = info.CanBeNull ? Returns.Maybe : Returns.Type;
-            if(info.Symbol is INamedTypeSymbol type)
-            {
-                var either = type.AllInterfaces.SingleOrDefault(x => x.ToDisplayString().StartsWith(ResultType))
-                    ?.TypeArguments
-                    .Single()
-                    .ToDisplayString()
-                    ??
-                    name;
-
-                return (either, returns); 
-            }
-
-            return (name, returns); 
-        }
-
-        throw new ArgumentOutOfRangeException();
     }
 }
 

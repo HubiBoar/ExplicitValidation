@@ -46,10 +46,8 @@ public class ObjectGenericGenerator : IIncrementalGenerator
     )
     {
         var type = attribute.AttributeClass!.TypeArguments.Single() as INamedTypeSymbol;
-        var value = attribute.NamedArguments.SingleOrDefault(x => x.Key == "AllowUnsafe").Value.Value;
-        bool allowUnsafe = value is null ? false : bool.Parse(value.ToString());
         
-        return ObjectGenerator.Generate(context, type!, allowUnsafe);
+        return ObjectGenerator.Generate(context, type!);
     }
 }
 

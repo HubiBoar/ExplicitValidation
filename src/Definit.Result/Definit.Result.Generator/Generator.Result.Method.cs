@@ -69,7 +69,7 @@ public class MethodGenerator : IIncrementalGenerator
         {
             var returnType = GetResultType(method.Symbol)!.Value;
             var isAsync = returnType.IsTask;
-            var returnEither = returnType.Type.AllInterfaces.Single(x => x.ToDisplayString().StartsWith(ResultType)).TypeArguments.Single().ToDisplayString();
+            var returnEither = returnType.Type.GetEitherFromResult();
             var returnResult = returnType.Type.ToDisplayString();
 
             var decStatic = method.Symbol.IsStatic ? " static": string.Empty;
@@ -77,8 +77,9 @@ public class MethodGenerator : IIncrementalGenerator
             var decReturn = isAsync ? $"{TaskType}{returnEither}>" : returnEither;
             var decName = method.Symbol.Name.Remove(0, 1);
 
-            var decGeneric = method.Symbol.GetMethodGenericArgs();
-            var decGenericConstraints = method.Symbol.GetMethodGenericArguments();
+            var generics = method.Symbol.GetMethodGenericArguments();
+            var decGeneric = generics.ArgumentNamesFull;
+            var decGenericConstraints = generics.ConstraintsString;
             var decParameters = string.Join(", ", method.Symbol.Parameters.Select(x => x.ToDisplayString()));
             var declaration = $"{method.Keyword}{decStatic}{decAsync} {decReturn} {decName}{decGeneric}({decParameters})";
 
@@ -87,7 +88,7 @@ public class MethodGenerator : IIncrementalGenerator
             var methodCall = $"{awaitCall}{method.Symbol.Name}({parametersCall})";
 
             return $$"""
-            {{declaration}}{{decGenericConstraints.ConstraintsString}}
+            {{declaration}}{{decGenericConstraints}}
             {
                 try
                 {
@@ -201,7 +202,7 @@ public class MethodGenerator : IIncrementalGenerator
 
         static bool IsResult(ITypeSymbol type)
         {
-            return type.AllInterfaces.Any(x => x.ToDisplayString().StartsWith(ResultType));
+            return type.GetEitherFromResult() is not null;
         }
     }
 }

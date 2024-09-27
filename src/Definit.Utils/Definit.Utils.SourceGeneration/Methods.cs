@@ -29,7 +29,7 @@ public static class Method
             {
                 Symbol = symbol;
                 Name = symbol.ToDisplayString();
-                CanBeNull = (symbol is ITypeParameterSymbol parameter) ? parameter.CanBeNull() : symbol.CanBeNull();
+                CanBeNull = symbol.CanBeNull();
             }
         }
 
@@ -41,11 +41,11 @@ public static class Method
                 public bool CanBeNull { get; }
                 public ITypeSymbol Symbol { get; }
 
-                public Type(ITypeSymbol symbol) : this()
+                public Type(ITypeSymbol symbol) : this() 
                 {
                     Symbol = symbol;
                     Name = symbol.ToDisplayString();
-                    CanBeNull = (symbol is ITypeParameterSymbol parameter) ? parameter.CanBeNull() : symbol.CanBeNull();
+                    CanBeNull = symbol.CanBeNull();
                 }
             }
         }
@@ -62,33 +62,32 @@ public static class Method
                 {
                     Symbol = symbol;
                     Name = symbol.ToDisplayString();
-                    CanBeNull = (symbol is ITypeParameterSymbol parameter) ? parameter.CanBeNull() : symbol.CanBeNull();
+                    CanBeNull = symbol.CanBeNull();
                 }
             }
         }
     }
 
-    public static bool CanBeNull(this ITypeParameterSymbol symbol)
-    {
-        var argument = symbol.GetGenericArgument();
-
-        if(argument.HasNullAnnotation)
-        {
-            return true;
-        }
-
-        return argument.Constraint switch
-        {
-            Generic.Constraint.Empty            => true,
-            Generic.Constraint.New              => true,
-            Generic.Constraint.ClassNullable    => true,
-            Generic.Constraint.ClassNullableNew => true,
-            _                                   => false
-        };
-    }
-
     public static bool CanBeNull(this ITypeSymbol symbol)
     {
+        if (symbol is ITypeParameterSymbol type)
+        {
+            var argument = type.GetGenericArgument();
+
+            if(argument.HasNullAnnotation)
+            {
+                return true;
+            }
+
+            return argument.Constraint switch
+            {
+                Generic.Constraint.Empty            => true,
+                Generic.Constraint.New              => true,
+                Generic.Constraint.ClassNullable    => true,
+                Generic.Constraint.ClassNullableNew => true,
+                _                                   => false
+            };
+        }
         return symbol.NullableAnnotation is NullableAnnotation.Annotated;
     }
 

@@ -15,606 +15,599 @@ public static class List_T__Auto__Extensions
     public readonly struct Wrapper<T>
     {
         public required System.Collections.Generic.List<T> Value { get; init; }
-        
-		public Error? Add(T item)
+
+        public Error? Add(T item) 
 		{
 		    try
-			{
-			    this.Value.Add(item);
-			    return (Error?)null;
-			}
-			catch (Exception exception)
-			{
-			    return Error.Matches(exception).Error;
-			}
+		    {
+		        this.Value.Add(item);
+		        return (Error?)null;
+		    }
+		    catch (Exception exception)
+		    {
+		        return Error.Matches(exception).Error;
+		    }
 		}
 		
-		public Error? AddRange(System.Collections.Generic.IEnumerable<T> collection)
+		public Error? AddRange(System.Collections.Generic.IEnumerable<T> collection) 
 		{
 		    try
-			{
-			    this.Value.AddRange(collection);
-			    return (Error?)null;
-			}
-			catch (Exception exception)
-			{
-			    return Error.Matches(exception).Error;
-			}
+		    {
+		        this.Value.AddRange(collection);
+		        return (Error?)null;
+		    }
+		    catch (Exception exception)
+		    {
+		        return Error.Matches(exception).Error;
+		    }
 		}
 		
-		public Either<System.Collections.ObjectModel.ReadOnlyCollection<T>, Error> AsReadOnly()
+		public Either<System.Collections.ObjectModel.ReadOnlyCollection<T>, Error> AsReadOnly() 
 		{
 		    try
-			{
-			    return new Either<System.Collections.ObjectModel.ReadOnlyCollection<T>, Error>((this.Value.AsReadOnly())!);
-			}
-			catch (Exception exception)
-			{
-			    return new Either<System.Collections.ObjectModel.ReadOnlyCollection<T>, Error>(Error.Matches(exception).Error);
-			}
+		    {
+		        return new Either<System.Collections.ObjectModel.ReadOnlyCollection<T>, Error>(this.Value.AsReadOnly());
+		    }
+		    catch (Exception exception)
+		    {
+		        return new Either<System.Collections.ObjectModel.ReadOnlyCollection<T>, Error>(Error.Matches(exception).Error);
+		    }
 		}
 		
-		public Either<int, Error> BinarySearch(int index, int count, T item, System.Collections.Generic.IComparer<T>? comparer)
+		public Either<int, Error> BinarySearch(int index, int count, T item, System.Collections.Generic.IComparer<T>? comparer) 
 		{
 		    try
-			{
-			    return new Either<int, Error>((this.Value.BinarySearch(index, count, item, comparer))!);
-			}
-			catch (Exception exception)
-			{
-			    return new Either<int, Error>(Error.Matches(exception).Error);
-			}
+		    {
+		        return new Either<int, Error>(this.Value.BinarySearch(index, count, item, comparer));
+		    }
+		    catch (Exception exception)
+		    {
+		        return new Either<int, Error>(Error.Matches(exception).Error);
+		    }
 		}
 		
-		public Either<int, Error> BinarySearch(T item)
+		public Either<int, Error> BinarySearch(T item) 
 		{
 		    try
-			{
-			    return new Either<int, Error>((this.Value.BinarySearch(item))!);
-			}
-			catch (Exception exception)
-			{
-			    return new Either<int, Error>(Error.Matches(exception).Error);
-			}
+		    {
+		        return new Either<int, Error>(this.Value.BinarySearch(item));
+		    }
+		    catch (Exception exception)
+		    {
+		        return new Either<int, Error>(Error.Matches(exception).Error);
+		    }
 		}
 		
-		public Either<int, Error> BinarySearch(T item, System.Collections.Generic.IComparer<T>? comparer)
+		public Either<int, Error> BinarySearch(T item, System.Collections.Generic.IComparer<T>? comparer) 
 		{
 		    try
-			{
-			    return new Either<int, Error>((this.Value.BinarySearch(item, comparer))!);
-			}
-			catch (Exception exception)
-			{
-			    return new Either<int, Error>(Error.Matches(exception).Error);
-			}
+		    {
+		        return new Either<int, Error>(this.Value.BinarySearch(item, comparer));
+		    }
+		    catch (Exception exception)
+		    {
+		        return new Either<int, Error>(Error.Matches(exception).Error);
+		    }
 		}
 		
-		public Error? Clear()
+		public Error? Clear() 
 		{
 		    try
-			{
-			    this.Value.Clear();
-			    return (Error?)null;
-			}
-			catch (Exception exception)
-			{
-			    return Error.Matches(exception).Error;
-			}
+		    {
+		        this.Value.Clear();
+		        return (Error?)null;
+		    }
+		    catch (Exception exception)
+		    {
+		        return Error.Matches(exception).Error;
+		    }
 		}
 		
-		public Either<bool, Error> Contains(T item)
+		public Either<bool, Error> Contains(T item) 
 		{
 		    try
-			{
-			    return new Either<bool, Error>((this.Value.Contains(item))!);
-			}
-			catch (Exception exception)
-			{
-			    return new Either<bool, Error>(Error.Matches(exception).Error);
-			}
+		    {
+		        return new Either<bool, Error>(this.Value.Contains(item));
+		    }
+		    catch (Exception exception)
+		    {
+		        return new Either<bool, Error>(Error.Matches(exception).Error);
+		    }
 		}
 		
-		public Either<System.Collections.Generic.List<TOutput>, Error> ConvertAll<TOutput>(System.Converter<T, TOutput> converter)
+		public Either<System.Collections.Generic.List<TOutput>, Error> ConvertAll<TOutput>(System.Converter<T, TOutput> converter) 
 		{
 		    try
-			{
-			    return new Either<System.Collections.Generic.List<TOutput>, Error>((this.Value.ConvertAll(converter))!);
-			}
-			catch (Exception exception)
-			{
-			    return new Either<System.Collections.Generic.List<TOutput>, Error>(Error.Matches(exception).Error);
-			}
+		    {
+		        return new Either<System.Collections.Generic.List<TOutput>, Error>(this.Value.ConvertAll(converter));
+		    }
+		    catch (Exception exception)
+		    {
+		        return new Either<System.Collections.Generic.List<TOutput>, Error>(Error.Matches(exception).Error);
+		    }
 		}
 		
-		public Error? CopyTo(int index, T[] array, int arrayIndex, int count)
+		public Error? CopyTo(int index, T[] array, int arrayIndex, int count) 
 		{
 		    try
-			{
-			    this.Value.CopyTo(index, array, arrayIndex, count);
-			    return (Error?)null;
-			}
-			catch (Exception exception)
-			{
-			    return Error.Matches(exception).Error;
-			}
+		    {
+		        this.Value.CopyTo(index, array, arrayIndex, count);
+		        return (Error?)null;
+		    }
+		    catch (Exception exception)
+		    {
+		        return Error.Matches(exception).Error;
+		    }
 		}
 		
-		public Error? CopyTo(T[] array)
+		public Error? CopyTo(T[] array) 
 		{
 		    try
-			{
-			    this.Value.CopyTo(array);
-			    return (Error?)null;
-			}
-			catch (Exception exception)
-			{
-			    return Error.Matches(exception).Error;
-			}
+		    {
+		        this.Value.CopyTo(array);
+		        return (Error?)null;
+		    }
+		    catch (Exception exception)
+		    {
+		        return Error.Matches(exception).Error;
+		    }
 		}
 		
-		public Error? CopyTo(T[] array, int arrayIndex)
+		public Error? CopyTo(T[] array, int arrayIndex) 
 		{
 		    try
-			{
-			    this.Value.CopyTo(array, arrayIndex);
-			    return (Error?)null;
-			}
-			catch (Exception exception)
-			{
-			    return Error.Matches(exception).Error;
-			}
+		    {
+		        this.Value.CopyTo(array, arrayIndex);
+		        return (Error?)null;
+		    }
+		    catch (Exception exception)
+		    {
+		        return Error.Matches(exception).Error;
+		    }
 		}
 		
-		public Either<int, Error> EnsureCapacity(int capacity)
+		public Either<int, Error> EnsureCapacity(int capacity) 
 		{
 		    try
-			{
-			    return new Either<int, Error>((this.Value.EnsureCapacity(capacity))!);
-			}
-			catch (Exception exception)
-			{
-			    return new Either<int, Error>(Error.Matches(exception).Error);
-			}
+		    {
+		        return new Either<int, Error>(this.Value.EnsureCapacity(capacity));
+		    }
+		    catch (Exception exception)
+		    {
+		        return new Either<int, Error>(Error.Matches(exception).Error);
+		    }
 		}
 		
-		public Either<bool, Error> Exists(System.Predicate<T> match)
+		public Either<bool, Error> Exists(System.Predicate<T> match) 
 		{
 		    try
-			{
-			    return new Either<bool, Error>((this.Value.Exists(match))!);
-			}
-			catch (Exception exception)
-			{
-			    return new Either<bool, Error>(Error.Matches(exception).Error);
-			}
+		    {
+		        return new Either<bool, Error>(this.Value.Exists(match));
+		    }
+		    catch (Exception exception)
+		    {
+		        return new Either<bool, Error>(Error.Matches(exception).Error);
+		    }
 		}
 		
-		public Either<Maybe<T?>, Error> Find(System.Predicate<T> match)
+		public Either<Maybe<T?>, Error> Find(System.Predicate<T> match) 
 		{
 		    try
-			{
-			    T? method_result = this.Value.Find(match);
-			    var maybe_result = new Maybe<T?>(method_result); 
-			
-			    return new Either<Maybe<T?>, Error>(maybe_result);
-			}
-			catch (Exception exception)
-			{
-			    return new Either<Maybe<T?>, Error>(Error.Matches(exception).Error);
-			}
+		    {
+		        return new Either<Maybe<T?>, Error>(new Maybe<T?>(this.Value.Find(match)));
+		    }
+		    catch (Exception exception)
+		    {
+		        return new Either<Maybe<T?>, Error>(Error.Matches(exception).Error);
+		    }
 		}
 		
-		public Either<System.Collections.Generic.List<T>, Error> FindAll(System.Predicate<T> match)
+		public Either<System.Collections.Generic.List<T>, Error> FindAll(System.Predicate<T> match) 
 		{
 		    try
-			{
-			    return new Either<System.Collections.Generic.List<T>, Error>((this.Value.FindAll(match))!);
-			}
-			catch (Exception exception)
-			{
-			    return new Either<System.Collections.Generic.List<T>, Error>(Error.Matches(exception).Error);
-			}
+		    {
+		        return new Either<System.Collections.Generic.List<T>, Error>(this.Value.FindAll(match));
+		    }
+		    catch (Exception exception)
+		    {
+		        return new Either<System.Collections.Generic.List<T>, Error>(Error.Matches(exception).Error);
+		    }
 		}
 		
-		public Either<int, Error> FindIndex(int startIndex, int count, System.Predicate<T> match)
+		public Either<int, Error> FindIndex(int startIndex, int count, System.Predicate<T> match) 
 		{
 		    try
-			{
-			    return new Either<int, Error>((this.Value.FindIndex(startIndex, count, match))!);
-			}
-			catch (Exception exception)
-			{
-			    return new Either<int, Error>(Error.Matches(exception).Error);
-			}
+		    {
+		        return new Either<int, Error>(this.Value.FindIndex(startIndex, count, match));
+		    }
+		    catch (Exception exception)
+		    {
+		        return new Either<int, Error>(Error.Matches(exception).Error);
+		    }
 		}
 		
-		public Either<int, Error> FindIndex(int startIndex, System.Predicate<T> match)
+		public Either<int, Error> FindIndex(int startIndex, System.Predicate<T> match) 
 		{
 		    try
-			{
-			    return new Either<int, Error>((this.Value.FindIndex(startIndex, match))!);
-			}
-			catch (Exception exception)
-			{
-			    return new Either<int, Error>(Error.Matches(exception).Error);
-			}
+		    {
+		        return new Either<int, Error>(this.Value.FindIndex(startIndex, match));
+		    }
+		    catch (Exception exception)
+		    {
+		        return new Either<int, Error>(Error.Matches(exception).Error);
+		    }
 		}
 		
-		public Either<int, Error> FindIndex(System.Predicate<T> match)
+		public Either<int, Error> FindIndex(System.Predicate<T> match) 
 		{
 		    try
-			{
-			    return new Either<int, Error>((this.Value.FindIndex(match))!);
-			}
-			catch (Exception exception)
-			{
-			    return new Either<int, Error>(Error.Matches(exception).Error);
-			}
+		    {
+		        return new Either<int, Error>(this.Value.FindIndex(match));
+		    }
+		    catch (Exception exception)
+		    {
+		        return new Either<int, Error>(Error.Matches(exception).Error);
+		    }
 		}
 		
-		public Either<Maybe<T?>, Error> FindLast(System.Predicate<T> match)
+		public Either<Maybe<T?>, Error> FindLast(System.Predicate<T> match) 
 		{
 		    try
-			{
-			    T? method_result = this.Value.FindLast(match);
-			    var maybe_result = new Maybe<T?>(method_result); 
-			
-			    return new Either<Maybe<T?>, Error>(maybe_result);
-			}
-			catch (Exception exception)
-			{
-			    return new Either<Maybe<T?>, Error>(Error.Matches(exception).Error);
-			}
+		    {
+		        return new Either<Maybe<T?>, Error>(new Maybe<T?>(this.Value.FindLast(match)));
+		    }
+		    catch (Exception exception)
+		    {
+		        return new Either<Maybe<T?>, Error>(Error.Matches(exception).Error);
+		    }
 		}
 		
-		public Either<int, Error> FindLastIndex(int startIndex, int count, System.Predicate<T> match)
+		public Either<int, Error> FindLastIndex(int startIndex, int count, System.Predicate<T> match) 
 		{
 		    try
-			{
-			    return new Either<int, Error>((this.Value.FindLastIndex(startIndex, count, match))!);
-			}
-			catch (Exception exception)
-			{
-			    return new Either<int, Error>(Error.Matches(exception).Error);
-			}
+		    {
+		        return new Either<int, Error>(this.Value.FindLastIndex(startIndex, count, match));
+		    }
+		    catch (Exception exception)
+		    {
+		        return new Either<int, Error>(Error.Matches(exception).Error);
+		    }
 		}
 		
-		public Either<int, Error> FindLastIndex(int startIndex, System.Predicate<T> match)
+		public Either<int, Error> FindLastIndex(int startIndex, System.Predicate<T> match) 
 		{
 		    try
-			{
-			    return new Either<int, Error>((this.Value.FindLastIndex(startIndex, match))!);
-			}
-			catch (Exception exception)
-			{
-			    return new Either<int, Error>(Error.Matches(exception).Error);
-			}
+		    {
+		        return new Either<int, Error>(this.Value.FindLastIndex(startIndex, match));
+		    }
+		    catch (Exception exception)
+		    {
+		        return new Either<int, Error>(Error.Matches(exception).Error);
+		    }
 		}
 		
-		public Either<int, Error> FindLastIndex(System.Predicate<T> match)
+		public Either<int, Error> FindLastIndex(System.Predicate<T> match) 
 		{
 		    try
-			{
-			    return new Either<int, Error>((this.Value.FindLastIndex(match))!);
-			}
-			catch (Exception exception)
-			{
-			    return new Either<int, Error>(Error.Matches(exception).Error);
-			}
+		    {
+		        return new Either<int, Error>(this.Value.FindLastIndex(match));
+		    }
+		    catch (Exception exception)
+		    {
+		        return new Either<int, Error>(Error.Matches(exception).Error);
+		    }
 		}
 		
-		public Error? ForEach(System.Action<T> action)
+		public Error? ForEach(System.Action<T> action) 
 		{
 		    try
-			{
-			    this.Value.ForEach(action);
-			    return (Error?)null;
-			}
-			catch (Exception exception)
-			{
-			    return Error.Matches(exception).Error;
-			}
+		    {
+		        this.Value.ForEach(action);
+		        return (Error?)null;
+		    }
+		    catch (Exception exception)
+		    {
+		        return Error.Matches(exception).Error;
+		    }
 		}
 		
-		public Either<System.Collections.Generic.List<T>.Enumerator, Error> GetEnumerator()
+		public Either<System.Collections.Generic.List<T>.Enumerator, Error> GetEnumerator() 
 		{
 		    try
-			{
-			    return new Either<System.Collections.Generic.List<T>.Enumerator, Error>((this.Value.GetEnumerator())!);
-			}
-			catch (Exception exception)
-			{
-			    return new Either<System.Collections.Generic.List<T>.Enumerator, Error>(Error.Matches(exception).Error);
-			}
+		    {
+		        return new Either<System.Collections.Generic.List<T>.Enumerator, Error>(this.Value.GetEnumerator());
+		    }
+		    catch (Exception exception)
+		    {
+		        return new Either<System.Collections.Generic.List<T>.Enumerator, Error>(Error.Matches(exception).Error);
+		    }
 		}
 		
-		public Either<System.Collections.Generic.List<T>, Error> GetRange(int index, int count)
+		public Either<System.Collections.Generic.List<T>, Error> GetRange(int index, int count) 
 		{
 		    try
-			{
-			    return new Either<System.Collections.Generic.List<T>, Error>((this.Value.GetRange(index, count))!);
-			}
-			catch (Exception exception)
-			{
-			    return new Either<System.Collections.Generic.List<T>, Error>(Error.Matches(exception).Error);
-			}
+		    {
+		        return new Either<System.Collections.Generic.List<T>, Error>(this.Value.GetRange(index, count));
+		    }
+		    catch (Exception exception)
+		    {
+		        return new Either<System.Collections.Generic.List<T>, Error>(Error.Matches(exception).Error);
+		    }
 		}
 		
-		public Either<int, Error> IndexOf(T item)
+		public Either<int, Error> IndexOf(T item) 
 		{
 		    try
-			{
-			    return new Either<int, Error>((this.Value.IndexOf(item))!);
-			}
-			catch (Exception exception)
-			{
-			    return new Either<int, Error>(Error.Matches(exception).Error);
-			}
+		    {
+		        return new Either<int, Error>(this.Value.IndexOf(item));
+		    }
+		    catch (Exception exception)
+		    {
+		        return new Either<int, Error>(Error.Matches(exception).Error);
+		    }
 		}
 		
-		public Either<int, Error> IndexOf(T item, int index)
+		public Either<int, Error> IndexOf(T item, int index) 
 		{
 		    try
-			{
-			    return new Either<int, Error>((this.Value.IndexOf(item, index))!);
-			}
-			catch (Exception exception)
-			{
-			    return new Either<int, Error>(Error.Matches(exception).Error);
-			}
+		    {
+		        return new Either<int, Error>(this.Value.IndexOf(item, index));
+		    }
+		    catch (Exception exception)
+		    {
+		        return new Either<int, Error>(Error.Matches(exception).Error);
+		    }
 		}
 		
-		public Either<int, Error> IndexOf(T item, int index, int count)
+		public Either<int, Error> IndexOf(T item, int index, int count) 
 		{
 		    try
-			{
-			    return new Either<int, Error>((this.Value.IndexOf(item, index, count))!);
-			}
-			catch (Exception exception)
-			{
-			    return new Either<int, Error>(Error.Matches(exception).Error);
-			}
+		    {
+		        return new Either<int, Error>(this.Value.IndexOf(item, index, count));
+		    }
+		    catch (Exception exception)
+		    {
+		        return new Either<int, Error>(Error.Matches(exception).Error);
+		    }
 		}
 		
-		public Error? Insert(int index, T item)
+		public Error? Insert(int index, T item) 
 		{
 		    try
-			{
-			    this.Value.Insert(index, item);
-			    return (Error?)null;
-			}
-			catch (Exception exception)
-			{
-			    return Error.Matches(exception).Error;
-			}
+		    {
+		        this.Value.Insert(index, item);
+		        return (Error?)null;
+		    }
+		    catch (Exception exception)
+		    {
+		        return Error.Matches(exception).Error;
+		    }
 		}
 		
-		public Error? InsertRange(int index, System.Collections.Generic.IEnumerable<T> collection)
+		public Error? InsertRange(int index, System.Collections.Generic.IEnumerable<T> collection) 
 		{
 		    try
-			{
-			    this.Value.InsertRange(index, collection);
-			    return (Error?)null;
-			}
-			catch (Exception exception)
-			{
-			    return Error.Matches(exception).Error;
-			}
+		    {
+		        this.Value.InsertRange(index, collection);
+		        return (Error?)null;
+		    }
+		    catch (Exception exception)
+		    {
+		        return Error.Matches(exception).Error;
+		    }
 		}
 		
-		public Either<int, Error> LastIndexOf(T item)
+		public Either<int, Error> LastIndexOf(T item) 
 		{
 		    try
-			{
-			    return new Either<int, Error>((this.Value.LastIndexOf(item))!);
-			}
-			catch (Exception exception)
-			{
-			    return new Either<int, Error>(Error.Matches(exception).Error);
-			}
+		    {
+		        return new Either<int, Error>(this.Value.LastIndexOf(item));
+		    }
+		    catch (Exception exception)
+		    {
+		        return new Either<int, Error>(Error.Matches(exception).Error);
+		    }
 		}
 		
-		public Either<int, Error> LastIndexOf(T item, int index)
+		public Either<int, Error> LastIndexOf(T item, int index) 
 		{
 		    try
-			{
-			    return new Either<int, Error>((this.Value.LastIndexOf(item, index))!);
-			}
-			catch (Exception exception)
-			{
-			    return new Either<int, Error>(Error.Matches(exception).Error);
-			}
+		    {
+		        return new Either<int, Error>(this.Value.LastIndexOf(item, index));
+		    }
+		    catch (Exception exception)
+		    {
+		        return new Either<int, Error>(Error.Matches(exception).Error);
+		    }
 		}
 		
-		public Either<int, Error> LastIndexOf(T item, int index, int count)
+		public Either<int, Error> LastIndexOf(T item, int index, int count) 
 		{
 		    try
-			{
-			    return new Either<int, Error>((this.Value.LastIndexOf(item, index, count))!);
-			}
-			catch (Exception exception)
-			{
-			    return new Either<int, Error>(Error.Matches(exception).Error);
-			}
+		    {
+		        return new Either<int, Error>(this.Value.LastIndexOf(item, index, count));
+		    }
+		    catch (Exception exception)
+		    {
+		        return new Either<int, Error>(Error.Matches(exception).Error);
+		    }
 		}
 		
-		public Either<bool, Error> Remove(T item)
+		public Either<bool, Error> Remove(T item) 
 		{
 		    try
-			{
-			    return new Either<bool, Error>((this.Value.Remove(item))!);
-			}
-			catch (Exception exception)
-			{
-			    return new Either<bool, Error>(Error.Matches(exception).Error);
-			}
+		    {
+		        return new Either<bool, Error>(this.Value.Remove(item));
+		    }
+		    catch (Exception exception)
+		    {
+		        return new Either<bool, Error>(Error.Matches(exception).Error);
+		    }
 		}
 		
-		public Either<int, Error> RemoveAll(System.Predicate<T> match)
+		public Either<int, Error> RemoveAll(System.Predicate<T> match) 
 		{
 		    try
-			{
-			    return new Either<int, Error>((this.Value.RemoveAll(match))!);
-			}
-			catch (Exception exception)
-			{
-			    return new Either<int, Error>(Error.Matches(exception).Error);
-			}
+		    {
+		        return new Either<int, Error>(this.Value.RemoveAll(match));
+		    }
+		    catch (Exception exception)
+		    {
+		        return new Either<int, Error>(Error.Matches(exception).Error);
+		    }
 		}
 		
-		public Error? RemoveAt(int index)
+		public Error? RemoveAt(int index) 
 		{
 		    try
-			{
-			    this.Value.RemoveAt(index);
-			    return (Error?)null;
-			}
-			catch (Exception exception)
-			{
-			    return Error.Matches(exception).Error;
-			}
+		    {
+		        this.Value.RemoveAt(index);
+		        return (Error?)null;
+		    }
+		    catch (Exception exception)
+		    {
+		        return Error.Matches(exception).Error;
+		    }
 		}
 		
-		public Error? RemoveRange(int index, int count)
+		public Error? RemoveRange(int index, int count) 
 		{
 		    try
-			{
-			    this.Value.RemoveRange(index, count);
-			    return (Error?)null;
-			}
-			catch (Exception exception)
-			{
-			    return Error.Matches(exception).Error;
-			}
+		    {
+		        this.Value.RemoveRange(index, count);
+		        return (Error?)null;
+		    }
+		    catch (Exception exception)
+		    {
+		        return Error.Matches(exception).Error;
+		    }
 		}
 		
-		public Error? Reverse()
+		public Error? Reverse() 
 		{
 		    try
-			{
-			    this.Value.Reverse();
-			    return (Error?)null;
-			}
-			catch (Exception exception)
-			{
-			    return Error.Matches(exception).Error;
-			}
+		    {
+		        this.Value.Reverse();
+		        return (Error?)null;
+		    }
+		    catch (Exception exception)
+		    {
+		        return Error.Matches(exception).Error;
+		    }
 		}
 		
-		public Error? Reverse(int index, int count)
+		public Error? Reverse(int index, int count) 
 		{
 		    try
-			{
-			    this.Value.Reverse(index, count);
-			    return (Error?)null;
-			}
-			catch (Exception exception)
-			{
-			    return Error.Matches(exception).Error;
-			}
+		    {
+		        this.Value.Reverse(index, count);
+		        return (Error?)null;
+		    }
+		    catch (Exception exception)
+		    {
+		        return Error.Matches(exception).Error;
+		    }
 		}
 		
-		public Either<System.Collections.Generic.List<T>, Error> Slice(int start, int length)
+		public Either<System.Collections.Generic.List<T>, Error> Slice(int start, int length) 
 		{
 		    try
-			{
-			    return new Either<System.Collections.Generic.List<T>, Error>((this.Value.Slice(start, length))!);
-			}
-			catch (Exception exception)
-			{
-			    return new Either<System.Collections.Generic.List<T>, Error>(Error.Matches(exception).Error);
-			}
+		    {
+		        return new Either<System.Collections.Generic.List<T>, Error>(this.Value.Slice(start, length));
+		    }
+		    catch (Exception exception)
+		    {
+		        return new Either<System.Collections.Generic.List<T>, Error>(Error.Matches(exception).Error);
+		    }
 		}
 		
-		public Error? Sort()
+		public Error? Sort() 
 		{
 		    try
-			{
-			    this.Value.Sort();
-			    return (Error?)null;
-			}
-			catch (Exception exception)
-			{
-			    return Error.Matches(exception).Error;
-			}
+		    {
+		        this.Value.Sort();
+		        return (Error?)null;
+		    }
+		    catch (Exception exception)
+		    {
+		        return Error.Matches(exception).Error;
+		    }
 		}
 		
-		public Error? Sort(System.Collections.Generic.IComparer<T>? comparer)
+		public Error? Sort(System.Collections.Generic.IComparer<T>? comparer) 
 		{
 		    try
-			{
-			    this.Value.Sort(comparer);
-			    return (Error?)null;
-			}
-			catch (Exception exception)
-			{
-			    return Error.Matches(exception).Error;
-			}
+		    {
+		        this.Value.Sort(comparer);
+		        return (Error?)null;
+		    }
+		    catch (Exception exception)
+		    {
+		        return Error.Matches(exception).Error;
+		    }
 		}
 		
-		public Error? Sort(System.Comparison<T> comparison)
+		public Error? Sort(System.Comparison<T> comparison) 
 		{
 		    try
-			{
-			    this.Value.Sort(comparison);
-			    return (Error?)null;
-			}
-			catch (Exception exception)
-			{
-			    return Error.Matches(exception).Error;
-			}
+		    {
+		        this.Value.Sort(comparison);
+		        return (Error?)null;
+		    }
+		    catch (Exception exception)
+		    {
+		        return Error.Matches(exception).Error;
+		    }
 		}
 		
-		public Error? Sort(int index, int count, System.Collections.Generic.IComparer<T>? comparer)
+		public Error? Sort(int index, int count, System.Collections.Generic.IComparer<T>? comparer) 
 		{
 		    try
-			{
-			    this.Value.Sort(index, count, comparer);
-			    return (Error?)null;
-			}
-			catch (Exception exception)
-			{
-			    return Error.Matches(exception).Error;
-			}
+		    {
+		        this.Value.Sort(index, count, comparer);
+		        return (Error?)null;
+		    }
+		    catch (Exception exception)
+		    {
+		        return Error.Matches(exception).Error;
+		    }
 		}
 		
-		public Either<T[], Error> ToArray()
+		public Either<T[], Error> ToArray() 
 		{
 		    try
-			{
-			    return new Either<T[], Error>((this.Value.ToArray())!);
-			}
-			catch (Exception exception)
-			{
-			    return new Either<T[], Error>(Error.Matches(exception).Error);
-			}
+		    {
+		        return new Either<T[], Error>(this.Value.ToArray());
+		    }
+		    catch (Exception exception)
+		    {
+		        return new Either<T[], Error>(Error.Matches(exception).Error);
+		    }
 		}
 		
-		public Error? TrimExcess()
+		public Error? TrimExcess() 
 		{
 		    try
-			{
-			    this.Value.TrimExcess();
-			    return (Error?)null;
-			}
-			catch (Exception exception)
-			{
-			    return Error.Matches(exception).Error;
-			}
+		    {
+		        this.Value.TrimExcess();
+		        return (Error?)null;
+		    }
+		    catch (Exception exception)
+		    {
+		        return Error.Matches(exception).Error;
+		    }
 		}
 		
-		public Either<bool, Error> TrueForAll(System.Predicate<T> match)
+		public Either<bool, Error> TrueForAll(System.Predicate<T> match) 
 		{
 		    try
-			{
-			    return new Either<bool, Error>((this.Value.TrueForAll(match))!);
-			}
-			catch (Exception exception)
-			{
-			    return new Either<bool, Error>(Error.Matches(exception).Error);
-			}
+		    {
+		        return new Either<bool, Error>(this.Value.TrueForAll(match));
+		    }
+		    catch (Exception exception)
+		    {
+		        return new Either<bool, Error>(Error.Matches(exception).Error);
+		    }
 		}
-		
     }
 }

@@ -15,18 +15,17 @@ public static class Examples__Auto__Extensions
     public readonly struct Wrapper
     {
         public required Definit.Resultss.Examples.Examples Value { get; init; }
-        
-		public Definit.Results.Either<int, string, Definit.Resultss.Examples.NotFound> PublicRun(int i)
+
+        public Definit.Results.Either<int, string, Definit.Resultss.Examples.NotFound> PublicRun(int i) 
 		{
 		    try
-			{
-			    return new Definit.Results.Either<int, string, Definit.Resultss.Examples.NotFound>((this.Value.PublicRun(i))!);
-			}
-			catch (Exception exception)
-			{
-			    return new Definit.Results.Either<int, string, Definit.Resultss.Examples.NotFound>(Error.Matches(exception).Error);
-			}
+		    {
+		        return new Definit.Results.Either<int, string, Definit.Resultss.Examples.NotFound>(this.Value.PublicRun(i));
+		    }
+		    catch (Exception exception)
+		    {
+		        return new Definit.Results.Either<int, string, Definit.Resultss.Examples.NotFound>(Error.Matches(exception).Error);
+		    }
 		}
-		
     }
 }

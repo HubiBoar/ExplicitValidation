@@ -35,9 +35,7 @@ public class ResultBaseGenerator : IIncrementalGenerator
 
     private static ImmutableArray<Func<(string Code, string ClassName)>> Run()
     {
-        var count = EitherBaseGenerator.Count;
-
-        return Enumerable.Range(1, resultCount + 1).Select<int, Func<(string, string)>>(length => () =>
+        return Enumerable.Range(1, EitherBaseGenerator.Count).Select<int, Func<(string, string)>>(length => () =>
         {
             var resultGenerics = new Generic.Elements
             (
@@ -49,28 +47,6 @@ public class ResultBaseGenerator : IIncrementalGenerator
   
             var genericArgs = resultGenerics.ArgumentNames;
             var resultName = $"Result<{genericArgs}>";
-
-            var errors = string.Join("\n\n\n\t", Enumerable.Range(1, errorCount).Select(errorsLength =>
-            {
-                var errorGenerics = new Generic.Elements
-                (
-                    Enumerable
-                        .Range(0, errorsLength)
-                        .Select(x => Generic.Argument.Struct($"TE{x}", $"IError<TE{x}>"))
-                        .ToImmutableArray()
-                );
-
-                var convertsFrom = new Generic.Elements
-                (
-                    resultGenerics,
-                    errorGenerics
-                );
-
-                var convertsFromArgs = convertsFrom.ArgumentNames;
-                var either = $"Either<{convertsFromArgs}>";
-                return string.Join("\n\t", GenerateErrorType(convertsFrom, either, errorGenerics, false).Split('\n'));
-            })
-            .ToArray());
 
             var convertsFrom = new Generic.Elements
             (
@@ -105,9 +81,6 @@ public class ResultBaseGenerator : IIncrementalGenerator
                 }
                 
                 {{interior}}
-
-
-                {{errors}}
             }
             """;
 

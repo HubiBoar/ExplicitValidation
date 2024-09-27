@@ -7,18 +7,6 @@ public sealed class GenerateResultAttribute : Attribute;
 
 public static partial class GenerateResult
 {
-    [System.AttributeUsage(System.AttributeTargets.Assembly, AllowMultiple = false)]
-    internal sealed class BaseAttribute : Attribute
-    {
-        public int MaxCountGenerics { get; }
-        public int MaxCountError { get; }
-
-        public BaseAttribute(int maxCountGenerics, int maxCountError)
-        {
-            MaxCountGenerics = maxCountGenerics;
-            MaxCountError = maxCountError;
-        }
-    }
 }
 
 public static class ResultHelper

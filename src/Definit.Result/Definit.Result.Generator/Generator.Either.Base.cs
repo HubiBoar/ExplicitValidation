@@ -7,51 +7,37 @@ namespace Definit.Results.Generator;
 [Generator]
 public class EitherBaseGenerator : IIncrementalGenerator
 {
+    internal const bool Activated = false;
+    internal const int Count = 10;
+
     private const int MaxDeconstructorsCount = 8;
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        var provider = context.SyntaxProvider.ForAttributeWithMetadataName
+        var provider = context.SyntaxProvider.CreateSyntaxProvider
         (
-            "Definit.Results.GenerateEither+BaseAttribute",
-            predicate: (c, _) => true,
+            predicate: static (_, _) => Activated,
 
-            transform: (n, _) => (n)
+            transform: static (n, _) => (n)
         );
 
         var compilation = context.CompilationProvider.Combine(provider.Collect());
 
-        context.RegisterSourceOutput(compilation, (spc, source) => Execute(spc, source.Left, source.Right)); 
+        context.RegisterSourceOutput(compilation, (spc, source) => Execute(spc, source.Left)); 
     }
 
     private static void Execute
     (
         SourceProductionContext context,
-        Compilation compilation,
-        ImmutableArray<GeneratorAttributeSyntaxContext> typeList
+        Compilation compilation
     )
     {
-        SourceHelper.Run(context, () => typeList
-            .SelectMany<GeneratorAttributeSyntaxContext, Func<(string, string)>>(x => GetType(x))
-            .ToImmutableArray());
+        SourceHelper.Run(context, Run);
     }
 
-    private static ImmutableArray<Func<(string Code, string ClassName)>> GetType
-    (
-        GeneratorAttributeSyntaxContext context
-    )
+    private static ImmutableArray<Func<(string Code, string ClassName)>> Run()
     {
-        int count = int.Parse(context
-            .Attributes
-            .Single(x => x
-                .AttributeClass!
-                .ToDisplayString() == "Definit.Results.GenerateEither.BaseAttribute")
-            .ConstructorArguments
-            .Single()
-            .Value!
-            .ToString());
-
-        return Enumerable.Range(0, count).Select<int, Func<(string, string)>>(inx => () =>
+        return Enumerable.Range(0, Count).Select<int, Func<(string, string)>>(inx => () =>
         {
             var length = inx + 2;
             var generic = 

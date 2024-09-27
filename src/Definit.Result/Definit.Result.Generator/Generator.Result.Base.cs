@@ -12,45 +12,30 @@ public class ResultBaseGenerator : IIncrementalGenerator
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        var provider = context.SyntaxProvider.ForAttributeWithMetadataName
+        var provider = context.SyntaxProvider.CreateSyntaxProvider
         (
-            "Definit.Results.GenerateResult+BaseAttribute",
-            predicate: (c, _) => true,
+            predicate: static (_, _) => EitherBaseGenerator.Activated,
 
             transform: (n, _) => (n)
         );
 
         var compilation = context.CompilationProvider.Combine(provider.Collect());
 
-        context.RegisterSourceOutput(compilation, (spc, source) => Execute(spc, source.Left, source.Right)); 
+        context.RegisterSourceOutput(compilation, (spc, source) => Execute(spc, source.Left)); 
     }
 
     private static void Execute
     (
         SourceProductionContext context,
-        Compilation compilation,
-        ImmutableArray<GeneratorAttributeSyntaxContext> typeList
+        Compilation compilation
     )
     {
-        SourceHelper.Run(context, () => typeList
-            .SelectMany<GeneratorAttributeSyntaxContext, Func<(string, string)>>(x => GetType(x))
-            .ToImmutableArray());
+        SourceHelper.Run(context, Run);
     }
 
-    private static ImmutableArray<Func<(string Code, string ClassName)>> GetType
-    (
-        GeneratorAttributeSyntaxContext context
-    )
+    private static ImmutableArray<Func<(string Code, string ClassName)>> Run()
     {
-        var constructorArgs = context
-            .Attributes
-            .Single(x => x
-                .AttributeClass!
-                .ToDisplayString() == "Definit.Results.GenerateResult.BaseAttribute")
-            .ConstructorArguments;
-
-        var resultCount = int.Parse(constructorArgs.First().Value!.ToString());
-        var errorCount = int.Parse(constructorArgs.Last().Value!.ToString());
+        var count = EitherBaseGenerator.Count;
 
         return Enumerable.Range(1, resultCount + 1).Select<int, Func<(string, string)>>(length => () =>
         {

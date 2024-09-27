@@ -1,8 +1,6 @@
 using System.Text;
 using Definit.Results;
 
-//[assembly: GenerateEither.Base(10)]
-//[assembly: GenerateResult.Base(5, 5)]
 [assembly: GenerateResult.Object(typeof(StringBuilder))]
 [assembly: GenerateResult.Object<StringReader>]
 [assembly: GenerateResult.Object(typeof(List<>))]

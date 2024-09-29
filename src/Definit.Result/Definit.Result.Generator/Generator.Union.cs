@@ -61,7 +61,7 @@ public class UnionGenerator : IIncrementalGenerator
 
         var (interior, extensions, _) = UnionBaseGenerator.GetInterior
         (
-            union.Value.Generics,
+            union.TypeArguments.GetGenericArguments(),
             symbol.TypeArguments.GetGenericArguments(),
             constructorName, 
             name

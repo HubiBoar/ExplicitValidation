@@ -30,6 +30,7 @@ internal static class Helper
         public const string SuccessInstance = $"{Helper.Namespace}.{HelperTypeName}.Success";
 
         public const string Error = $"{Helper.Namespace}.Error";
+        public const string ErrorInterface = $"{Helper.Namespace}.IError";
 
         public static string UnionError(string type) => $"{Helper.TypeName}<{type}, {Error}>";
         public static string UnionMaybeError(string type) => $"{Helper.TypeName}<Maybe<{type}>, {Error}>";
@@ -68,12 +69,12 @@ internal static class Helper
         Generic.Argument.Notnull(Types.Error)
     );
 
-    public static (string Name, Generic.Elements Generics)? IsUnion(ITypeSymbol symbol)
+    public static INamedTypeSymbol? IsUnion(ITypeSymbol symbol)
     {
         var union = symbol.AllInterfaces
-            .SingleOrDefault(x => x.AllInterfaces.Any(y => y
+            .SingleOrDefault(x => x
                 .ToDisplayString()
-                .StartsWith(InterfaceName)))
+                .StartsWith(InterfaceName))
             ?.ContainingType;
 
         if(union is null)
@@ -81,7 +82,17 @@ internal static class Helper
             return null;
         }
 
-        return (union.ToDisplayString(), union.TypeArguments.GetGenericArguments());
+        return union;
+    }
+
+    public static bool IsError(ITypeSymbol symbol)
+    {
+        var error = symbol.AllInterfaces
+            .SingleOrDefault(x => x
+                .ToDisplayString()
+                .StartsWith(Types.ErrorInterface));
+
+        return error is not null;
     }
 }
 

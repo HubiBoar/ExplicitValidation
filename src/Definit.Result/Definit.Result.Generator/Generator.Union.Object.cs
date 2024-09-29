@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Text;
 using Definit.Utils.SourceGenerator;
 using Microsoft.CodeAnalysis;
 
@@ -206,17 +207,72 @@ public class ObjectGenerator : IIncrementalGenerator
             {
                 var isUnion = Helper.IsUnion(info.Symbol); 
 
-                var union = (isUnion is null) switch
+                return (isUnion is null) switch
                 {   
-                    true => 
-                        info.CanBeNull
-                        ? 
-                        Helper.Types.UnionMaybeError(info.Name)
-                        : 
-                        Helper.Types.UnionError(info.Name),
-                    false =>
-                        isUnion.Value.Name
+                    true => ReturnsNotUnion(info, taskPrefix),
+                    false => ReturnsUnion(info, isUnion, taskPrefix)
                 };
+
+            }
+
+            string ReturnsUnion
+            (
+                Method.IReturnInfo info,
+                INamedTypeSymbol union,
+                string? taskPrefix
+            )
+            {
+                var errors = union.TypeArguments.Where(x => Helper.IsError(x)).ToArray();
+
+                if(errors.Length == 0)
+                {
+                    var unionArgs = string.Join(", ", union.TypeArguments
+                        .Select(x => x.ToDisplayString())
+                        .Concat([Helper.Types.Error]));
+
+                    var unionReturns = $"{Helper.TypeName}<{unionArgs}>";
+                    var methodReturns = taskPrefix is null ? unionReturns : $"async {taskPrefix}<{unionReturns}>";
+                    
+                    return $$"""
+                        public {{methodReturns}} {{name}}{{genericArguments}}({{parameters}}){{genericConstraints}} 
+                        {
+                            try
+                            {
+                                return new {{unionReturns}}({{method}});
+                            }
+                            catch (Exception exception)
+                            {
+                                return new {{unionReturns}}(Error.Matches(exception).Error);
+                            }
+                        }
+                    """;
+                }
+
+                var exceptionMatching = string.Join("\n", errors.Select((x, i) =>
+                {
+                    if(i == errors.Length - 1)
+                    {
+                        builder.
+                    }
+                    else
+                    {
+
+                    }
+                    var error = errors[i];
+                })
+            }
+
+            string ReturnsNotUnion
+            (
+                Method.IReturnInfo info,
+                string? taskPrefix
+            )
+            {
+                var union = info.CanBeNull
+                    ? 
+                    Helper.Types.UnionMaybeError(info.Name)
+                    : 
+                    Helper.Types.UnionError(info.Name);
 
                 var methodReturns = taskPrefix is null ? union : $"async {taskPrefix}<{union}>";
                 
@@ -245,5 +301,6 @@ public class ObjectGenerator : IIncrementalGenerator
             return exception.ReportException(context, description);
         }
     }
+
 }
 

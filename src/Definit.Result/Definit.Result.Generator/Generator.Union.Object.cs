@@ -209,11 +209,18 @@ public class ObjectGenerator : IIncrementalGenerator
                 """;
             }
 
-            string ResultInfo(string either, string internalType, string methodReturns, bool canBeNull, string method)
+            string ResultInfo
+            (
+                Method.IReturnInfo info,
+                string? taskPrefix
+            )
             {
-                return canBeNull switch
-                {
-                    false => $$"""
+                var eitherFromResult = info.Symbol.GetEitherFromResult(); 
+
+                var either = (info.CanBeNull ? $"Either<Maybe<{info.Name}>, Error>" : $"Either<{info.Name}, Error>");
+                var methodReturns = taskPrefix is null ? either : $"async {taskPrefix}<{either}>";
+                
+                return $$"""
                     public {{methodReturns}} {{name}}{{genericArguments}}({{parameters}}){{genericConstraints}} 
                     {
                         try
@@ -225,28 +232,11 @@ public class ObjectGenerator : IIncrementalGenerator
                             return new {{either}}(Error.Matches(exception).Error);
                         }
                     }
-                    """,
-                    true => $$"""
-                    public {{methodReturns}} {{name}}{{genericArguments}}({{parameters}}){{genericConstraints}} 
-                    {
-                        try
-                        {
-                            return new {{either}}(new Maybe<{{internalType}}>({{method}}));
-                        }
-                        catch (Exception exception)
-                        {
-                            return new {{either}}(Error.Matches(exception).Error);
-                        }
-                    }
-                    """,
-                };
+                """;
             }
 
-            static string ToResult(Method.IReturnInfo info)
+            static ToResult(Method.IReturnInfo info)
             {
-                var either = info.Symbol.GetEitherFromResult(); 
-
-                return either ?? (info.CanBeNull ? $"Either<Maybe<{info.Name}>, Error>" : $"Either<{info.Name}, Error>");
             }
 
             return null;

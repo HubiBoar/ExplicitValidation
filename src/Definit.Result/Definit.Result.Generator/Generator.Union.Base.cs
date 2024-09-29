@@ -5,18 +5,13 @@ using Microsoft.CodeAnalysis;
 namespace Definit.Results.Generator;
 
 [Generator]
-public class EitherBaseGenerator : IIncrementalGenerator
+public class UnionBaseGenerator : IIncrementalGenerator
 {
-    internal const bool Activated = false;
-    internal const int Count = 10;
-
-    private const int MaxDeconstructorsCount = 8;
-
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var provider = context.SyntaxProvider.CreateSyntaxProvider
         (
-            predicate: static (_, _) => Activated,
+            predicate: static (_, _) => Helper.Base.Activated,
 
             transform: static (n, _) => (n)
         );
@@ -37,59 +32,128 @@ public class EitherBaseGenerator : IIncrementalGenerator
 
     private static ImmutableArray<Func<(string Code, string ClassName)>> Run()
     {
-        return Enumerable.Range(0, Count).Select<int, Func<(string, string)>>(inx => () =>
+        return
+        Enumerable.Range(0, Helper.Base.Count).Select<int, Func<(string, string)>>(i => () => i switch
         {
-            var length = inx + 2;
-            var generic = 
-                new Generic.Elements
-                (
-                    Enumerable
-                        .Range(0, length)
-                        .Select(x => Generic.Argument.Notnull($"T{x}"))
-                        .ToImmutableArray()
-                );
-            
-            var genericArgs = string.Join(", ", generic.ArgumentNames);
-            var either = $"Either<{genericArgs}>";
-            var (interior, extension, genericOrArgs) = EitherInterior
-            (
-                generic,
-                generic,
-                "Either",
-                either
-            );
-
-            interior = string.Join("\n\t", interior.Split('\n'));
-            extension = string.Join("\n\t", extension.Split('\n'));
-
-            var setupCode = $$"""
-            #nullable enable
-
-            using System.Diagnostics.CodeAnalysis;
-
-            namespace Definit.Results;
-
-            public readonly struct {{either}} : {{either}}.Base{{generic.ConstraintsString}} 
-            {
-                public interface Base : IEitherBase<({{genericOrArgs}})>;
-
-                {{interior}}
-            }
-
-            public static class EitherExtensions_{{length}} 
-            {
-                {{extension}}
-            }
-            """;
-
-            string fileName = $"Definit.Results.Either_{length}"; 
-
-            return (setupCode, fileName);
+            0 => Generate0(),
+            1 => Generate1(),
+            _ => GenerateRest(i)
         })
         .ToImmutableArray();
     }
 
-    public static (string Interior, string Extensions, string GenericOrArgs) EitherInterior
+    private static (string Code, string ClassName) Generate0()
+    {
+        var generic = Helper.Generics1(); 
+        var allGenerics = new Generic.Elements(generic.First, generic.Second);
+        var typeGenerics = new Generic.Elements();
+        var constructorName = Helper.TypeName;
+        var genericTypeName = Helper.TypeName; 
+
+        var extensionsName = $"Extensions_{Helper.TypeName}_1";
+
+        var setupCode = CreateType
+        (
+            allGenerics,
+            typeGenerics,
+            constructorName, 
+            genericTypeName,
+            extensionsName
+        );
+
+        string fileName = $"{Helper.TypeNameWithNamespace}_1"; 
+
+        return (setupCode, fileName);
+    }
+
+    private static (string Code, string ClassName) Generate1()
+    {
+        var generic = Helper.Generics1(); 
+        var allGenerics = new Generic.Elements(generic.First, generic.Second);
+        var typeGenerics = new Generic.Elements(generic.First);
+        var constructorName = Helper.TypeName;
+        var genericTypeName = Helper.GenericTypeName(typeGenerics); 
+
+        var extensionsName = $"Extensions_{Helper.TypeName}_1";
+
+        var setupCode = CreateType
+        (
+            allGenerics,
+            typeGenerics,
+            constructorName, 
+            genericTypeName,
+            extensionsName
+        );
+
+        string fileName = $"{Helper.TypeNameWithNamespace}_1"; 
+
+        return (setupCode, fileName);
+    }
+
+    private static (string Code, string ClassName) GenerateRest(int count)
+    {
+        var allGenerics = Helper.Generics(count); 
+        var constructorName = Helper.TypeName;
+        var genericTypeName = Helper.GenericTypeName(allGenerics); 
+
+        var extensionsName = $"Extensions_{Helper.TypeName}_{count}";
+
+        var setupCode = CreateType
+        (
+            allGenerics,
+            allGenerics,
+            constructorName, 
+            genericTypeName,
+            extensionsName
+        );
+
+        string fileName = $"{Helper.TypeNameWithNamespace}_{count}"; 
+
+        return (setupCode, fileName);
+    }
+
+    private static string CreateType
+    (
+        Generic.Elements allGenericParams,
+        Generic.Elements typeGenericParams,
+        string constructorName,
+        string typeName,
+        string extensionsName
+    )
+    {
+        var (interior, extension, genericOrArgs) = GetInterior
+        (
+            allGenericParams,
+            typeGenericParams,
+            constructorName,
+            typeName
+        );
+
+        interior = string.Join("\n\t", interior.Split('\n'));
+        extension = string.Join("\n\t", extension.Split('\n'));
+
+        return $$"""
+        #nullable enable
+
+        using System.Diagnostics.CodeAnalysis;
+
+        namespace {{Helper.Namespace}};
+
+        public readonly struct {{typeName}} : {{typeName}}.Base{{allGenericParams.ConstraintsString}} 
+        {
+            public interface Base : {{Helper.InterfaceName}}<({{genericOrArgs}})>;
+
+            {{interior}}
+        }
+
+        public static class {{extensionsName}}
+        {
+            {{extension}}
+        }
+        """;
+    }
+
+    public static (string Interior, string Extensions, string GenericOrArgs) GetInterior
     (
         Generic.Elements allGenericParams,
         Generic.Elements typeGenericParams,
@@ -142,7 +206,7 @@ public class EitherBaseGenerator : IIncrementalGenerator
 
         var typeGenericArgs = string.Join(", ", typeGenericParams.Value.Select(x => x.Name));
 
-        if(length <= MaxDeconstructorsCount)
+        if(length <= Helper.Base.MaxDeconstructorsCount)
         {
             var generic = allGenericParams.Value.Select(x => (Type: x, Return: $"{x.Name}_arg", Assign: $"{x.Name}_out")).ToArray();
             var outArgs = string.Join(",\n\t", generic.Select(x => $"out {x.Type.Name}? {x.Return}"));
@@ -230,7 +294,7 @@ public class EitherBaseGenerator : IIncrementalGenerator
         }
         else
         {
-            int roundedUp = (int)Math.Ceiling((double)length / MaxDeconstructorsCount); 
+            int roundedUp = (int)Math.Ceiling((double)length / Helper.Base.MaxDeconstructorsCount); 
             var parts = new int[roundedUp];
             var total = length;
             while(total > 0)

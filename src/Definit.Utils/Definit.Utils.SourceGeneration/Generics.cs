@@ -156,6 +156,10 @@ public static class Generic
                 .Select(x => x.ConstraintsString).Where(x => string.IsNullOrEmpty(x) == false));
             ConstraintsString = string.IsNullOrEmpty(constraints) ? string.Empty : $"\n\t{constraints}";
         }
+
+        public Elements() : this(ImmutableArray<Element>.Empty)
+        {
+        }
     }
 
     public static Argument GetGenericArgument(this ITypeParameterSymbol symbol) 

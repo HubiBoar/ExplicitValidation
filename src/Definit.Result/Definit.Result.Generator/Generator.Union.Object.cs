@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using System.Text;
 using Definit.Utils.SourceGenerator;
 using Microsoft.CodeAnalysis;
 
@@ -14,7 +13,8 @@ public class ObjectGenerator : IIncrementalGenerator
     {
         var provider = context.SyntaxProvider.ForAttributeWithMetadataName
         (
-            "Definit.Results.GenerateResult+ObjectAttribute",
+            Helper.Attributes.GenerateUnionObjectMeta,
+
             predicate: (c, _) => true,
 
             transform: (n, _) => n
@@ -36,7 +36,7 @@ public class ObjectGenerator : IIncrementalGenerator
             typeList
             .SelectMany(x => x.Attributes
                 .Where(y => y.AttributeClass is not null && y.AttributeClass!
-                    .ToDisplayString() == "Definit.Results.GenerateResult.ObjectAttribute") 
+                    .ToDisplayString() == Helper.Attributes.GenerateUnionObject)
                 .Select<AttributeData, Func<(string, string)>>(x => () => GetType(context, compilation, x)))
                 .ToImmutableArray());
     }
@@ -47,7 +47,7 @@ public class ObjectGenerator : IIncrementalGenerator
         INamedTypeSymbol type 
     )
     {
-        var wrapperName = $"Wrapper";
+        var wrapperName = Helper.CastingWrapperName;
         var wrapperGenericArgs = string.Empty;
         var wrapperGenericConstraints = string.Empty;
 
@@ -89,14 +89,14 @@ public class ObjectGenerator : IIncrementalGenerator
         var code = $$"""
         #nullable enable
 
-        using Definit.Results;
+        using {{Helper.Namespace}};
         using System.Diagnostics.CodeAnalysis;
 
         namespace {{type.ContainingNamespace.ToDisplayString()}};
 
-        public static class {{typeName}}__Auto__Extensions
+        public static class {{Helper.ExtensionsTypeName(typeName)}}
         {
-            public static {{wrapperName}} Results{{wrapperGenericArgs}}(this {{type.ToDisplayString()}} value){{wrapperGenericConstraints}}
+            public static {{wrapperName}} {{Helper.CastingMethodName}}{{wrapperGenericArgs}}(this {{type.ToDisplayString()}} value){{wrapperGenericConstraints}}
             {
                 return new {{wrapperName}}() { Value = value };
             }
@@ -110,15 +110,7 @@ public class ObjectGenerator : IIncrementalGenerator
         }
         """;
 
-        var name = type
-            .ToDisplayString()
-            .Replace("<", "_")
-            .Replace(">", "")
-            .Replace(", ", "_")
-            .Replace(" ", "_")
-            .Replace(",", "_");
-
-        return (code, name);
+        return (code, type.ToDisplayString());
     }
 
     private static (string Code, string ClassName) GetType
@@ -160,38 +152,35 @@ public class ObjectGenerator : IIncrementalGenerator
 
             if(returnType is Method.Return.Void)
             {
-                return Result("Error?", methodCall);
+                return Returns(Helper.TypeName, methodCall);
             }
 
             if(returnType is Method.Return.Task)
             {
-                return Result($"async {taskPrefix}<Error?>", $"await {methodCall}");
+                return Returns($"async {taskPrefix}<{Helper.TypeName}>", $"await {methodCall}");
             }
 
             if(returnType is Method.Return.ValueTask)
             {
-                return Result($"async {taskPrefix}<Error?>", $"await {methodCall}");
+                return Returns($"async {taskPrefix}<{Helper.TypeName}>", $"await {methodCall}");
             }
 
             if(returnType is Method.Return.Type type)
             {
-                var returns = ToResult(type);
-                return ResultInfo(returns, type.Name, returns, type.CanBeNull, methodCall);
+                return ReturnsInfo(type, null);
             }
 
             if(returnType is Method.Return.Task.Type task)
             {
-                var returns = ToResult(task);
-                return ResultInfo(returns, task.Name, $"async {taskPrefix}<{returns}>", task.CanBeNull, $"await {methodCall}");
+                return ReturnsInfo(task, taskPrefix);
             }
 
             if(returnType is Method.Return.ValueTask.Type valueTask)
             {
-                var returns = ToResult(valueTask);
-                return ResultInfo(returns, valueTask.Name, $"async {valueTaskPrefix}<{returns}>", valueTask.CanBeNull, $"await {methodCall}");
+                return ReturnsInfo(valueTask, valueTaskPrefix);
             }
 
-            string Result(string methodReturns, string method)
+            string Returns(string methodReturns, string method)
             {
                 return $$"""
                 public {{methodReturns}} {{name}}{{genericArguments}}({{parameters}}){{genericConstraints}} 
@@ -199,7 +188,7 @@ public class ObjectGenerator : IIncrementalGenerator
                     try
                     {
                         {{method}};
-                        return (Error?)null;
+                        return {{Helper.Types.SuccessInstance}};
                     }
                     catch (Exception exception)
                     {
@@ -209,34 +198,41 @@ public class ObjectGenerator : IIncrementalGenerator
                 """;
             }
 
-            string ResultInfo
+            string ReturnsInfo
             (
                 Method.IReturnInfo info,
                 string? taskPrefix
             )
             {
-                var eitherFromResult = info.Symbol.GetEitherFromResult(); 
+                var isUnion = Helper.IsUnion(info.Symbol); 
 
-                var either = (info.CanBeNull ? $"Either<Maybe<{info.Name}>, Error>" : $"Either<{info.Name}, Error>");
-                var methodReturns = taskPrefix is null ? either : $"async {taskPrefix}<{either}>";
+                var union = (isUnion is null) switch
+                {   
+                    true => 
+                        info.CanBeNull
+                        ? 
+                        Helper.Types.UnionMaybeError(info.Name)
+                        : 
+                        Helper.Types.UnionError(info.Name),
+                    false =>
+                        isUnion.Value.Name
+                };
+
+                var methodReturns = taskPrefix is null ? union : $"async {taskPrefix}<{union}>";
                 
                 return $$"""
                     public {{methodReturns}} {{name}}{{genericArguments}}({{parameters}}){{genericConstraints}} 
                     {
                         try
                         {
-                            return new {{either}}({{method}});
+                            return new {{union}}({{method}});
                         }
                         catch (Exception exception)
                         {
-                            return new {{either}}(Error.Matches(exception).Error);
+                            return new {{union}}(Error.Matches(exception).Error);
                         }
                     }
                 """;
-            }
-
-            static ToResult(Method.IReturnInfo info)
-            {
             }
 
             return null;

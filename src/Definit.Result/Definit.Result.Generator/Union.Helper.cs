@@ -11,15 +11,28 @@ internal static class Helper
     public const string TypeNameWithNamespace = $"{Namespace}.{TypeName}";
     public const string InterfaceName = $"IUnionBase";
 
+    public const string CastingMethodName = $"Results";
+    public const string CastingWrapperName = $"UnionsWrapper";
+
     public static class Attributes
     {
         public const string GenerateUnion = $"{Helper.Namespace}.GenerateUnionAttribute";
+
+        public const string GenerateUnionObject = $"{Helper.Namespace}.GenerateUnion.ObjectAttribute";
+        public const string GenerateUnionObjectMeta = $"{Helper.Namespace}.GenerateUnion+ObjectAttribute";
     }
 
     public static class Types
     {
+        public const string HelperTypeName = $"Union";
+
         public const string Success = $"{Helper.Namespace}.Success";
+        public const string SuccessInstance = $"{Helper.Namespace}.{HelperTypeName}.Success";
+
         public const string Error = $"{Helper.Namespace}.Error";
+
+        public static string UnionError(string type) => $"{Helper.TypeName}<{type}, {Error}>";
+        public static string UnionMaybeError(string type) => $"{Helper.TypeName}<Maybe<{type}>, {Error}>";
     }
 
     public static class Base
@@ -55,15 +68,20 @@ internal static class Helper
         Generic.Argument.Notnull(Types.Error)
     );
 
-    public static Generic.Elements GetGenericsOfType(INamedTypeSymbol symbol)
+    public static (string Name, Generic.Elements Generics)? IsUnion(ITypeSymbol symbol)
     {
-        return symbol.AllInterfaces
-            .Single(x => x.AllInterfaces.Any(y => y
+        var union = symbol.AllInterfaces
+            .SingleOrDefault(x => x.AllInterfaces.Any(y => y
                 .ToDisplayString()
                 .StartsWith(InterfaceName)))
-            .ContainingType
-            .TypeArguments
-            .GetGenericArguments();
+            ?.ContainingType;
+
+        if(union is null)
+        {
+            return null;
+        }
+
+        return (union.ToDisplayString(), union.TypeArguments.GetGenericArguments());
     }
 }
 

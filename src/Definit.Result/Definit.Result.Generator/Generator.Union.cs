@@ -53,11 +53,15 @@ public class UnionGenerator : IIncrementalGenerator
         var name = info.Name;
         var constructorName = info.ConstructorName;
 
-        var genericArgs = Helper.GetGenericsOfType(symbol);
+        var union = Helper.IsUnion(symbol);
+        if(union is null)
+        {
+            throw new Exception($"Cannot find Union.Base Interface Generic Args type from type :: {info.FullName}, have you added the Base interface?");
+        }
 
         var (interior, extensions, _) = UnionBaseGenerator.GetInterior
         (
-            genericArgs,
+            union.Value.Generics,
             symbol.TypeArguments.GetGenericArguments(),
             constructorName, 
             name

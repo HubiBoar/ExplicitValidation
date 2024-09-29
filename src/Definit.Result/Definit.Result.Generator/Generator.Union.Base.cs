@@ -30,7 +30,7 @@ public class UnionBaseGenerator : IIncrementalGenerator
         SourceHelper.Run(context, Run);
     }
 
-    private static ImmutableArray<Func<(string Code, string ClassName)>> Run()
+    private static ImmutableArray<Func<(string Code, string FileName)>> Run()
     {
         return
         Enumerable.Range(0, Helper.Base.Count).Select<int, Func<(string, string)>>(i => () => i switch
@@ -42,15 +42,16 @@ public class UnionBaseGenerator : IIncrementalGenerator
         .ToImmutableArray();
     }
 
-    private static (string Code, string ClassName) Generate0()
+    private static (string Code, string FileName) Generate0()
     {
-        var generic = Helper.Generics1(); 
-        var allGenerics = new Generic.Elements(generic.First, generic.Second);
+        var generic = Helper.Generics0(); 
+        var allGenerics = new Generic.Elements(generic.Success, generic.Error);
         var typeGenerics = new Generic.Elements();
         var constructorName = Helper.TypeName;
         var genericTypeName = Helper.TypeName; 
 
-        var extensionsName = $"Extensions_{Helper.TypeName}_1";
+        string extensionsName = Helper.ExtensionsTypeName(0);
+        string fileName = Helper.FileTypeName(0); 
 
         var setupCode = CreateType
         (
@@ -61,20 +62,19 @@ public class UnionBaseGenerator : IIncrementalGenerator
             extensionsName
         );
 
-        string fileName = $"{Helper.TypeNameWithNamespace}_1"; 
-
         return (setupCode, fileName);
     }
 
-    private static (string Code, string ClassName) Generate1()
+    private static (string Code, string FileName) Generate1()
     {
         var generic = Helper.Generics1(); 
-        var allGenerics = new Generic.Elements(generic.First, generic.Second);
-        var typeGenerics = new Generic.Elements(generic.First);
+        var allGenerics = new Generic.Elements(generic.T, generic.Error);
+        var typeGenerics = new Generic.Elements(generic.T);
         var constructorName = Helper.TypeName;
         var genericTypeName = Helper.GenericTypeName(typeGenerics); 
 
-        var extensionsName = $"Extensions_{Helper.TypeName}_1";
+        string extensionsName = Helper.ExtensionsTypeName(1);
+        string fileName = Helper.FileTypeName(1); 
 
         var setupCode = CreateType
         (
@@ -85,18 +85,17 @@ public class UnionBaseGenerator : IIncrementalGenerator
             extensionsName
         );
 
-        string fileName = $"{Helper.TypeNameWithNamespace}_1"; 
-
         return (setupCode, fileName);
     }
 
-    private static (string Code, string ClassName) GenerateRest(int count)
+    private static (string Code, string FileName) GenerateRest(int count)
     {
         var allGenerics = Helper.Generics(count); 
         var constructorName = Helper.TypeName;
         var genericTypeName = Helper.GenericTypeName(allGenerics); 
 
-        var extensionsName = $"Extensions_{Helper.TypeName}_{count}";
+        string extensionsName = Helper.ExtensionsTypeName(count);
+        string fileName = Helper.FileTypeName(count); 
 
         var setupCode = CreateType
         (
@@ -106,8 +105,6 @@ public class UnionBaseGenerator : IIncrementalGenerator
             genericTypeName,
             extensionsName
         );
-
-        string fileName = $"{Helper.TypeNameWithNamespace}_{count}"; 
 
         return (setupCode, fileName);
     }

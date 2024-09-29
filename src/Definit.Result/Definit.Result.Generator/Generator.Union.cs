@@ -7,10 +7,8 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace Definit.Results.Generator;
 
 [Generator]
-public class EitherGenerator : IIncrementalGenerator
+public class UnionGenerator : IIncrementalGenerator
 {
-    const string EitherName = "Definit.Results.IEitherBase<";
-
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var provider = context.SyntaxProvider.ForAttributeWithMetadataName
@@ -48,22 +46,16 @@ public class EitherGenerator : IIncrementalGenerator
         var (code, info) = symbol.BuildTypeHierarchy
         (
             name => $"readonly {name}",
-            "Definit.Results",
+            Helper.Namespace,
             "System.Diagnostics.CodeAnalysis"
         );
-
-        var interf = symbol.AllInterfaces
-            .Single(x => x.AllInterfaces.Any(y => y
-                .ToDisplayString()
-                .StartsWith(EitherName)))
-            .ContainingType;
 
         var name = info.Name;
         var constructorName = info.ConstructorName;
 
-        var genericArgs = interf.TypeArguments.GetGenericArguments();
+        var genericArgs = Helper.GetGenericsOfType(symbol);
 
-        var (interior, extensions, _) = EitherBaseGenerator.EitherInterior
+        var (interior, extensions, _) = UnionBaseGenerator.GetInterior
         (
             genericArgs,
             symbol.TypeArguments.GetGenericArguments(),
@@ -77,11 +69,10 @@ public class EitherGenerator : IIncrementalGenerator
         var result = $$"""
         {{code.ToString()}}
 
-        public static partial class {{constructorName}}__Auto__Extensions
+        public static partial class {{Helper.ExtensionsTypeName(constructorName)}}
         {
             {{extensions}}
         }
-
         """;
 
         return (result, name);

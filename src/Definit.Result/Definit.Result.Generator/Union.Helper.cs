@@ -11,10 +11,15 @@ internal static class Helper
     public const string TypeNameWithNamespace = $"{Namespace}.{TypeName}";
     public const string InterfaceName = $"IUnionBase";
 
+    public static class Attributes
+    {
+        public const string GenerateUnion = $"{Helper.Namespace}.GenerateUnionAttribute";
+    }
+
     public static class Types
     {
-        public const string Success = "Definit.Results.Success";
-        public const string Error = "Definit.Results.Success";
+        public const string Success = $"{Helper.Namespace}.Success";
+        public const string Error = $"{Helper.Namespace}.Error";
     }
 
     public static class Base
@@ -25,6 +30,9 @@ internal static class Helper
     }
 
     public static string GenericTypeName(Generic.Elements elements) => $"{TypeName}{elements.ArgumentNamesFull}";
+    public static string ExtensionsTypeName(int count) => $"Extensions_{TypeName}_{count}";
+    public static string ExtensionsTypeName(string typeName) => $"{typeName}_Extensions_{TypeName}";
+    public static string FileTypeName(int count) => $"{TypeNameWithNamespace}_{count}";
 
     public static Generic.Elements Generics(int count) => 
         new Generic.Elements
@@ -35,23 +43,32 @@ internal static class Helper
                 .ToImmutableArray()
         );
 
-    public static (Generic.Element First, Generic.Element Second) Generics0() => 
+    public static (Generic.Element Success, Generic.Element Error) Generics0() => 
     (
         Generic.Argument.Notnull(Types.Success),
         Generic.Argument.Notnull(Types.Error)
     );
 
-    public static (Generic.Element First, Generic.Element Second) Generics1() => 
+    public static (Generic.Element T, Generic.Element Error) Generics1() => 
     (
         Generic.Argument.Notnull("T"),
         Generic.Argument.Notnull(Types.Error)
     );
+
+    public static Generic.Elements GetGenericsOfType(INamedTypeSymbol symbol)
+    {
+        return symbol.AllInterfaces
+            .Single(x => x.AllInterfaces.Any(y => y
+                .ToDisplayString()
+                .StartsWith(InterfaceName)))
+            .ContainingType
+            .TypeArguments
+            .GetGenericArguments();
+    }
 }
 
 internal static class LinqExtensions
 {
-    private const string ResultType = "Definit.Results.IResultBase";
-
     public static T[][] Chunk<T>(this T[] arr, int size)
     {
         if(size <= 0)
@@ -66,19 +83,5 @@ internal static class LinqExtensions
         }
 
         return result.ToArray();
-    }
-
-    public static string? GetEitherFromResult(this ITypeSymbol symbol)
-    {
-        if(symbol is INamedTypeSymbol type)
-        {
-            var either = type.AllInterfaces.SingleOrDefault(x => x.ToDisplayString().StartsWith(ResultType))
-                ?.TypeArguments
-                .Single();
-
-            return either is not null ? either.ToDisplayString() : null; 
-        }
-
-        return null;
     }
 }

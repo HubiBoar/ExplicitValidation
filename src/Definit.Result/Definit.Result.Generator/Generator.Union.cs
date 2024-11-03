@@ -36,7 +36,7 @@ public class UnionGenerator : IIncrementalGenerator
         SourceHelper.Run(context, () => typeList
             .Select<INamedTypeSymbol, Func<(string, string)>>(x => () => GetType(x))
             .ToImmutableArray());
-}
+    }
 
     private static (string Code, string ClassName) GetType
     (

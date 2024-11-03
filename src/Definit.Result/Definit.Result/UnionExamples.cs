@@ -1,4 +1,3 @@
-using System.Text;
 using Definit.Results;
 
 //[assembly: GenerateUnion.Object(typeof(StringBuilder))]
@@ -7,11 +6,11 @@ using Definit.Results;
 //[assembly: GenerateUnion.Object<Task<string>>]
 //[assembly: GenerateUnion.Object<Definit.Resultss.Examples.Examples>]
 //
-//namespace Definit.Resultss.Examples;
-//
-//[GenerateUnion]
-//public partial struct ResultExample<T> : U<T, NotFound>.Base
-//    where T : notnull;
+namespace Definit.Resultss.Examples;
+
+[GenerateUnion]
+public partial struct ResultExample<T> : Definit.Results.U<T, NotFound>.Base
+    where T : notnull;
 //
 //[GenerateUnion]
 //public partial struct ResultExample2<T> : U<T, string, NotFound>.Base
@@ -21,7 +20,7 @@ using Definit.Results;
 //public partial struct EitherExample2<T> : U<T, string, int>.Base
 //    where T : notnull;
 //
-//public readonly record struct NotFound() : IError<NotFound, KeyNotFoundException>;
+public readonly record struct NotFound(ErrorPayload Payload) : IError<NotFound>;
 //
 //[GenerateUnion.This]
 //public partial class Examples

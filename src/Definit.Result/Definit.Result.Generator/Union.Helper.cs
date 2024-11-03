@@ -10,6 +10,7 @@ internal static class Helper
     public const string TypeName              = $"U";
     public const string TypeNameWithNamespace = $"{Namespace}.{TypeName}";
     public const string InterfaceName         = $"IUnionBase";
+    public const string InterfaceNameWithNamespace = $"{Namespace}.{InterfaceName}";
 
     public const string MaybeTypeName         = $"Opt";
     public const string UnionMatchException = $"{Helper.Namespace}.UnionMatchException"; 
@@ -48,6 +49,7 @@ internal static class Helper
 
     public static class Base
     {
+        public const bool Activated = false;
         public const int Count = 10;
         public const int MaxDeconstructorsCount = 8;
     }
@@ -80,10 +82,11 @@ internal static class Helper
 
     public static INamedTypeSymbol? IsUnion(ITypeSymbol symbol)
     {
-        var union = symbol.AllInterfaces
-            .SingleOrDefault(x => x
-                .ToDisplayString()
-                .StartsWith(InterfaceName))
+        var union = symbol.Interfaces
+            .SingleOrDefault(x => x.AllInterfaces
+                .Any(y => y
+                    .ToDisplayString()
+                    .Equals(InterfaceNameWithNamespace)))
             ?.ContainingType;
 
         if(union is null)

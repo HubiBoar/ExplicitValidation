@@ -6,39 +6,48 @@ namespace Definit.Results.Generator;
 
 internal static class Helper
 {
-    public const string Namespace = "Definit.Results";
-    public const string TypeName = $"U";
+    public const string Namespace             = "Definit.Results";
+    public const string TypeName              = $"U";
     public const string TypeNameWithNamespace = $"{Namespace}.{TypeName}";
-    public const string InterfaceName = $"IUnionBase";
+    public const string InterfaceName         = $"IUnionBase";
 
-    public const string CastingMethodName = $"Results";
+    public const string MaybeTypeName         = $"Opt";
+    public const string UnionMatchException = $"{Helper.Namespace}.UnionMatchException"; 
+    public const string UnionMatchError = $"{Helper.Namespace}.UnionMatchError"; 
+
+    public static string UnionError(string type) => $"{Helper.TypeName}<{type}, {Error}>";
+    public static string UnionMaybeError(string type) => $"{Helper.TypeName}<{MaybeTypeName}<{type}>, {Error}>";
+
+    public const string CastingMethodName  = $"Results";
     public const string CastingWrapperName = $"UnionsWrapper";
+
+    public const string Success = $"{Helper.Namespace}.Success";
+    public const string SuccessInstance = $"{Helper.Namespace}.{TypeName}.Success";
+
+    public const string Error = $"System.Exception";
 
     public static class Attributes
     {
         public const string GenerateUnion = $"{Helper.Namespace}.GenerateUnionAttribute";
 
-        public const string GenerateUnionObject = $"{Helper.Namespace}.GenerateUnion.ObjectAttribute";
+        public const string GenerateUnionThis     = $"{Helper.Namespace}.GenerateUnion.ThisAttribute";
+        public const string GenerateUnionThisMeta = $"{Helper.Namespace}.GenerateUnion+ThisAttribute";
+
+        public const string GenerateUnionObject     = $"{Helper.Namespace}.GenerateUnion.ObjectAttribute";
         public const string GenerateUnionObjectMeta = $"{Helper.Namespace}.GenerateUnion+ObjectAttribute";
+
+        public const string GenerateUnionObjectGeneric     = $"{Helper.Namespace}.GenerateUnion.ObjectAttribute`1";
+        public const string GenerateUnionObjectGenericMeta = $"{Helper.Namespace}.GenerateUnion+ObjectAttribute`1";
     }
 
-    public static class Types
+    public static class Async
     {
-        public const string HelperTypeName = $"Union";
-
-        public const string Success = $"{Helper.Namespace}.Success";
-        public const string SuccessInstance = $"{Helper.Namespace}.{HelperTypeName}.Success";
-
-        public const string Error = $"{Helper.Namespace}.Error";
-        public const string ErrorInterface = $"{Helper.Namespace}.IError";
-
-        public static string UnionError(string type) => $"{Helper.TypeName}<{type}, {Error}>";
-        public static string UnionMaybeError(string type) => $"{Helper.TypeName}<Maybe<{type}>, {Error}>";
+        public const string TaskPrefix = "System.Threading.Tasks.Task";
+        public const string ValueTaskPrefix = "System.Threading.Tasks.ValueTask";
     }
 
     public static class Base
     {
-        public const bool Activated = false;
         public const int Count = 10;
         public const int MaxDeconstructorsCount = 8;
     }
@@ -59,14 +68,14 @@ internal static class Helper
 
     public static (Generic.Element Success, Generic.Element Error) Generics0() => 
     (
-        Generic.Argument.Notnull(Types.Success),
-        Generic.Argument.Notnull(Types.Error)
+        Generic.Argument.Notnull(Success),
+        Generic.Argument.Notnull(Error)
     );
 
     public static (Generic.Element T, Generic.Element Error) Generics1() => 
     (
         Generic.Argument.Notnull("T"),
-        Generic.Argument.Notnull(Types.Error)
+        Generic.Argument.Notnull(Error)
     );
 
     public static INamedTypeSymbol? IsUnion(ITypeSymbol symbol)
@@ -83,16 +92,6 @@ internal static class Helper
         }
 
         return union;
-    }
-
-    public static bool IsError(ITypeSymbol symbol)
-    {
-        var error = symbol.AllInterfaces
-            .SingleOrDefault(x => x
-                .ToDisplayString()
-                .StartsWith(Types.ErrorInterface));
-
-        return error is not null;
     }
 }
 

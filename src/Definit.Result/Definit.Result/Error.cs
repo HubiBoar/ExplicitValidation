@@ -1,81 +1,54 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace Definit.Results;
 
-public interface IError<TSelf, TException> : IError<TSelf>
-    where TSelf : struct, IError<TSelf, TException>
-    where TException : notnull, Exception
+public interface IError<TSelf>
+    where TSelf : IError<TSelf>
 {
-    static (bool Matches, TSelf Error) IError<TSelf>.Matches(Exception exception)
+    public ErrorPayload Payload { get; }
+
+    public abstract static TSelf Create(ErrorPayload payload);
+}
+
+public readonly record struct ErrorPayload(string Message, string StackTrace)
+{
+    public ErrorPayload(string message) : this (message, Environment.StackTrace) {}
+    public ErrorPayload(Exception ex) : this (ex.Message, ex.StackTrace ?? Environment.StackTrace) {}
+
+    public static implicit operator ErrorPayload(Exception ex) => new (ex);
+
+    public ErrorPayload WithContext(string context)
     {
-        var (matches, error) = exception.Matches<TException>();
-       // return (matches, new TSelf()
-       // {
-       // }); 
+        return this with
+        {
+            Message = $"{context} :: {this.Message}",
+        };
     }
 }
 
-public interface IError
+public readonly record struct Error(ErrorPayload Payload) : IError<Error>
 {
-}
+    public Error(Exception exception) : this(new ErrorPayload(exception)) {} 
+    public Error(string message) : this(new ErrorPayload(message)) {} 
 
-public interface IError<TSelf> : IError
-    where TSelf : struct, IError<TSelf>
-{
-    public abstract static (bool Matches, TSelf Error) Matches(Exception exception); 
-}
+    public T ToError<T>(string context)
+        where T : IError<T> 
+    {
+        var payload = Payload.WithContext(context);
+        return T.Create(payload);
+    }
 
-public readonly record struct Err<T>(string Context) : IError<Err<T>, T>
-    where T : Exception;
-
-public readonly record struct Error(string Message, string StackTrace) : IError<Error>, IEitherBase
-{
-    public Error(Exception exception) : this(exception.Message, exception.StackTrace ?? Environment.StackTrace) {} 
-    public Error(string message) : this(message, Environment.StackTrace) {} 
-    public Error(string prefix, Error error) : this($"{prefix} :: {error.Message}", error.StackTrace) {}
-
-    public string Context { get; init; } = string.Empty;
-
-    public static Error FromError(Error error) => error;
-
-    public static (bool Matches, Error Error) Matches(Exception exception) => (true, exception);
+    public static Error Create(ErrorPayload payload) => new Error(payload);
 
     public static implicit operator Error(Exception ex) => new Error(ex);
+    public static implicit operator Error(ErrorPayload ex) => new Error(ex);
 }
 
-public static class ErrorExtensions
+public static class ErrorExtension
 {
-    public static bool IsError<T>(this T? value, [NotNullWhen(true)] out T? val)
-        where T : struct, IError
+    public static T WithContext<T>(this T error, string context)
+        where T : IError<T>
     {
-        val = value;
-        return value is not null;
-    }
+        var payload = error.Payload.WithContext(context);
 
-    public static (bool Matches, Either<T, Exception> Either) Matches<T>(this Exception exception)
-        where T : Exception
-    {
-        if(exception is T match)
-        {
-            return (true, match);
-        }
-
-        return (false, exception);
-    }
-
-    public static TError WithContext<TError>(this TError error, string context)
-        where TError : struct, IError<TError>
-    {
-        var previousContext = error.Context;
-        return error with { Context = $"{context} :: {previousContext}" };
-    }
-}
-
-public static class ErrorHelper
-{
-    public static (bool Matches, T Error) Matches<T>(Exception exception)
-        where T : struct, IError<T>
-    {
-        return T.Matches(exception);
+        return T.Create(payload);
     }
 }

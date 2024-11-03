@@ -4,14 +4,14 @@ using Microsoft.CodeAnalysis;
 
 namespace Definit.Results.Generator;
 
-[Generator]
-public class UnionBaseGenerator : IIncrementalGenerator
+//[Generator]
+public sealed class UnionBaseGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var provider = context.SyntaxProvider.CreateSyntaxProvider
         (
-            predicate: static (_, _) => Helper.Base.Activated,
+            predicate: static (_, _) => true,
 
             transform: static (n, _) => (n)
         );
@@ -136,7 +136,7 @@ public class UnionBaseGenerator : IIncrementalGenerator
 
         namespace {{Helper.Namespace}};
 
-        public readonly struct {{typeName}} : {{typeName}}.Base{{allGenericParams.ConstraintsString}} 
+        public readonly struct {{typeName}} : {{typeName}}.Base{{typeGenericParams.ConstraintsString}} 
         {
             public interface Base : {{Helper.InterfaceName}}<({{genericOrArgs}})>;
 
@@ -183,7 +183,7 @@ public class UnionBaseGenerator : IIncrementalGenerator
 
         {{constructors}}
 
-        public static implicit operator {{typeName}}([DisallowNull] EitherMatchError _) => throw new EitherMatchException<Either<{{genericArgs}}>>();
+        public static implicit operator {{typeName}}([DisallowNull] {{Helper.UnionMatchError}} _) => throw new {{Helper.UnionMatchException}}<{{Helper.TypeName}}<{{genericArgs}}>>();
         {{operators}}
         """;
 
@@ -201,11 +201,15 @@ public class UnionBaseGenerator : IIncrementalGenerator
     {
         var length = allGenericParams.Value.Length;
 
-        var typeGenericArgs = string.Join(", ", typeGenericParams.Value.Select(x => x.Name));
+        var typeGenericArgs = typeGenericParams.Value.Length > 0
+            ? 
+            "<" + string.Join(", ", typeGenericParams.Value.Select(x => x.Name)) + ">"
+            :
+            string.Empty;
 
         if(length <= Helper.Base.MaxDeconstructorsCount)
         {
-            var generic = allGenericParams.Value.Select(x => (Type: x, Return: $"{x.Name}_arg", Assign: $"{x.Name}_out")).ToArray();
+            var generic = allGenericParams.Value.Select((x, i) => (Type: x, Return: $"_arg_{i}", Assign: $"_out_{i}")).ToArray();
             var outArgs = string.Join(",\n\t", generic.Select(x => $"out {x.Type.Name}? {x.Return}"));
             var returns = string.Join(", ", generic.Select(x => x.Assign));
             var assignments = string.Join("\n\t", generic.Select(x => $"{x.Return} = {x.Assign}?.Out ?? null;"));
@@ -261,7 +265,7 @@ public class UnionBaseGenerator : IIncrementalGenerator
                 }).ToImmutableArray()); 
 
                 return $$"""
-                public static void Deconstruct<{{typeGenericArgs}}>
+                public static void Deconstruct{{typeGenericArgs}}
                 (
                     this {{typeName}} either,
                     {{outArgs}}
@@ -271,7 +275,7 @@ public class UnionBaseGenerator : IIncrementalGenerator
                     {{assignments}}
                 }
 
-                public static void Deconstruct<{{typeGenericArgs}}>
+                public static void Deconstruct{{typeGenericArgs}}
                 (
                     this {{typeName}}? either,
                     {{outArgs}}
@@ -318,13 +322,13 @@ public class UnionBaseGenerator : IIncrementalGenerator
             .ToArray();
 
             var eitherGenericsArgs = eitherGenerics
-                .Select((x, i) => (Type: "Either<" + string.Join(", ", x.Generics.Select(e => e.Name)) + ">", Name: $"arg_{i}", Generic: x))
+                .Select((x, i) => (Type: $"{Helper.TypeName}<" + string.Join(", ", x.Generics.Select(e => e.Name)) + ">", Name: $"_arg_{i}", Generic: x))
                 .ToArray();
 
             var outArgs = string.Join(",\n\t", eitherGenericsArgs.Select((x) => $"out {x.Type}? {x.Name}"));
             var nullValues = string.Join(" ", eitherGenericsArgs.Select(x => $"{x.Name} = null;"));
             var genericConstraints = allGenericParams.ConstraintsString;
-            var results = Enumerable.Range(0, length).Select(x => $"out_{x}").ToArray();
+            var results = Enumerable.Range(0, length).Select(x => $"_out_{x}").ToArray();
             var assignOut = string.Join(", ", results);
 
             var returns = string.Join("\n\t", eitherGenericsArgs
@@ -339,7 +343,7 @@ public class UnionBaseGenerator : IIncrementalGenerator
                     + "null;" )); 
 
             return $$"""
-            public static void Deconstruct<{{typeGenericArgs}}>
+            public static void Deconstruct{{typeGenericArgs}}
             (
                 this {{typeName}} either,
                 {{outArgs}}
@@ -349,7 +353,7 @@ public class UnionBaseGenerator : IIncrementalGenerator
                 {{returns}}
             }
 
-            public static void Deconstruct<{{typeGenericArgs}}>
+            public static void Deconstruct{{typeGenericArgs}}
             (
                 this {{typeName}}? either,
                 {{outArgs}}
@@ -365,13 +369,13 @@ public class UnionBaseGenerator : IIncrementalGenerator
                 {{returns}}
             }
             """;
+        }
     }
-}
 
-private static bool[][] GenerateAllStates(int size)
-{
-    int totalStates = (int)Math.Pow(2, size);  
-    bool[][] result = new bool[totalStates][];
+    private static bool[][] GenerateAllStates(int size)
+    {
+        int totalStates = (int)Math.Pow(2, size);  
+        bool[][] result = new bool[totalStates][];
 
         for (int i = 0; i < totalStates; i++)
         {

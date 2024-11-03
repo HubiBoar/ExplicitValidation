@@ -13,7 +13,7 @@ public class UnionGenerator : IIncrementalGenerator
     {
         var provider = context.SyntaxProvider.ForAttributeWithMetadataName
         (
-            "Definit.Results.GenerateEitherAttribute",
+            Helper.Attributes.GenerateUnion,
             predicate: (c, _) =>
                 c is TypeDeclarationSyntax type
                 && type.Modifiers.Any(m => m.IsKind(SyntaxKind.PartialKeyword)),

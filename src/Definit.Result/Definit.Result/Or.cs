@@ -15,44 +15,44 @@ public readonly struct Or<T>
     public static implicit operator Or<T>([DisallowNull] T value) => new(value);
 }
 
-public static class Maybe
+public static class Opt
 {
     public static Null Null { get; } = new Null();
 
-    public static Maybe<T> Create<T>([MaybeNull] T? value) => new Maybe<T>(value);
+    public static Opt<T> Create<T>([MaybeNull] T? value) => new Opt<T>(value);
 }
 
-public readonly struct Maybe<T>
+public readonly struct Opt<T>
 {
-    public static Maybe<T> Null { get; } = Maybe.Null;
+    public static Opt<T> Null { get; } = Opt.Null;
 
     private T? Value { get; } 
     private bool Exists { get; }
 
     [Obsolete(DefaultConstructorException.Attribute, true)]
-    public Maybe() => throw new DefaultConstructorException();
+    public Opt() => throw new DefaultConstructorException();
 
-    public Maybe([MaybeNull] T? value) { Value = value; Exists = true; }
-    public Maybe(Null nu) { Value = default!; Exists = false; }
+    public Opt([MaybeNull] T? value) { Value = value; Exists = true; }
+    public Opt(Null nu) { Value = default!; Exists = false; }
 
-    public static implicit operator Maybe<T>([MaybeNull] T? value) => new(value);
-    public static implicit operator Maybe<T>(Null value) => new(value);
+    public static implicit operator Opt<T>([MaybeNull] T? value) => new(value);
+    public static implicit operator Opt<T>(Null value) => new(value);
     
-    public static void Deconstruct<T0>(Maybe<T0> maybe, out T0? value, out Null? nul)
+    public static void Deconstruct<T0>(Opt<T0> maybe, out T0? value, out Null? nul)
         where T0 : class?
     {
         if(maybe.Exists)
         {
             value = maybe.Value;
-            nul = maybe.Value is null ? Maybe.Null : null;
+            nul = maybe.Value is null ? Opt.Null : null;
             return;
         }
 
         value = null;
-        nul = Maybe.Null;
+        nul = Opt.Null;
     }
 
-    public static void Deconstruct<T0>(Maybe<T0> maybe, out T0? value, out Null? nul)
+    public static void Deconstruct<T0>(Opt<T0> maybe, out T0? value, out Null? nul)
         where T0 : struct
     {
         if(maybe.Exists)
@@ -63,21 +63,21 @@ public readonly struct Maybe<T>
         }
 
         value = null;
-        nul = Maybe.Null;
+        nul = Opt.Null;
     }
 
-    public static void Deconstruct<T0>(Maybe<T0?> maybe, out T0? value, out Null? nul)
+    public static void Deconstruct<T0>(Opt<T0?> maybe, out T0? value, out Null? nul)
         where T0 : struct
     {
         if(maybe.Exists)
         {
             value = maybe.Value;
-            nul = maybe.Value is null ? Maybe.Null : null;
+            nul = maybe.Value is null ? Opt.Null : null;
             return;
         }
 
         value = null;
-        nul = Maybe.Null;
+        nul = Opt.Null;
     }
 }
 
@@ -89,25 +89,25 @@ public readonly struct Null
 
 public static class MaybeExtensions
 {
-    public static void Deconstruct<T>(this Maybe<T?> maybe, out T? value, out Null? nul)
+    public static void Deconstruct<T>(this Opt<T?> maybe, out T? value, out Null? nul)
         where T : struct
     {
-        Maybe<T?>.Deconstruct<T>(maybe, out value, out nul); 
+        Opt<T?>.Deconstruct<T>(maybe, out value, out nul); 
     }
 
-    public static void Deconstruct<T>(this Maybe<T> maybe, out T? value, out Null? nul)
+    public static void Deconstruct<T>(this Opt<T> maybe, out T? value, out Null? nul)
         where T : struct
     {
-        Maybe<T>.Deconstruct<T>(maybe, out value, out nul); 
+        Opt<T>.Deconstruct<T>(maybe, out value, out nul); 
     }
 
-    public static void Deconstruct<T>(this Maybe<T> maybe, out T? value, out Null? nul)
+    public static void Deconstruct<T>(this Opt<T> maybe, out T? value, out Null? nul)
         where T : class?
     {
-        Maybe<T>.Deconstruct<T>(maybe, out value, out nul); 
+        Opt<T>.Deconstruct<T>(maybe, out value, out nul); 
     }
 
-    public static void Deconstruct<T>(this Maybe<T?>? maybe, out T? value, out Null? nul)
+    public static void Deconstruct<T>(this Opt<T?>? maybe, out T? value, out Null? nul)
         where T : struct
     {
         if(maybe is null)
@@ -117,10 +117,10 @@ public static class MaybeExtensions
             return;
         }
 
-        Maybe<T>.Deconstruct<T>(maybe.Value, out value, out nul); 
+        Opt<T>.Deconstruct<T>(maybe.Value, out value, out nul); 
     }
 
-    public static void Deconstruct<T>(this Maybe<T>? maybe, out T? value, out Null? nul)
+    public static void Deconstruct<T>(this Opt<T>? maybe, out T? value, out Null? nul)
         where T : struct
     {
         if(maybe is null)
@@ -130,10 +130,10 @@ public static class MaybeExtensions
             return;
         }
 
-        Maybe<T>.Deconstruct<T>(maybe.Value, out value, out nul); 
+        Opt<T>.Deconstruct<T>(maybe.Value, out value, out nul); 
     }
 
-    public static void Deconstruct<T>(this Maybe<T>? maybe, out T? value, out Null? nul)
+    public static void Deconstruct<T>(this Opt<T>? maybe, out T? value, out Null? nul)
         where T : class?
     {
         if(maybe is null)
@@ -143,10 +143,10 @@ public static class MaybeExtensions
             return;
         }
 
-        Maybe<T>.Deconstruct<T>(maybe.Value, out value, out nul); 
+        Opt<T>.Deconstruct<T>(maybe.Value, out value, out nul); 
     }
 
-    public static void Deconstruct<T>(this Or<Maybe<T?>>? or, out T? value, out Null? nul)
+    public static void Deconstruct<T>(this Or<Opt<T?>>? or, out T? value, out Null? nul)
         where T : struct
     {
         if(or is null)
@@ -155,10 +155,10 @@ public static class MaybeExtensions
             nul = null;
             return;
         }
-        Maybe<T?>.Deconstruct<T>(or.Value.Out, out value, out nul); 
+        Opt<T?>.Deconstruct<T>(or.Value.Out, out value, out nul); 
     }
 
-    public static void Deconstruct<T>(this Or<Maybe<T>>? or, out T? value, out Null? nul)
+    public static void Deconstruct<T>(this Or<Opt<T>>? or, out T? value, out Null? nul)
         where T : struct
     {
         if(or is null)
@@ -168,10 +168,10 @@ public static class MaybeExtensions
             return;
         }
 
-        Maybe<T>.Deconstruct<T>(or.Value.Out, out value, out nul); 
+        Opt<T>.Deconstruct<T>(or.Value.Out, out value, out nul); 
     }
 
-    public static void Deconstruct<T>(this Or<Maybe<T>>? or, out T? value, out Null? nul)
+    public static void Deconstruct<T>(this Or<Opt<T>>? or, out T? value, out Null? nul)
         where T : class?
     {
         if(or is null)
@@ -180,6 +180,6 @@ public static class MaybeExtensions
             nul = null;
             return;
         }
-        Maybe<T>.Deconstruct<T>(or.Value.Out, out value, out nul); 
+        Opt<T>.Deconstruct<T>(or.Value.Out, out value, out nul); 
     }
 }

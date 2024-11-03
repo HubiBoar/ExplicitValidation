@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using System.Text;
 using Definit.Utils.SourceGenerator;
 using Microsoft.CodeAnalysis;
 
@@ -8,8 +7,6 @@ namespace Definit.Results.Generator;
 [Generator]
 public class ObjectGenerator : IIncrementalGenerator
 {
-    private const string Success = "Definit.Results.Success";
-
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var provider = context.SyntaxProvider.ForAttributeWithMetadataName
@@ -134,8 +131,8 @@ public class ObjectGenerator : IIncrementalGenerator
     {
         try
         {
-            const string taskPrefix = "System.Threading.Tasks.Task";
-            const string valueTaskPrefix = "System.Threading.Tasks.ValueTask";
+            const string taskPrefix = Helper.Async.TaskPrefix;
+            const string valueTaskPrefix = Helper.Async.ValueTaskPrefix;
 
             if(method.IsUnsafe() || method.Name == "ToString")
             {
@@ -189,7 +186,7 @@ public class ObjectGenerator : IIncrementalGenerator
                     try
                     {
                         {{method}};
-                        return {{Helper.Types.SuccessInstance}};
+                        return {{Helper.SuccessInstance}};
                     }
                     catch (Exception exception)
                     {
@@ -212,7 +209,6 @@ public class ObjectGenerator : IIncrementalGenerator
                     true => ReturnsNotUnion(info, taskPrefix),
                     false => ReturnsUnion(info, isUnion, taskPrefix)
                 };
-
             }
 
             string ReturnsUnion
@@ -222,44 +218,26 @@ public class ObjectGenerator : IIncrementalGenerator
                 string? taskPrefix
             )
             {
-                var errors = union.TypeArguments.Where(x => Helper.IsError(x)).ToArray();
+                var unionArgs = string.Join(", ", union.TypeArguments
+                    .Select(x => x.ToDisplayString())
+                    .Concat([Helper.Error]));
 
-                if(errors.Length == 0)
-                {
-                    var unionArgs = string.Join(", ", union.TypeArguments
-                        .Select(x => x.ToDisplayString())
-                        .Concat([Helper.Types.Error]));
-
-                    var unionReturns = $"{Helper.TypeName}<{unionArgs}>";
-                    var methodReturns = taskPrefix is null ? unionReturns : $"async {taskPrefix}<{unionReturns}>";
-                    
-                    return $$"""
-                        public {{methodReturns}} {{name}}{{genericArguments}}({{parameters}}){{genericConstraints}} 
+                var unionReturns = $"{Helper.TypeName}<{unionArgs}>";
+                var methodReturns = taskPrefix is null ? unionReturns : $"async {taskPrefix}<{unionReturns}>";
+                
+                return $$"""
+                    public {{methodReturns}} {{name}}{{genericArguments}}({{parameters}}){{genericConstraints}} 
+                    {
+                        try
                         {
-                            try
-                            {
-                                return new {{unionReturns}}({{method}});
-                            }
-                            catch (Exception exception)
-                            {
-                                return new {{unionReturns}}(Error.Matches(exception).Error);
-                            }
+                            return new {{unionReturns}}({{method}});
                         }
-                    """;
-                }
-
-                var exceptionMatching = string.Join("\n", errors.Select((x, i) =>
-                {
-                    if(i == errors.Length - 1)
-                    {
-                        builder.
+                        catch (Exception exception)
+                        {
+                            return new {{unionReturns}}(exception);
+                        }
                     }
-                    else
-                    {
-
-                    }
-                    var error = errors[i];
-                })
+                """;
             }
 
             string ReturnsNotUnion
@@ -270,9 +248,9 @@ public class ObjectGenerator : IIncrementalGenerator
             {
                 var union = info.CanBeNull
                     ? 
-                    Helper.Types.UnionMaybeError(info.Name)
+                    Helper.UnionMaybeError(info.Name)
                     : 
-                    Helper.Types.UnionError(info.Name);
+                    Helper.UnionError(info.Name);
 
                 var methodReturns = taskPrefix is null ? union : $"async {taskPrefix}<{union}>";
                 
@@ -285,7 +263,7 @@ public class ObjectGenerator : IIncrementalGenerator
                         }
                         catch (Exception exception)
                         {
-                            return new {{union}}(Error.Matches(exception).Error);
+                            return new {{union}}(exception);
                         }
                     }
                 """;
@@ -301,6 +279,4 @@ public class ObjectGenerator : IIncrementalGenerator
             return exception.ReportException(context, description);
         }
     }
-
 }
-

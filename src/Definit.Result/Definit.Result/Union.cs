@@ -23,8 +23,10 @@ public static class GenerateUnion
 
 public interface IUnionBase;
 
-public interface IUnionBase<TValue> : IEitherBase
+public interface IUnionBase<TValue> : IUnionBase
     where TValue : struct
 {
     public TValue Value { get; }
 }
+
+public record struct Success();

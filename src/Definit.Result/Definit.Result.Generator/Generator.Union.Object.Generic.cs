@@ -11,7 +11,7 @@ public class ObjectGenericGenerator : IIncrementalGenerator
     {
         var provider = context.SyntaxProvider.ForAttributeWithMetadataName
         (
-            "Definit.Results.GenerateResult+ObjectAttribute`1",
+            Helper.Attributes.GenerateUnionObjectGenericMeta,
             predicate: (c, _) => true,
 
             transform: (n, _) => n
@@ -34,7 +34,7 @@ public class ObjectGenericGenerator : IIncrementalGenerator
             .SelectMany(x => x.Attributes
                 .Where(y => y.AttributeClass is not null && y.AttributeClass!
                     .ToDisplayString()
-                    .StartsWith("Definit.Results.GenerateResult.ObjectAttribute<")) 
+                    .StartsWith($"{Helper.Attributes.GenerateUnionObjectGeneric}<")) 
                 .Select<AttributeData, Func<(string, string)>>(x => () => GetType(context, x)))
                 .ToImmutableArray());
     }
@@ -50,4 +50,3 @@ public class ObjectGenericGenerator : IIncrementalGenerator
         return ObjectGenerator.Generate(context, type!);
     }
 }
-

@@ -185,12 +185,12 @@ public class ObjectGenerator : IIncrementalGenerator
                 {
                     try
                     {
-                        {{method}};
+                        {{methodCall}};
                         return {{Helper.SuccessInstance}};
                     }
                     catch (Exception exception)
                     {
-                        return Error.Matches(exception).Error;
+                        return exception;
                     }
                 }
                 """;
@@ -226,17 +226,17 @@ public class ObjectGenerator : IIncrementalGenerator
                 var methodReturns = taskPrefix is null ? unionReturns : $"async {taskPrefix}<{unionReturns}>";
                 
                 return $$"""
-                    public {{methodReturns}} {{name}}{{genericArguments}}({{parameters}}){{genericConstraints}} 
+                public {{methodReturns}} {{name}}{{genericArguments}}({{parameters}}){{genericConstraints}} 
+                {
+                    try
                     {
-                        try
-                        {
-                            return new {{unionReturns}}({{method}});
-                        }
-                        catch (Exception exception)
-                        {
-                            return new {{unionReturns}}(exception);
-                        }
+                        return {{methodCall}};
                     }
+                    catch (Exception exception)
+                    {
+                        return exception;
+                    }
+                }
                 """;
             }
 
@@ -253,19 +253,25 @@ public class ObjectGenerator : IIncrementalGenerator
                     Helper.UnionError(info.Name);
 
                 var methodReturns = taskPrefix is null ? union : $"async {taskPrefix}<{union}>";
-                
+
+                var callMethod = info.CanBeNull
+                    ?
+                    $"new {Helper.Maybe(info.Name)}({methodCall})"
+                    :
+                    methodCall;
+
                 return $$"""
-                    public {{methodReturns}} {{name}}{{genericArguments}}({{parameters}}){{genericConstraints}} 
+                public {{methodReturns}} {{name}}{{genericArguments}}({{parameters}}){{genericConstraints}} 
+                {
+                    try
                     {
-                        try
-                        {
-                            return new {{union}}({{method}});
-                        }
-                        catch (Exception exception)
-                        {
-                            return new {{union}}(exception);
-                        }
+                        return {{callMethod}};
                     }
+                    catch (Exception exception)
+                    {
+                        return exception;
+                    }
+                }
                 """;
             }
 

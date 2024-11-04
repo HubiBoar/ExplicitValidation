@@ -29,4 +29,12 @@ public interface IUnionBase<TValue> : IUnionBase
     public TValue Value { get; }
 }
 
-public record struct Success();
+public static class Union
+{
+    public static Success Success { get; } = Success.Instance;
+}
+
+public record struct Success
+{
+    public static Success Instance { get; } = new ();
+}

@@ -17,13 +17,14 @@ internal static class Helper
     public const string UnionMatchError = $"{Helper.Namespace}.UnionMatchError"; 
 
     public static string UnionError(string type) => $"{Helper.TypeName}<{type}, {Error}>";
-    public static string UnionMaybeError(string type) => $"{Helper.TypeName}<{MaybeTypeName}<{type}>, {Error}>";
+    public static string UnionMaybeError(string type) => $"{Helper.TypeName}<{Maybe(type)}, {Error}>";
+    public static string Maybe(string type) => $"{MaybeTypeName}<{type}>";
 
     public const string CastingMethodName  = $"Results";
     public const string CastingWrapperName = $"UnionsWrapper";
 
     public const string Success = $"{Helper.Namespace}.Success";
-    public const string SuccessInstance = $"{Helper.Namespace}.{TypeName}.Success";
+    public const string SuccessInstance = $"{Helper.Namespace}.Union.Success";
 
     public const string Error = $"System.Exception";
 

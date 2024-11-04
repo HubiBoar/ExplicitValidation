@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Text;
 using Definit.Utils.SourceGenerator;
 using Microsoft.CodeAnalysis;
 
@@ -165,17 +166,17 @@ public class ObjectGenerator : IIncrementalGenerator
 
             if(returnType is Method.Return.Type type)
             {
-                return ReturnsInfo(type, null);
+                return ReturnsInfo(type, null, methodCall);
             }
 
             if(returnType is Method.Return.Task.Type task)
             {
-                return ReturnsInfo(task, taskPrefix);
+                return ReturnsInfo(task, taskPrefix, $"await {methodCall}");
             }
 
             if(returnType is Method.Return.ValueTask.Type valueTask)
             {
-                return ReturnsInfo(valueTask, valueTaskPrefix);
+                return ReturnsInfo(valueTask, valueTaskPrefix, $"await {methodCall}");
             }
 
             string Returns(string methodReturns, string method)
@@ -185,7 +186,7 @@ public class ObjectGenerator : IIncrementalGenerator
                 {
                     try
                     {
-                        {{methodCall}};
+                        {{method}};
                         return {{Helper.SuccessInstance}};
                     }
                     catch (Exception exception)
@@ -199,15 +200,16 @@ public class ObjectGenerator : IIncrementalGenerator
             string ReturnsInfo
             (
                 Method.IReturnInfo info,
-                string? taskPrefix
+                string? taskPrefix,
+                string method
             )
             {
                 var isUnion = Helper.IsUnion(info.Symbol); 
 
                 return (isUnion is null) switch
                 {   
-                    true => ReturnsNotUnion(info, taskPrefix),
-                    false => ReturnsUnion(info, isUnion, taskPrefix)
+                    true => ReturnsNotUnion(info, taskPrefix, method),
+                    false => ReturnsUnion(info, isUnion, taskPrefix, method)
                 };
             }
 
@@ -215,7 +217,8 @@ public class ObjectGenerator : IIncrementalGenerator
             (
                 Method.IReturnInfo info,
                 INamedTypeSymbol union,
-                string? taskPrefix
+                string? taskPrefix,
+                string method
             )
             {
                 var unionArgs = string.Join(", ", union.TypeArguments
@@ -224,13 +227,31 @@ public class ObjectGenerator : IIncrementalGenerator
 
                 var unionReturns = $"{Helper.TypeName}<{unionArgs}>";
                 var methodReturns = taskPrefix is null ? unionReturns : $"async {taskPrefix}<{unionReturns}>";
-                
+
+                StringBuilder callMethod = new();
+
+                var methodArgs = union.TypeArguments.Select((x, i) => (Name: $"_arg_{i}", Type: x.ToDisplayString())).ToArray();
+                callMethod.AppendLine("var (" + string.Join(", ", methodArgs.Select(x => x.Name)) + $") = {method};"); 
+
+                foreach(var arg in methodArgs)
+                {
+                    callMethod.AppendLine($$"""
+
+                            if ({{arg.Name}} is not null)
+                            {
+                                return ({{arg.Type}}){{arg.Name}};
+                            }
+                    """);
+                }
+
                 return $$"""
                 public {{methodReturns}} {{name}}{{genericArguments}}({{parameters}}){{genericConstraints}} 
                 {
                     try
                     {
-                        return {{methodCall}};
+                        {{callMethod}}
+                        
+                        return new {{Helper.UnionMatchError}}();
                     }
                     catch (Exception exception)
                     {
@@ -243,7 +264,8 @@ public class ObjectGenerator : IIncrementalGenerator
             string ReturnsNotUnion
             (
                 Method.IReturnInfo info,
-                string? taskPrefix
+                string? taskPrefix,
+                string method
             )
             {
                 var union = info.CanBeNull
@@ -256,9 +278,10 @@ public class ObjectGenerator : IIncrementalGenerator
 
                 var callMethod = info.CanBeNull
                     ?
-                    $"new {Helper.Maybe(info.Name)}({methodCall})"
+                    $"new {Helper.Maybe(info.Name)}({method})"
                     :
-                    methodCall;
+                    method;
+
 
                 return $$"""
                 public {{methodReturns}} {{name}}{{genericArguments}}({{parameters}}){{genericConstraints}} 

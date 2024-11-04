@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Text;
 using Definit.Utils.SourceGenerator;
 using Microsoft.CodeAnalysis;
 

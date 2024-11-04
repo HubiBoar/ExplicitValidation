@@ -38,7 +38,7 @@ internal static class Helper
         public const string GenerateUnionObject     = $"{Helper.Namespace}.GenerateUnion.ObjectAttribute";
         public const string GenerateUnionObjectMeta = $"{Helper.Namespace}.GenerateUnion+ObjectAttribute";
 
-        public const string GenerateUnionObjectGeneric     = $"{Helper.Namespace}.GenerateUnion.ObjectAttribute`1";
+        public const string GenerateUnionObjectGeneric     = $"{Helper.Namespace}.GenerateUnion.ObjectAttribute";
         public const string GenerateUnionObjectGenericMeta = $"{Helper.Namespace}.GenerateUnion+ObjectAttribute`1";
     }
 

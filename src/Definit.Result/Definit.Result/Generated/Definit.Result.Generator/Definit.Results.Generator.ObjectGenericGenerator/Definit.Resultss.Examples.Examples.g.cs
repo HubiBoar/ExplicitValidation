@@ -16,11 +16,11 @@ public static class Examples_Extensions_U
     {
         public required Definit.Resultss.Examples.Examples Value { get; init; }
 
-        public U<int, string, Definit.Resultss.Examples.NotFound, System.Exception> PublicRun(int i) 
+        public U<int, string, Definit.Resultss.Examples.NotFound, System.Exception> PublicRun(int i, System.IO.StringReader reader) 
 		{
 		    try
 		    {
-		        var (_arg_0, _arg_1, _arg_2) = this.Value.PublicRun(i);
+		        var (_arg_0, _arg_1, _arg_2) = this.Value.PublicRun(i, reader);
 		
 		        if (_arg_0 is not null)
 		        {

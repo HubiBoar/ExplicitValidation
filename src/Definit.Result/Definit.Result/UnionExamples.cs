@@ -23,10 +23,10 @@ public partial struct EitherExample2<T> : U<T, string, int>.Base
 
 public readonly record struct NotFound(ErrorPayload Payload) : IError<NotFound>;
 
-//[GenerateUnion.This]
+[GenerateUnion.This]
 public partial class Examples
 {
-    public ResultExample2<int> PublicRun(int i)
+    public ResultExample2<int> PublicRun(int i, StringReader reader)
     {
         return string.Empty;
     }

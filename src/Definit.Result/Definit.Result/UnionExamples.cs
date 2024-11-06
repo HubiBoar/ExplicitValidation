@@ -28,6 +28,7 @@ public partial class Examples
 {
     public ResultExample2<int> PublicRun(int i, StringReader reader)
     {
+        var (str, notFound, u, exception) = this.PublicResults().PublicRun(i, reader);
         return string.Empty;
     }
 
@@ -43,6 +44,7 @@ public partial class Examples
 
     private U<string, NotFound> PrivateRun(string t)
     {
+        var (str, notFound, exception) = this.PrivateResults().PrivateRun(t);
         return t;
     }
 

@@ -34,12 +34,12 @@ public class ThisGenerator : IIncrementalGenerator
         ImmutableArray<INamedTypeSymbol> typeList
     )
     {
-        SourceHelper.Run(context, () => typeList
-            .Select<INamedTypeSymbol, Func<(string, string)>>(x => () => Generate(context, x))
+        SourceHelper.RunNullable(context, () => typeList
+            .Select<INamedTypeSymbol, Func<(string, string)?>>(x => () => Generate(context, x))
             .ToImmutableArray());
     }
 
-    private static (string Code, string ClassName) Generate
+    private static (string Code, string ClassName)? Generate
     (
         SourceProductionContext context,
         INamedTypeSymbol type 
@@ -53,90 +53,91 @@ public class ThisGenerator : IIncrementalGenerator
         );
 
         var name = info.Name;
-        var wrapperName = Helper.CastingWrapperName;
         var wrapperGenericArgs = string.Empty;
         var wrapperGenericConstraints = string.Empty;
 
-        var publicMethods = type
-            .GetMembers()
-            .OfType<IMethodSymbol>()
-            .Where(x => 
-                x.IsStatic == false 
-                && x.IsExtern == false 
-                && x.MethodKind == MethodKind.Ordinary
-                && x.DeclaredAccessibility == Accessibility.Public)
-            .Select(x => GenerateMethod(context, x))
-            .Where(x => x is not null)
-            .ToArray();
+        var publicMethods = GetMethods(context, type, Accessibility.Public);
+        var internalMethods = GetMethods(context, type, Accessibility.Internal);
+        var protectedMethods = GetMethods(context, type, Accessibility.Protected);
+        var privateMethods = GetMethods(context, type, Accessibility.Private);
 
-        var internalMethods = type
-            .GetMembers()
-            .OfType<IMethodSymbol>()
-            .Where(x => 
-                x.IsStatic == false 
-                && x.IsExtern == false 
-                && x.MethodKind == MethodKind.Ordinary
-                && x.DeclaredAccessibility == Accessibility.Internal)
-            .Select(x => GenerateMethod(context, x))
-            .Where(x => x is not null)
-            .ToArray();
-
-        var privateMethods = type
-            .GetMembers()
-            .OfType<IMethodSymbol>()
-            .Where(x => 
-                x.IsStatic == false 
-                && x.IsExtern == false 
-                && x.MethodKind == MethodKind.Ordinary
-                && x.DeclaredAccessibility != Accessibility.Public
-                && x.DeclaredAccessibility != Accessibility.Internal)
-            .Select(x => GenerateMethod(context, x))
-            .Where(x => x is not null)
-            .ToArray();
-
-        var publicMethodsString = string.Join("\n\t", string.Join("\n\n", publicMethods).Split('\n'));
-        var internalMethodsString = string.Join("\n\t", string.Join("\n\n", internalMethods).Split('\n'));
-        var privateMethodsString = string.Join("\n\t", string.Join("\n\n", privateMethods).Split('\n'));
-
-        code.AddBlock($$"""
-        public {{wrapperName}} {{Helper.CastingMethodName}}()
+        if(publicMethods is null && internalMethods is null && protectedMethods is null && privateMethods is null)
         {
-            return new {{wrapperName}}() { Value = this };
+            return null;
         }
 
-        internal Internal{{wrapperName}} Internal{{Helper.CastingMethodName}}()
+        var wrapperBuilder = new StringBuilder();
+
+        if (publicMethods is not null)
         {
-            return new Internal{{wrapperName}}() { Value = this };
+            wrapperBuilder.AppendLine(publicMethods);
         }
 
-        protected Protected{{wrapperName}} Protected{{Helper.CastingMethodName}}()
+        if (internalMethods is not null)
         {
-            return new Protected{{wrapperName}}() { Value = this };
+            wrapperBuilder.AppendLine(internalMethods);
         }
 
-        public readonly struct {{wrapperName}}
+        if (protectedMethods is not null)
         {
-            public required {{type.ToDisplayString()}} Value { get; init; }
-
-            {{publicMethodsString}}
+            wrapperBuilder.AppendLine(protectedMethods);
         }
 
-        internal readonly struct Internal{{wrapperName}}
+        if (privateMethods is not null)
         {
-            public required {{type.ToDisplayString()}} Value { get; init; }
-
-            {{internalMethodsString}}
+            wrapperBuilder.AppendLine(privateMethods);
         }
 
-        protected readonly struct Protected{{wrapperName}}
-        {
-            public required {{type.ToDisplayString()}} Value { get; init; }
-
-            {{privateMethodsString}}
-        }
-        """);
+        var typeName = type.ToDisplayString();
+        code.AddBlock(wrapperBuilder.ToString());
 
         return (code.ToString(), name);
+    }
+
+    private static string? GetMethods
+    (
+        SourceProductionContext context,
+        INamedTypeSymbol type,
+        Accessibility declaredAccessibility
+    )
+    {
+        var methods = type
+            .GetMembers()
+            .OfType<IMethodSymbol>()
+            .Where(x => 
+                x.IsStatic == false 
+                && x.IsExtern == false 
+                && x.MethodKind == MethodKind.Ordinary
+                && x.DeclaredAccessibility == declaredAccessibility)
+            .Select(x => GenerateMethod(context, x))
+            .Where(x => x is not null)
+            .Select(x => x!)
+            .ToImmutableArray();
+
+        if (methods.Length == 0)
+        {
+            return null;
+        }
+
+        var upper = declaredAccessibility.ToString();
+        var lower = upper.ToLower();
+        var wrapperName = $"{upper}{Helper.CastingWrapperName}";
+        var typeName = type.ToDisplayString();
+
+        var methodsString = string.Join("\n\t", string.Join("\n\n", methods).Split('\n'));
+        return $$"""
+
+        {{lower}} {{wrapperName}} {{upper}}{{Helper.CastingMethodName}}() => new {{wrapperName}}(this);
+
+        {{lower}} readonly struct {{wrapperName}}
+        {
+            private {{typeName}} Value { get; }
+
+            public {{wrapperName}}({{typeName}} value) { Value = value; }
+
+            {{methodsString}}
+        }
+        """;
     }
 
     public static string? GenerateMethod
@@ -265,7 +266,6 @@ public class ThisGenerator : IIncrementalGenerator
                     try
                     {
                         {{callMethod}}
-                        
                         return new {{Helper.UnionMatchError}}();
                     }
                     catch (Exception exception)

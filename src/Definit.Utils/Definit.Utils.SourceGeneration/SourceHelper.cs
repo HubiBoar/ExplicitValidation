@@ -62,6 +62,17 @@ public static class SourceHelper
         Func<ImmutableArray<Func<(string Code, string FileName)>>> outerFunc
     )
     {
+        RunNullable(context, () => outerFunc()
+            .Select<Func<(string Code, string FileName)>, Func<(string Code, string FileName)?>>(x => () => x())
+            .ToImmutableArray()); 
+    }
+
+    public static void RunNullable
+    (
+        SourceProductionContext context,
+        Func<ImmutableArray<Func<(string Code, string FileName)?>>> outerFunc
+    )
+    {
         try
         {
             int index = 0;
@@ -69,7 +80,13 @@ public static class SourceHelper
             {
                 try
                 {
-                    var (code, fileName) = func(); 
+                    var result = func();
+                    if(result is null)
+                    {
+                        continue;
+                    }
+
+                    var (code, fileName) = result!.Value; 
                     fileName = fileName.Replace("<", "_").Replace(">", "").Replace(", ", "_").Replace(" ", "_").Replace(",", "_");
                     context.AddSource($"{fileName}.g.cs", code);
                 }

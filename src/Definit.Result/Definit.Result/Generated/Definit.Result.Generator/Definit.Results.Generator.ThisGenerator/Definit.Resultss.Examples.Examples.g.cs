@@ -7,24 +7,14 @@ namespace Definit.Resultss.Examples;
 
 partial class Examples
 {
-	public UnionsWrapper Results()
-	{
-	    return new UnionsWrapper() { Value = this };
-	}
 	
-	internal InternalUnionsWrapper InternalResults()
-	{
-	    return new InternalUnionsWrapper() { Value = this };
-	}
+	public PublicUnionsWrapper PublicResults() => new PublicUnionsWrapper(this);
 	
-	protected ProtectedUnionsWrapper ProtectedResults()
+	public readonly struct PublicUnionsWrapper
 	{
-	    return new ProtectedUnionsWrapper() { Value = this };
-	}
+	    private Definit.Resultss.Examples.Examples Value { get; }
 	
-	public readonly struct UnionsWrapper
-	{
-	    public required Definit.Resultss.Examples.Examples Value { get; init; }
+	    public PublicUnionsWrapper(Definit.Resultss.Examples.Examples value) { Value = value; }
 	
 	    public U<int, string, Definit.Resultss.Examples.NotFound, System.Exception> PublicRun(int i, System.IO.StringReader reader) 
 		{
@@ -47,7 +37,6 @@ partial class Examples
 		            return (Definit.Resultss.Examples.NotFound)_arg_2;
 		        }
 		
-		        
 		        return new Definit.Results.UnionMatchError();
 		    }
 		    catch (Exception exception)
@@ -57,16 +46,13 @@ partial class Examples
 		}
 	}
 	
-	internal readonly struct InternalUnionsWrapper
-	{
-	    public required Definit.Resultss.Examples.Examples Value { get; init; }
+	private PrivateUnionsWrapper PrivateResults() => new PrivateUnionsWrapper(this);
 	
-	    
-	}
-	
-	protected readonly struct ProtectedUnionsWrapper
+	private readonly struct PrivateUnionsWrapper
 	{
-	    public required Definit.Resultss.Examples.Examples Value { get; init; }
+	    private Definit.Resultss.Examples.Examples Value { get; }
+	
+	    public PrivateUnionsWrapper(Definit.Resultss.Examples.Examples value) { Value = value; }
 	
 	    public U<int, string, Definit.Resultss.Examples.NotFound, System.Exception> PrivateRun(int i) 
 		{
@@ -89,7 +75,6 @@ partial class Examples
 		            return (Definit.Resultss.Examples.NotFound)_arg_2;
 		        }
 		
-		        
 		        return new Definit.Results.UnionMatchError();
 		    }
 		    catch (Exception exception)
@@ -104,7 +89,6 @@ partial class Examples
 		    {
 		        var () = this.Value.PrivateRun2(t);
 		
-		        
 		        return new Definit.Results.UnionMatchError();
 		    }
 		    catch (Exception exception)
@@ -129,7 +113,6 @@ partial class Examples
 		            return (Definit.Resultss.Examples.NotFound)_arg_1;
 		        }
 		
-		        
 		        return new Definit.Results.UnionMatchError();
 		    }
 		    catch (Exception exception)
@@ -138,4 +121,5 @@ partial class Examples
 		    }
 		}
 	}
+	
 }

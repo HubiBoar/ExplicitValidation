@@ -1,32 +1,31 @@
 ﻿#nullable enable
 
+using Definit.Results;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Definit.Results;
 
-public readonly struct U<T> : U<T>.Base
-	where T : notnull 
+readonly partial struct R<T>
+	where T : notnull
 {
-    public interface Base : IUnionBase<(Or<T>?, Or<System.Exception>?)>;
-
-    public (Or<T>?, Or<System.Exception>?) Value { get; }
+	public (Or<T>?, Or<System.Exception>?) Value { get; }
 	
 	[Obsolete(DefaultConstructorException.Attribute, true)]
-	public U() => throw new DefaultConstructorException();
+	public R() => throw new DefaultConstructorException();
 	
-	public U(T value) => Value = (value!, null);
-	public U(System.Exception value) => Value = (null, value!);
+	public R(T value) => Value = (value!, null);
+	public R(System.Exception value) => Value = (null, value!);
 	
-	public static implicit operator U<T>([DisallowNull] Definit.Results.UnionMatchError _) => throw new Definit.Results.UnionMatchException<U<T, System.Exception>>();
-	public static implicit operator U<T>(T value) => new (value);
-	public static implicit operator U<T>(System.Exception value) => new (value);
+	public static implicit operator Definit.Results.R<T>([DisallowNull] Definit.Results.UnionMatchError _) => throw new Definit.Results.UnionMatchException<U<T, System.Exception>>();
+	public static implicit operator Definit.Results.R<T>(T value) => new (value);
+	public static implicit operator Definit.Results.R<T>(System.Exception value) => new (value);
 }
 
-public static class Extensions_U_1
+public static partial class R_Extensions_U
 {
     public static void Deconstruct<T>
 	(
-	    this U<T> either,
+	    this Definit.Results.R<T> either,
 	    out T? _arg_0,
 		out System.Exception? _arg_1
 	)
@@ -39,7 +38,7 @@ public static class Extensions_U_1
 	
 	public static void Deconstruct<T>
 	(
-	    this U<T>? either,
+	    this Definit.Results.R<T>? either,
 	    out T? _arg_0,
 		out System.Exception? _arg_1
 	)
@@ -58,7 +57,7 @@ public static class Extensions_U_1
 	
 	public static void Deconstruct<T>
 	(
-	    this U<T> either,
+	    this Definit.Results.R<T> either,
 	    out T? _arg_0,
 		out System.Exception? _arg_1
 	)
@@ -71,7 +70,7 @@ public static class Extensions_U_1
 	
 	public static void Deconstruct<T>
 	(
-	    this U<T>? either,
+	    this Definit.Results.R<T>? either,
 	    out T? _arg_0,
 		out System.Exception? _arg_1
 	)

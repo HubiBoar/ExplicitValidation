@@ -56,7 +56,7 @@ public class ThisGenerator : IIncrementalGenerator
         var wrapperGenericArgs = string.Empty;
         var wrapperGenericConstraints = string.Empty;
 
-        var publicMethods = GetMethods(context, type, Accessibility.Public);
+        var publicMethods = GetMethodsPublic(context, type);
         var internalMethods = GetMethods(context, type, Accessibility.Internal);
         var protectedMethods = GetMethods(context, type, Accessibility.Protected);
         var privateMethods = GetMethods(context, type, Accessibility.Private);
@@ -94,13 +94,16 @@ public class ThisGenerator : IIncrementalGenerator
         return (code.ToString(), name);
     }
 
-    private static string? GetMethods
+    private static ImmutableArray<string> GetMethodsList
     (
         SourceProductionContext context,
         INamedTypeSymbol type,
-        Accessibility declaredAccessibility
+        Accessibility declaredAccessibility,
+        Func<string, string> overrideName
     )
     {
+        var prefix = declaredAccessibility.ToString().ToLower();
+
         var methods = type
             .GetMembers()
             .OfType<IMethodSymbol>()
@@ -109,27 +112,36 @@ public class ThisGenerator : IIncrementalGenerator
                 && x.IsExtern == false 
                 && x.MethodKind == MethodKind.Ordinary
                 && x.DeclaredAccessibility == declaredAccessibility)
-            .Select(x => GenerateMethod(context, x))
+            .Select(x => GenerateMethod(context, x, prefix, overrideName))
             .Where(x => x is not null)
             .Select(x => x!)
             .ToImmutableArray();
+
+        return methods;
+    }
+
+    private static string? GetMethodsPublic
+    (
+        SourceProductionContext context,
+        INamedTypeSymbol type
+    )
+    {
+        var methods = GetMethodsList(context, type, Accessibility.Public, str => str);
 
         if (methods.Length == 0)
         {
             return null;
         }
 
-        var upper = declaredAccessibility.ToString();
-        var lower = upper.ToLower();
-        var wrapperName = $"{upper}{Helper.CastingWrapperName}";
         var typeName = type.ToDisplayString();
-
+        var wrapperName = Helper.CastingWrapperName;
         var methodsString = string.Join("\n\t", string.Join("\n\n", methods).Split('\n'));
+
         return $$"""
 
-        {{lower}} {{wrapperName}} {{upper}}{{Helper.CastingMethodName}}() => new {{wrapperName}}(this);
+        public {{wrapperName}} {{Helper.CastingMethodName}}() => new {{wrapperName}}(this);
 
-        {{lower}} readonly struct {{wrapperName}}
+        public readonly struct {{wrapperName}}
         {
             private {{typeName}} Value { get; }
 
@@ -140,10 +152,31 @@ public class ThisGenerator : IIncrementalGenerator
         """;
     }
 
+    private static string? GetMethods
+    (
+        SourceProductionContext context,
+        INamedTypeSymbol type,
+        Accessibility declaredAccessibility
+    )
+    {
+        var methods = GetMethodsList(context, type, declaredAccessibility, str => $"{str}_{Helper.CastingMethodName}");
+
+        if (methods.Length == 0)
+        {
+            return null;
+        }
+
+        var methodsString = string.Join("\n", string.Join("\n\n", methods).Split('\n'));
+
+        return methodsString;
+    }
+
     public static string? GenerateMethod
     (
         SourceProductionContext context,
-        IMethodSymbol method
+        IMethodSymbol method,
+        string prefix,
+        Func<string, string> overrideName
     )
     {
         try
@@ -156,7 +189,7 @@ public class ThisGenerator : IIncrementalGenerator
                 return null;
             }
 
-            var name = method.Name;
+            var name = overrideName(method.Name);
             var parameters = string.Join(", ", method.Parameters.Select(x => x.ToDisplayString()));
             var returnType = method.GetReturnType();
             var call = string.Join(", ", method.GetCallingParameters());
@@ -198,7 +231,7 @@ public class ThisGenerator : IIncrementalGenerator
             string Returns(string methodReturns, string method)
             {
                 return $$"""
-                public {{methodReturns}} {{name}}{{genericArguments}}({{parameters}}){{genericConstraints}} 
+                {{prefix}} {{methodReturns}} {{name}}{{genericArguments}}({{parameters}}){{genericConstraints}} 
                 {
                     try
                     {
@@ -261,7 +294,7 @@ public class ThisGenerator : IIncrementalGenerator
                 }
 
                 return $$"""
-                public {{methodReturns}} {{name}}{{genericArguments}}({{parameters}}){{genericConstraints}} 
+                {{prefix}} {{methodReturns}} {{name}}{{genericArguments}}({{parameters}}){{genericConstraints}} 
                 {
                     try
                     {
@@ -287,7 +320,7 @@ public class ThisGenerator : IIncrementalGenerator
                     ? 
                     Helper.UnionMaybeError(info.Name)
                     : 
-                    Helper.UnionError(info.Name);
+                    Helper.ResultError(info.Name);
 
                 var methodReturns = taskPrefix is null ? union : $"async {taskPrefix}<{union}>";
 
@@ -299,7 +332,7 @@ public class ThisGenerator : IIncrementalGenerator
 
 
                 return $$"""
-                public {{methodReturns}} {{name}}{{genericArguments}}({{parameters}}){{genericConstraints}} 
+                {{prefix}} {{methodReturns}} {{name}}{{genericArguments}}({{parameters}}){{genericConstraints}} 
                 {
                     try
                     {

@@ -1,16 +1,16 @@
 using System.Text;
 using Definit.Results;
 
-[assembly: GenerateUnion.Object(typeof(StringBuilder))]
-[assembly: GenerateUnion.Object<StringReader>]
-[assembly: GenerateUnion.Object(typeof(List<>))]
-[assembly: GenerateUnion.Object<Task<string>>]
-[assembly: GenerateUnion.Object<Definit.Resultss.Examples.Examples>]
+//[assembly: GenerateUnion.Object(typeof(StringBuilder))]
+//[assembly: GenerateUnion.Object<StringReader>]
+//[assembly: GenerateUnion.Object(typeof(List<>))]
+//[assembly: GenerateUnion.Object<Task<string>>]
+//[assembly: GenerateUnion.Object<Definit.Resultss.Examples.Examples>]
 
 namespace Definit.Resultss.Examples;
 
 [GenerateUnion]
-public partial struct ResultExample<T> : Definit.Results.U<T, NotFound>.Base
+public partial struct ResultExample<T> : U<T, NotFound>.Base
     where T : notnull;
 
 [GenerateUnion]
@@ -23,12 +23,12 @@ public partial struct EitherExample2<T> : U<T, string, int>.Base
 
 public readonly record struct NotFound(ErrorPayload Payload) : IError<NotFound>;
 
-[GenerateUnion.This]
+//[GenerateUnion.This]
 public partial class Examples
 {
     public ResultExample2<int> PublicRun(int i, StringReader reader)
     {
-        var (str, notFound, u, exception) = this.PublicResults().PublicRun(i, reader);
+        //var (str, notFound, u, exception) = this.Try().PublicRun(i, reader);
         return string.Empty;
     }
 
@@ -37,14 +37,14 @@ public partial class Examples
         return string.Empty;
     }
 
-    private U PrivateRun2(string t)
+    private R PrivateRun2(string t)
     {
-        return Union.Success;
+        return R.Success;
     }
 
-    private U<string, NotFound> PrivateRun(string t)
+    private R<string, NotFound> PrivateRun(string t)
     {
-        var (str, notFound, exception) = this.PrivateResults().PrivateRun(t);
+        //var (str, notFound, exception) = this.Try().PrivateRun(t);
         return t;
     }
 

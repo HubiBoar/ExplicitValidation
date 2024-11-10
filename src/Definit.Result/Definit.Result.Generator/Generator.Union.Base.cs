@@ -33,62 +33,13 @@ public sealed class UnionBaseGenerator : IIncrementalGenerator
     private static ImmutableArray<Func<(string Code, string FileName)>> Run()
     {
         return
-        Enumerable.Range(0, Helper.Base.Count).Select<int, Func<(string, string)>>(i => () => i switch
-        {
-            0 => Generate0(),
-            1 => Generate1(),
-            _ => GenerateRest(i)
-        })
-        .ToImmutableArray();
+        Enumerable
+            .Range(2, Helper.Base.Count - 2)
+            .Select<int, Func<(string, string)>>(i => () => Generate(i))
+            .ToImmutableArray();
     }
 
-    private static (string Code, string FileName) Generate0()
-    {
-        var generic = Helper.Generics0(); 
-        var allGenerics = new Generic.Elements(generic.Success, generic.Error);
-        var typeGenerics = new Generic.Elements();
-        var constructorName = Helper.TypeName;
-        var genericTypeName = Helper.TypeName; 
-
-        string extensionsName = Helper.ExtensionsTypeName(0);
-        string fileName = Helper.FileTypeName(0); 
-
-        var setupCode = CreateType
-        (
-            allGenerics,
-            typeGenerics,
-            constructorName, 
-            genericTypeName,
-            extensionsName
-        );
-
-        return (setupCode, fileName);
-    }
-
-    private static (string Code, string FileName) Generate1()
-    {
-        var generic = Helper.Generics1(); 
-        var allGenerics = new Generic.Elements(generic.T, generic.Error);
-        var typeGenerics = new Generic.Elements(generic.T);
-        var constructorName = Helper.TypeName;
-        var genericTypeName = Helper.GenericTypeName(typeGenerics); 
-
-        string extensionsName = Helper.ExtensionsTypeName(1);
-        string fileName = Helper.FileTypeName(1); 
-
-        var setupCode = CreateType
-        (
-            allGenerics,
-            typeGenerics,
-            constructorName, 
-            genericTypeName,
-            extensionsName
-        );
-
-        return (setupCode, fileName);
-    }
-
-    private static (string Code, string FileName) GenerateRest(int count)
+    private static (string Code, string FileName) Generate(int count)
     {
         var allGenerics = Helper.Generics(count); 
         var constructorName = Helper.TypeName;

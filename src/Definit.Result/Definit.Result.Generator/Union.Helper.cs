@@ -7,7 +7,7 @@ namespace Definit.Results.Generator;
 internal static class Helper
 {
     public const string Namespace             = "Definit.Results";
-    public const string TypeName              = $"U";
+    public const string TypeName              = $"R";
     public const string TypeNameWithNamespace = $"{Namespace}.{TypeName}";
     public const string InterfaceName         = $"IUnionBase";
     public const string InterfaceNameWithNamespace = $"{Namespace}.{InterfaceName}";
@@ -16,11 +16,11 @@ internal static class Helper
     public const string UnionMatchException = $"{Helper.Namespace}.UnionMatchException"; 
     public const string UnionMatchError = $"{Helper.Namespace}.UnionMatchError"; 
 
-    public static string UnionError(string type) => $"{Helper.TypeName}<{type}, {Error}>";
+    public static string ResultError(string type) => $"{Helper.TypeName}<{type}, {Error}>";
     public static string UnionMaybeError(string type) => $"{Helper.TypeName}<{Maybe(type)}, {Error}>";
     public static string Maybe(string type) => $"{MaybeTypeName}<{type}>";
 
-    public const string CastingMethodName  = $"Results";
+    public const string CastingMethodName  = $"Try";
     public const string CastingWrapperName = $"UnionsWrapper";
 
     public const string Success = $"{Helper.Namespace}.Success";
@@ -69,19 +69,24 @@ internal static class Helper
                 .ToImmutableArray()
         );
 
-    public static (Generic.Element Success, Generic.Element Error) Generics0() => 
-    (
-        Generic.Argument.Notnull(Success),
-        Generic.Argument.Notnull(Error)
-    );
-
-    public static (Generic.Element T, Generic.Element Error) Generics1() => 
-    (
-        Generic.Argument.Notnull("T"),
-        Generic.Argument.Notnull(Error)
-    );
-
     public static INamedTypeSymbol? IsUnion(ITypeSymbol symbol)
+    {
+        var union = symbol.Interfaces
+            .SingleOrDefault(x => x.AllInterfaces
+                .Any(y => y
+                    .ToDisplayString()
+                    .Equals(InterfaceNameWithNamespace)))
+            ?.ContainingType;
+
+        if(union is null)
+        {
+            return null;
+        }
+
+        return union;
+    }
+
+    public static INamedTypeSymbol? IsResult(ITypeSymbol symbol)
     {
         var union = symbol.Interfaces
             .SingleOrDefault(x => x.AllInterfaces

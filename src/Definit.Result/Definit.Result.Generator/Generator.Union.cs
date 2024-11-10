@@ -53,7 +53,7 @@ public class UnionGenerator : IIncrementalGenerator
         var name = info.Name;
         var constructorName = info.ConstructorName;
 
-        var union = Helper.IsUnion(symbol);
+        var union = Helper.IsResult(symbol);
         if(union is null)
         {
             throw new Exception($"Cannot find Union.Base Interface Generic Args type from type :: {info.FullName}, have you added the Base interface?");

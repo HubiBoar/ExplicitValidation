@@ -204,7 +204,7 @@ public class ObjectGenerator : IIncrementalGenerator
                 string method
             )
             {
-                var isUnion = Helper.IsUnion(info.Symbol); 
+                var isUnion = Helper.IsResult(info.Symbol); 
 
                 return (isUnion is null) switch
                 {   
@@ -272,7 +272,7 @@ public class ObjectGenerator : IIncrementalGenerator
                     ? 
                     Helper.UnionMaybeError(info.Name)
                     : 
-                    Helper.UnionError(info.Name);
+                    Helper.ResultError(info.Name);
 
                 var methodReturns = taskPrefix is null ? union : $"async {taskPrefix}<{union}>";
 

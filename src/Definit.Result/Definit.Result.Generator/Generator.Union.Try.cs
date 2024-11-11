@@ -269,23 +269,24 @@ internal sealed class UnionTryGenerator : IIncrementalGenerator
                 string method
             )
             {
-                var union = info.CanBeNull
-                    ? 
-                    Helper.UnionMaybeError(info.Name)
-                    : 
-                    Helper.UnionError(info.Name);
+                var returnTypeName = info.Name;
+
+                var union = returnTypeName == Helper.Error
+                    ? Helper.Error
+                    : info.CanBeNull
+                        ? Helper.UnionMaybeError(returnTypeName)
+                        : Helper.UnionError(returnTypeName);
 
                 var methodReturns = taskPrefix is null ? union : $"async {taskPrefix}<{union}>";
 
                 var callMethod = info.CanBeNull
                     ?
-                    $"new {Helper.Maybe(info.Name)}({method})"
+                    $"new {Helper.Maybe(returnTypeName)}({method})"
                     :
                     method;
 
-
                 return $$"""
-                public {{methodReturns}} {{name}}{{genericArguments}}({{parameters}}){{genericConstraints}} 
+                public {{methodReturns}} {{returnTypeName}}{{genericArguments}}({{parameters}}){{genericConstraints}} 
                 {
                     try
                     {

@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 namespace Definit.Results.Generator;
 
 //[Generator]
-public sealed class UnionBaseGenerator : IIncrementalGenerator
+internal sealed class UnionBaseGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
@@ -77,6 +77,7 @@ public sealed class UnionBaseGenerator : IIncrementalGenerator
             typeName
         );
 
+        var infoName = $"{Helper.InterfaceInfoName}{allGenericParams.ArgumentNamesFull}";
         interior = string.Join("\n\t", interior.Split('\n'));
         extension = string.Join("\n\t", extension.Split('\n'));
 
@@ -87,9 +88,11 @@ public sealed class UnionBaseGenerator : IIncrementalGenerator
 
         namespace {{Helper.Namespace}};
 
+        public interface {{infoName}} : {{Helper.InterfaceName}}<({{genericOrArgs}})>{{typeGenericParams.ConstraintsString}};
+
         public readonly struct {{typeName}} : {{typeName}}.Base{{typeGenericParams.ConstraintsString}} 
         {
-            public interface Base : {{Helper.InterfaceName}}<({{genericOrArgs}})>;
+            public interface Base : {{infoName}};
 
             {{interior}}
         }

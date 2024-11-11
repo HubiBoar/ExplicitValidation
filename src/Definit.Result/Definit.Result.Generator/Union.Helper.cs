@@ -7,24 +7,26 @@ namespace Definit.Results.Generator;
 internal static class Helper
 {
     public const string Namespace             = "Definit.Results";
-    public const string TypeName              = $"R";
+    public const string TypeName              = $"U";
     public const string TypeNameWithNamespace = $"{Namespace}.{TypeName}";
     public const string InterfaceName         = $"IUnionBase";
+    public const string InterfaceInfoName     = $"IUnionInfo";
     public const string InterfaceNameWithNamespace = $"{Namespace}.{InterfaceName}";
+    public const string InterfaceInfoNameWithNamespace = $"{Namespace}.{InterfaceInfoName}";
 
     public const string MaybeTypeName         = $"Opt";
     public const string UnionMatchException = $"{Helper.Namespace}.UnionMatchException"; 
     public const string UnionMatchError = $"{Helper.Namespace}.UnionMatchError"; 
 
-    public static string ResultError(string type) => $"{Helper.TypeName}<{type}, {Error}>";
+    public static string UnionError(string type) => $"{Helper.TypeName}<{type}, {Error}>";
     public static string UnionMaybeError(string type) => $"{Helper.TypeName}<{Maybe(type)}, {Error}>";
     public static string Maybe(string type) => $"{MaybeTypeName}<{type}>";
+    public static string ReturnsVoid => $"{Error}?";
 
     public const string CastingMethodName  = $"Try";
     public const string CastingWrapperName = $"UnionsWrapper";
 
-    public const string Success = $"{Helper.Namespace}.Success";
-    public const string SuccessInstance = $"{Helper.Namespace}.Union.Success";
+    public const string ReturnsVoidSuccess = "null";
 
     public const string Error = $"System.Exception";
 
@@ -32,14 +34,14 @@ internal static class Helper
     {
         public const string GenerateUnion = $"{Helper.Namespace}.GenerateUnionAttribute";
 
-        public const string GenerateUnionThis     = $"{Helper.Namespace}.GenerateUnion.ThisAttribute";
-        public const string GenerateUnionThisMeta = $"{Helper.Namespace}.GenerateUnion+ThisAttribute";
+        public const string GenerateUnionThis     = $"{Helper.Namespace}.GenerateUnion.Try.ThisAttribute";
+        public const string GenerateUnionThisMeta = $"{Helper.Namespace}.GenerateUnion+Try+ThisAttribute";
 
-        public const string GenerateUnionObject     = $"{Helper.Namespace}.GenerateUnion.ObjectAttribute";
-        public const string GenerateUnionObjectMeta = $"{Helper.Namespace}.GenerateUnion+ObjectAttribute";
+        public const string GenerateUnionObject     = $"{Helper.Namespace}.GenerateUnion.TryAttribute";
+        public const string GenerateUnionObjectMeta = $"{Helper.Namespace}.GenerateUnion+TryAttribute";
 
-        public const string GenerateUnionObjectGeneric     = $"{Helper.Namespace}.GenerateUnion.ObjectAttribute";
-        public const string GenerateUnionObjectGenericMeta = $"{Helper.Namespace}.GenerateUnion+ObjectAttribute`1";
+        public const string GenerateUnionObjectGeneric     = $"{Helper.Namespace}.GenerateUnion.TryAttribute";
+        public const string GenerateUnionObjectGenericMeta = $"{Helper.Namespace}.GenerateUnion+TryAttribute`1";
     }
 
     public static class Async
@@ -71,29 +73,12 @@ internal static class Helper
 
     public static INamedTypeSymbol? IsUnion(ITypeSymbol symbol)
     {
-        var union = symbol.Interfaces
+        var union = symbol.AllInterfaces
             .SingleOrDefault(x => x.AllInterfaces
                 .Any(y => y
                     .ToDisplayString()
-                    .Equals(InterfaceNameWithNamespace)))
-            ?.ContainingType;
-
-        if(union is null)
-        {
-            return null;
-        }
-
-        return union;
-    }
-
-    public static INamedTypeSymbol? IsResult(ITypeSymbol symbol)
-    {
-        var union = symbol.Interfaces
-            .SingleOrDefault(x => x.AllInterfaces
-                .Any(y => y
-                    .ToDisplayString()
-                    .Equals(InterfaceNameWithNamespace)))
-            ?.ContainingType;
+                    .Equals(InterfaceNameWithNamespace))
+                && x.ToDisplayString().StartsWith(InterfaceInfoNameWithNamespace));
 
         if(union is null)
         {

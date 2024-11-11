@@ -1,11 +1,10 @@
 using System.Text;
 using Definit.Results;
 
-//[assembly: GenerateUnion.Object(typeof(StringBuilder))]
-//[assembly: GenerateUnion.Object<StringReader>]
-//[assembly: GenerateUnion.Object(typeof(List<>))]
-//[assembly: GenerateUnion.Object<Task<string>>]
-//[assembly: GenerateUnion.Object<Definit.Resultss.Examples.Examples>]
+[assembly: GenerateUnion.Try(typeof(StringBuilder))]
+[assembly: GenerateUnion.Try<StringReader>]
+[assembly: GenerateUnion.Try(typeof(List<>))]
+[assembly: GenerateUnion.Try<Task<string>>]
 
 namespace Definit.Resultss.Examples;
 
@@ -23,7 +22,7 @@ public partial struct EitherExample2<T> : U<T, string, int>.Base
 
 public readonly record struct NotFound(ErrorPayload Payload) : IError<NotFound>;
 
-//[GenerateUnion.This]
+[GenerateUnion.Try.This]
 public partial class Examples
 {
     public ResultExample2<int> PublicRun(int i, StringReader reader)
@@ -32,23 +31,23 @@ public partial class Examples
         return string.Empty;
     }
 
-    private ResultExample2<int> PrivateRun(int i)
+    public ResultExample2<int> PrivateRun(int i)
     {
         return string.Empty;
     }
 
-    private R PrivateRun2(string t)
+    public void PrivateRun2(string t)
     {
-        return R.Success;
+        return;
     }
 
-    private R<string, NotFound> PrivateRun(string t)
+    public U<string, Exception, NotFound> PrivateRun(string t)
     {
         //var (str, notFound, exception) = this.Try().PrivateRun(t);
         return t;
     }
 
-    private static Task<U<T, NotFound>> PublicRun<T>(T t)
+    public Task<U<T, NotFound>> PublicRun<T>(T t)
         where T : struct, IError<T>
     {
         return Task.FromResult<U<T, NotFound>>(t);

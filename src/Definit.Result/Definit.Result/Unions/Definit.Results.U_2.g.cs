@@ -4,11 +4,15 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Definit.Results;
 
+public interface IUnionInfo<T0, T1> : IUnionBase<(Or<T0>?, Or<T1>?)>
+	where T0 : notnull
+	where T1 : notnull;
+
 public readonly struct U<T0, T1> : U<T0, T1>.Base
 	where T0 : notnull
 	where T1 : notnull 
 {
-    public interface Base : IUnionBase<(Or<T0>?, Or<T1>?)>;
+    public interface Base : IUnionInfo<T0, T1>;
 
     public (Or<T0>?, Or<T1>?) Value { get; }
 	

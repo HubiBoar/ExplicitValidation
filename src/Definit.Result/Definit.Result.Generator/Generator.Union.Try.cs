@@ -2,24 +2,21 @@ using System.Collections.Immutable;
 using System.Text;
 using Definit.Utils.SourceGenerator;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Definit.Results.Generator;
 
 [Generator]
-public class ThisGenerator : IIncrementalGenerator
+internal sealed class UnionTryGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var provider = context.SyntaxProvider.ForAttributeWithMetadataName
         (
-            Helper.Attributes.GenerateUnionThisMeta,
-            predicate: (c, _) =>
-                c is TypeDeclarationSyntax type
-                && type.Modifiers.Any(m => m.IsKind(SyntaxKind.PartialKeyword)),
+            Helper.Attributes.GenerateUnionObjectMeta,
 
-            transform: (n, _) => (n.TargetSymbol as INamedTypeSymbol)!
+            predicate: (c, _) => true,
+
+            transform: (n, _) => n
         );
 
         var compilation = context.CompilationProvider.Combine(provider.Collect());
@@ -31,152 +28,106 @@ public class ThisGenerator : IIncrementalGenerator
     (
         SourceProductionContext context,
         Compilation compilation,
-        ImmutableArray<INamedTypeSymbol> typeList
+        ImmutableArray<GeneratorAttributeSyntaxContext> typeList
     )
     {
-        SourceHelper.RunNullable(context, () => typeList
-            .Select<INamedTypeSymbol, Func<(string, string)?>>(x => () => Generate(context, x))
-            .ToImmutableArray());
+        SourceHelper.Run(context, () => 
+            typeList
+            .SelectMany(x => x.Attributes
+                .Where(y => y.AttributeClass is not null && y.AttributeClass!
+                    .ToDisplayString() == Helper.Attributes.GenerateUnionObject)
+                .Select<AttributeData, Func<(string, string)>>(x => () => GetType(context, compilation, x)))
+                .ToImmutableArray());
     }
 
-    private static (string Code, string ClassName)? Generate
+    public static (string Code, string ClassName) Generate
     (
         SourceProductionContext context,
         INamedTypeSymbol type 
     )
     {
-        var (code, info) = type.BuildTypeHierarchy
-        (
-            name => name,
-            Helper.Namespace,
-            "System.Diagnostics.CodeAnalysis"
-        );
-
-        var name = info.Name;
+        var wrapperName = Helper.CastingWrapperName;
         var wrapperGenericArgs = string.Empty;
         var wrapperGenericConstraints = string.Empty;
 
-        var publicMethods = GetMethodsPublic(context, type);
-        var internalMethods = GetMethods(context, type, Accessibility.Internal);
-        var protectedMethods = GetMethods(context, type, Accessibility.Protected);
-        var privateMethods = GetMethods(context, type, Accessibility.Private);
-
-        if(publicMethods is null && internalMethods is null && protectedMethods is null && privateMethods is null)
+        if(type.IsUnboundGenericType)
         {
-            return null;
+            type = type.ConstructedFrom;
+            var generics = type.TypeArguments.GetGenericArguments();
+
+            wrapperGenericArgs = generics.ArgumentNamesFull;
+            wrapperGenericConstraints = generics.ConstraintsString;
+
+            wrapperName = $"{wrapperName}{wrapperGenericArgs}";
         }
 
-        var wrapperBuilder = new StringBuilder();
-
-        if (publicMethods is not null)
+        var typeName = type.Name;
+        if(type.IsGenericType)
         {
-            wrapperBuilder.AppendLine(publicMethods);
+            var types = string.Join("_", type.TypeArguments.Select(x => x.ToDisplayString()));
+
+            typeName = $"{typeName}_{types}";
         }
 
-        if (internalMethods is not null)
-        {
-            wrapperBuilder.AppendLine(internalMethods);
-        }
-
-        if (protectedMethods is not null)
-        {
-            wrapperBuilder.AppendLine(protectedMethods);
-        }
-
-        if (privateMethods is not null)
-        {
-            wrapperBuilder.AppendLine(privateMethods);
-        }
-
-        var typeName = type.ToDisplayString();
-        code.AddBlock(wrapperBuilder.ToString());
-
-        return (code.ToString(), name);
-    }
-
-    private static ImmutableArray<string> GetMethodsList
-    (
-        SourceProductionContext context,
-        INamedTypeSymbol type,
-        Accessibility declaredAccessibility,
-        Func<string, string> overrideName
-    )
-    {
-        var prefix = declaredAccessibility.ToString().ToLower();
-
-        var methods = type
+        var typeMethods = type
             .GetMembers()
             .OfType<IMethodSymbol>()
             .Where(x => 
                 x.IsStatic == false 
                 && x.IsExtern == false 
                 && x.MethodKind == MethodKind.Ordinary
-                && x.DeclaredAccessibility == declaredAccessibility)
-            .Select(x => GenerateMethod(context, x, prefix, overrideName))
+                && x.DeclaredAccessibility == Accessibility.Public)
+            .Select(x => GenerateMethod(context, x))
             .Where(x => x is not null)
-            .Select(x => x!)
-            .ToImmutableArray();
+            .ToArray();
 
-        return methods;
-    }
+        var methods = string.Join("\n\n", typeMethods); 
 
-    private static string? GetMethodsPublic
-    (
-        SourceProductionContext context,
-        INamedTypeSymbol type
-    )
-    {
-        var methods = GetMethodsList(context, type, Accessibility.Public, str => str);
+        var allMethods = string.Join("\n\t\t", methods.ToString().Split('\n'));
 
-        if (methods.Length == 0)
+        var code = $$"""
+        #nullable enable
+
+        using {{Helper.Namespace}};
+        using System.Diagnostics.CodeAnalysis;
+
+        namespace {{type.ContainingNamespace.ToDisplayString()}};
+
+        public static class {{Helper.ExtensionsTypeName(typeName)}}
         {
-            return null;
-        }
+            public static {{wrapperName}} {{Helper.CastingMethodName}}{{wrapperGenericArgs}}(this {{type.ToDisplayString()}} value){{wrapperGenericConstraints}}
+            {
+                return new {{wrapperName}}() { Value = value };
+            }
 
-        var typeName = type.ToDisplayString();
-        var wrapperName = Helper.CastingWrapperName;
-        var methodsString = string.Join("\n\t", string.Join("\n\n", methods).Split('\n'));
+            public readonly struct {{wrapperName}}{{wrapperGenericConstraints}}
+            {
+                public required {{type.ToDisplayString()}} Value { get; init; }
 
-        return $$"""
-
-        public {{wrapperName}} {{Helper.CastingMethodName}}() => new {{wrapperName}}(this);
-
-        public readonly struct {{wrapperName}}
-        {
-            private {{typeName}} Value { get; }
-
-            public {{wrapperName}}({{typeName}} value) { Value = value; }
-
-            {{methodsString}}
+                {{allMethods}}
+            }
         }
         """;
+
+        return (code, type.ToDisplayString());
     }
 
-    private static string? GetMethods
+    private static (string Code, string ClassName) GetType
     (
         SourceProductionContext context,
-        INamedTypeSymbol type,
-        Accessibility declaredAccessibility
+        Compilation compilation,
+        AttributeData attribute
     )
     {
-        var methods = GetMethodsList(context, type, declaredAccessibility, str => $"{str}_{Helper.CastingMethodName}");
+        var type = (INamedTypeSymbol)attribute.ConstructorArguments.Single().Value!;
 
-        if (methods.Length == 0)
-        {
-            return null;
-        }
-
-        var methodsString = string.Join("\n", string.Join("\n\n", methods).Split('\n'));
-
-        return methodsString;
+        return Generate(context, type);
     }
 
     public static string? GenerateMethod
     (
         SourceProductionContext context,
-        IMethodSymbol method,
-        string prefix,
-        Func<string, string> overrideName
+        IMethodSymbol method
     )
     {
         try
@@ -189,7 +140,7 @@ public class ThisGenerator : IIncrementalGenerator
                 return null;
             }
 
-            var name = overrideName(method.Name);
+            var name = method.Name;
             var parameters = string.Join(", ", method.Parameters.Select(x => x.ToDisplayString()));
             var returnType = method.GetReturnType();
             var call = string.Join(", ", method.GetCallingParameters());
@@ -200,17 +151,17 @@ public class ThisGenerator : IIncrementalGenerator
 
             if(returnType is Method.Return.Void)
             {
-                return Returns(Helper.TypeName, methodCall);
+                return Returns(Helper.ReturnsVoid, methodCall);
             }
 
             if(returnType is Method.Return.Task)
             {
-                return Returns($"async {taskPrefix}<{Helper.TypeName}>", $"await {methodCall}");
+                return Returns($"async {taskPrefix}<{Helper.ReturnsVoid}>", $"await {methodCall}");
             }
 
             if(returnType is Method.Return.ValueTask)
             {
-                return Returns($"async {taskPrefix}<{Helper.TypeName}>", $"await {methodCall}");
+                return Returns($"async {taskPrefix}<{Helper.ReturnsVoid}>", $"await {methodCall}");
             }
 
             if(returnType is Method.Return.Type type)
@@ -231,12 +182,12 @@ public class ThisGenerator : IIncrementalGenerator
             string Returns(string methodReturns, string method)
             {
                 return $$"""
-                {{prefix}} {{methodReturns}} {{name}}{{genericArguments}}({{parameters}}){{genericConstraints}} 
+                public {{methodReturns}} {{name}}{{genericArguments}}({{parameters}}){{genericConstraints}} 
                 {
                     try
                     {
                         {{method}};
-                        return {{Helper.SuccessInstance}};
+                        return {{Helper.ReturnsVoidSuccess}};
                     }
                     catch (Exception exception)
                     {
@@ -272,6 +223,7 @@ public class ThisGenerator : IIncrementalGenerator
             {
                 var unionArgs = string.Join(", ", union.TypeArguments
                     .Select(x => x.ToDisplayString())
+                    .Where(x => x != Helper.Error)
                     .Concat([Helper.Error]));
 
                 var unionReturns = $"{Helper.TypeName}<{unionArgs}>";
@@ -294,11 +246,12 @@ public class ThisGenerator : IIncrementalGenerator
                 }
 
                 return $$"""
-                {{prefix}} {{methodReturns}} {{name}}{{genericArguments}}({{parameters}}){{genericConstraints}} 
+                public {{methodReturns}} {{name}}{{genericArguments}}({{parameters}}){{genericConstraints}} 
                 {
                     try
                     {
                         {{callMethod}}
+                        
                         return new {{Helper.UnionMatchError}}();
                     }
                     catch (Exception exception)
@@ -320,7 +273,7 @@ public class ThisGenerator : IIncrementalGenerator
                     ? 
                     Helper.UnionMaybeError(info.Name)
                     : 
-                    Helper.ResultError(info.Name);
+                    Helper.UnionError(info.Name);
 
                 var methodReturns = taskPrefix is null ? union : $"async {taskPrefix}<{union}>";
 
@@ -332,7 +285,7 @@ public class ThisGenerator : IIncrementalGenerator
 
 
                 return $$"""
-                {{prefix}} {{methodReturns}} {{name}}{{genericArguments}}({{parameters}}){{genericConstraints}} 
+                public {{methodReturns}} {{name}}{{genericArguments}}({{parameters}}){{genericConstraints}} 
                 {
                     try
                     {

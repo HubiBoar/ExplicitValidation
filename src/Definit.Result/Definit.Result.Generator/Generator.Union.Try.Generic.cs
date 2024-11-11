@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 namespace Definit.Results.Generator;
 
 [Generator]
-public class ObjectGenericGenerator : IIncrementalGenerator
+internal sealed class UnionTryGenericGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
@@ -47,6 +47,6 @@ public class ObjectGenericGenerator : IIncrementalGenerator
     {
         var type = attribute.AttributeClass!.TypeArguments.Single() as INamedTypeSymbol;
         
-        return ObjectGenerator.Generate(context, type!);
+        return UnionTryGenerator.Generate(context, type!);
     }
 }

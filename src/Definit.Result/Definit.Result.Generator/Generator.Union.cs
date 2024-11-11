@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace Definit.Results.Generator;
 
 [Generator]
-public class UnionGenerator : IIncrementalGenerator
+internal sealed class UnionGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
@@ -53,7 +53,7 @@ public class UnionGenerator : IIncrementalGenerator
         var name = info.Name;
         var constructorName = info.ConstructorName;
 
-        var union = Helper.IsResult(symbol);
+        var union = Helper.IsUnion(symbol);
         if(union is null)
         {
             throw new Exception($"Cannot find Union.Base Interface Generic Args type from type :: {info.FullName}, have you added the Base interface?");

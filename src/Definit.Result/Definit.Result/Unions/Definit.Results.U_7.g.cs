@@ -4,6 +4,15 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Definit.Results;
 
+public interface IUnionInfo<T0, T1, T2, T3, T4, T5, T6> : IUnionBase<(Or<T0>?, Or<T1>?, Or<T2>?, Or<T3>?, Or<T4>?, Or<T5>?, Or<T6>?)>
+	where T0 : notnull
+	where T1 : notnull
+	where T2 : notnull
+	where T3 : notnull
+	where T4 : notnull
+	where T5 : notnull
+	where T6 : notnull;
+
 public readonly struct U<T0, T1, T2, T3, T4, T5, T6> : U<T0, T1, T2, T3, T4, T5, T6>.Base
 	where T0 : notnull
 	where T1 : notnull
@@ -13,7 +22,7 @@ public readonly struct U<T0, T1, T2, T3, T4, T5, T6> : U<T0, T1, T2, T3, T4, T5,
 	where T5 : notnull
 	where T6 : notnull 
 {
-    public interface Base : IUnionBase<(Or<T0>?, Or<T1>?, Or<T2>?, Or<T3>?, Or<T4>?, Or<T5>?, Or<T6>?)>;
+    public interface Base : IUnionInfo<T0, T1, T2, T3, T4, T5, T6>;
 
     public (Or<T0>?, Or<T1>?, Or<T2>?, Or<T3>?, Or<T4>?, Or<T5>?, Or<T6>?) Value { get; }
 	

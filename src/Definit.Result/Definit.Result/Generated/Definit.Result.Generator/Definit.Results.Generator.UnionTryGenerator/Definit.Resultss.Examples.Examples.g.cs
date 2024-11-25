@@ -8,6 +8,18 @@ namespace Definit.Resultss.Examples;
 
 public static class TryExamples
 {
+    public static U<Definit.Resultss.Examples.Examples, System.Exception> New() 
+	{
+	    try
+	    {
+	        return new Definit.Resultss.Examples.Examples();
+	    }
+	    catch (Exception exception)
+	    {
+	        return exception;
+	    }
+	}
+
     public static U<int, string, Definit.Resultss.Examples.NotFound, System.Exception> PublicRun(int i, System.IO.StringReader reader) 
 	{
 	    try

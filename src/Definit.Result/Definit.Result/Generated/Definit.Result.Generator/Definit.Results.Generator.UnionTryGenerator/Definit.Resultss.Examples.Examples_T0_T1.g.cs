@@ -9,6 +9,18 @@ namespace Definit.Resultss.Examples;
 public static class TryExamples<T0, T1>
 	where T0 : notnull
 {
+    public static U<Definit.Resultss.Examples.Examples<T0, T1>, System.Exception> New() 
+	{
+	    try
+	    {
+	        return new Definit.Resultss.Examples.Examples<T0, T1>();
+	    }
+	    catch (Exception exception)
+	    {
+	        return exception;
+	    }
+	}
+
     public static U<int, string, Definit.Resultss.Examples.NotFound, System.Exception> PublicRun(int i, System.IO.StringReader reader) 
 	{
 	    try

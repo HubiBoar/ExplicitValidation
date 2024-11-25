@@ -8,6 +8,78 @@ namespace System.Text;
 
 public static class TryStringBuilder
 {
+    public static U<System.Text.StringBuilder, System.Exception> New() 
+	{
+	    try
+	    {
+	        return new System.Text.StringBuilder();
+	    }
+	    catch (Exception exception)
+	    {
+	        return exception;
+	    }
+	}
+	
+	public static U<System.Text.StringBuilder, System.Exception> New(int capacity) 
+	{
+	    try
+	    {
+	        return new System.Text.StringBuilder(capacity);
+	    }
+	    catch (Exception exception)
+	    {
+	        return exception;
+	    }
+	}
+	
+	public static U<System.Text.StringBuilder, System.Exception> New(int capacity, int maxCapacity) 
+	{
+	    try
+	    {
+	        return new System.Text.StringBuilder(capacity, maxCapacity);
+	    }
+	    catch (Exception exception)
+	    {
+	        return exception;
+	    }
+	}
+	
+	public static U<System.Text.StringBuilder, System.Exception> New(string? value) 
+	{
+	    try
+	    {
+	        return new System.Text.StringBuilder(value);
+	    }
+	    catch (Exception exception)
+	    {
+	        return exception;
+	    }
+	}
+	
+	public static U<System.Text.StringBuilder, System.Exception> New(string? value, int capacity) 
+	{
+	    try
+	    {
+	        return new System.Text.StringBuilder(value, capacity);
+	    }
+	    catch (Exception exception)
+	    {
+	        return exception;
+	    }
+	}
+	
+	public static U<System.Text.StringBuilder, System.Exception> New(string? value, int startIndex, int length, int capacity) 
+	{
+	    try
+	    {
+	        return new System.Text.StringBuilder(value, startIndex, length, capacity);
+	    }
+	    catch (Exception exception)
+	    {
+	        return exception;
+	    }
+	}
+
     
 }
 

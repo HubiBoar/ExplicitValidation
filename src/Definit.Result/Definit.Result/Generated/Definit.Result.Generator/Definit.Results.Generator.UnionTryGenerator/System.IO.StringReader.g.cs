@@ -8,6 +8,18 @@ namespace System.IO;
 
 public static class TryStringReader
 {
+    public static U<System.IO.StringReader, System.Exception> New(string s) 
+	{
+	    try
+	    {
+	        return new System.IO.StringReader(s);
+	    }
+	    catch (Exception exception)
+	    {
+	        return exception;
+	    }
+	}
+
     
 }
 

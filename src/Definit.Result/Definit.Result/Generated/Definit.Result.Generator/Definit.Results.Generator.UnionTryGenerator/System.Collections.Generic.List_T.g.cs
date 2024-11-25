@@ -8,6 +8,42 @@ namespace System.Collections.Generic;
 
 public static class TryList<T>
 {
+    public static U<System.Collections.Generic.List<T>, System.Exception> New() 
+	{
+	    try
+	    {
+	        return new System.Collections.Generic.List<T>();
+	    }
+	    catch (Exception exception)
+	    {
+	        return exception;
+	    }
+	}
+	
+	public static U<System.Collections.Generic.List<T>, System.Exception> New(System.Collections.Generic.IEnumerable<T> collection) 
+	{
+	    try
+	    {
+	        return new System.Collections.Generic.List<T>(collection);
+	    }
+	    catch (Exception exception)
+	    {
+	        return exception;
+	    }
+	}
+	
+	public static U<System.Collections.Generic.List<T>, System.Exception> New(int capacity) 
+	{
+	    try
+	    {
+	        return new System.Collections.Generic.List<T>(capacity);
+	    }
+	    catch (Exception exception)
+	    {
+	        return exception;
+	    }
+	}
+
     
 }
 

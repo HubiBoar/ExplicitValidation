@@ -117,8 +117,7 @@ internal sealed class UnionTryGenerator : IIncrementalGenerator
         }
     }
 
-
-    public static (string Code, string ClassName) Generate
+    private static (string Code, string ClassName) Generate
     (
         SourceProductionContext context,
         INamedTypeSymbol type 
@@ -212,7 +211,7 @@ internal sealed class UnionTryGenerator : IIncrementalGenerator
             typeName = $"{typeName}{generics.ArgumentNamesFull}{generics.ConstraintsString}";
         }
 
-        var typeMethods = type
+        var staticMethods = type
             .GetMembers()
             .OfType<IMethodSymbol>()
             .Where(x => 
@@ -224,15 +223,33 @@ internal sealed class UnionTryGenerator : IIncrementalGenerator
             .Where(x => x is not null)
             .ToArray();
 
-        var methods = string.Join("\n\n", typeMethods); 
+        var constructors = type
+            .GetMembers()
+            .OfType<IMethodSymbol>()
+            .Where(x => 
+                x.IsStatic == false 
+                && x.IsExtern == false 
+                && x.MethodKind == MethodKind.Constructor
+                && x.DeclaredAccessibility == Accessibility.Public)
+            .Select(x => GenerateConstructor(context, x, callPrefix))
+            .Where(x => x is not null)
+            .ToArray();
 
-        var allMethods = string.Join("\n\t", methods.ToString().Split('\n'));
+        var staticMethodsString = string.Join("\n\n", staticMethods); 
+
+        var staticMethodsStringTab = string.Join("\n\t", staticMethodsString.ToString().Split('\n'));
+
+        var constructorsString = string.Join("\n\n", constructors); 
+
+        var constructorsStringTab = string.Join("\n\t", constructorsString.ToString().Split('\n'));
 
         return $$"""
 
         public static class {{Helper.StaticTypeName(typeName)}}
         {
-            {{allMethods}}
+            {{constructorsStringTab}}
+
+            {{staticMethodsStringTab}}
         }
         """;
     }
@@ -249,7 +266,44 @@ internal sealed class UnionTryGenerator : IIncrementalGenerator
         return Generate(context, type);
     }
 
-    public static string? GenerateMethod
+    private static string? GenerateConstructor
+    (
+        SourceProductionContext context,
+        IMethodSymbol method,
+        string typeName
+    )
+    {
+        try
+        {
+            var parameters = string.Join(", ", method.Parameters.Select(x => x.ToDisplayString()));
+            var call = string.Join(", ", method.GetCallingParameters());
+            var methodCall = $"{typeName}({call})";
+
+            var returnType = Helper.UnionError(typeName);
+
+            return $$"""
+            public static {{returnType}} {{Helper.ConstructorName}}({{parameters}}) 
+            {
+                try
+                {
+                    return new {{typeName}}({{call}});
+                }
+                catch (Exception exception)
+                {
+                    return exception;
+                }
+            }
+            """;
+        }
+        catch (Exception exception)
+        {
+            var description = $"{typeName}{method.ReturnType.ToDisplayString()} :: {method.ToDisplayString()} :: {exception.ToString()}";
+
+            return exception.ReportException(context, description);
+        }
+    }
+
+    private static string? GenerateMethod
     (
         SourceProductionContext context,
         IMethodSymbol method,

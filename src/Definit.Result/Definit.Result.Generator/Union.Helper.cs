@@ -14,6 +14,7 @@ internal static class Helper
     public const string InterfaceNameWithNamespace = $"{Namespace}.{InterfaceName}";
     public const string InterfaceInfoNameWithNamespace = $"{Namespace}.{InterfaceInfoName}";
 
+    public const string ConstructorName       = "New";
     public const string MaybeTypeName         = $"Opt";
     public const string UnionMatchException = $"{Helper.Namespace}.UnionMatchException"; 
     public const string UnionMatchError = $"{Helper.Namespace}.UnionMatchError"; 

@@ -8,6 +8,102 @@ namespace System.Threading.Tasks;
 
 public static class TryTask<TResult>
 {
+    public static U<System.Threading.Tasks.Task<TResult>, System.Exception> New(System.Func<object?, TResult> function, object? state) 
+	{
+	    try
+	    {
+	        return new System.Threading.Tasks.Task<TResult>(function, state);
+	    }
+	    catch (Exception exception)
+	    {
+	        return exception;
+	    }
+	}
+	
+	public static U<System.Threading.Tasks.Task<TResult>, System.Exception> New(System.Func<object?, TResult> function, object? state, System.Threading.CancellationToken cancellationToken) 
+	{
+	    try
+	    {
+	        return new System.Threading.Tasks.Task<TResult>(function, state, cancellationToken);
+	    }
+	    catch (Exception exception)
+	    {
+	        return exception;
+	    }
+	}
+	
+	public static U<System.Threading.Tasks.Task<TResult>, System.Exception> New(System.Func<object?, TResult> function, object? state, System.Threading.CancellationToken cancellationToken, System.Threading.Tasks.TaskCreationOptions creationOptions) 
+	{
+	    try
+	    {
+	        return new System.Threading.Tasks.Task<TResult>(function, state, cancellationToken, creationOptions);
+	    }
+	    catch (Exception exception)
+	    {
+	        return exception;
+	    }
+	}
+	
+	public static U<System.Threading.Tasks.Task<TResult>, System.Exception> New(System.Func<object?, TResult> function, object? state, System.Threading.Tasks.TaskCreationOptions creationOptions) 
+	{
+	    try
+	    {
+	        return new System.Threading.Tasks.Task<TResult>(function, state, creationOptions);
+	    }
+	    catch (Exception exception)
+	    {
+	        return exception;
+	    }
+	}
+	
+	public static U<System.Threading.Tasks.Task<TResult>, System.Exception> New(System.Func<TResult> function) 
+	{
+	    try
+	    {
+	        return new System.Threading.Tasks.Task<TResult>(function);
+	    }
+	    catch (Exception exception)
+	    {
+	        return exception;
+	    }
+	}
+	
+	public static U<System.Threading.Tasks.Task<TResult>, System.Exception> New(System.Func<TResult> function, System.Threading.CancellationToken cancellationToken) 
+	{
+	    try
+	    {
+	        return new System.Threading.Tasks.Task<TResult>(function, cancellationToken);
+	    }
+	    catch (Exception exception)
+	    {
+	        return exception;
+	    }
+	}
+	
+	public static U<System.Threading.Tasks.Task<TResult>, System.Exception> New(System.Func<TResult> function, System.Threading.CancellationToken cancellationToken, System.Threading.Tasks.TaskCreationOptions creationOptions) 
+	{
+	    try
+	    {
+	        return new System.Threading.Tasks.Task<TResult>(function, cancellationToken, creationOptions);
+	    }
+	    catch (Exception exception)
+	    {
+	        return exception;
+	    }
+	}
+	
+	public static U<System.Threading.Tasks.Task<TResult>, System.Exception> New(System.Func<TResult> function, System.Threading.Tasks.TaskCreationOptions creationOptions) 
+	{
+	    try
+	    {
+	        return new System.Threading.Tasks.Task<TResult>(function, creationOptions);
+	    }
+	    catch (Exception exception)
+	    {
+	        return exception;
+	    }
+	}
+
     
 }
 

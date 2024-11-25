@@ -1,9 +1,9 @@
 namespace Definit.Results;
 
 [AttributeUsage(AttributeTargets.Struct, AllowMultiple = false)]
-public sealed class GenerateUnionAttribute : Attribute;
+public sealed class UnionAttribute : Attribute;
 
-public static class GenerateUnion
+public static class Union
 {
     public static class Try
     {

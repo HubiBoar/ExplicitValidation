@@ -76,12 +76,12 @@ public static class Examples_Extensions_U
 		    }
 		}
 		
-		public System.Exception? PrivateRun2(string t) 
+		public R<System.Exception> PrivateRun2(string t) 
 		{
 		    try
 		    {
 		        this.Value.PrivateRun2(t);
-		        return null;
+		        return R.Success;
 		    }
 		    catch (Exception exception)
 		    {

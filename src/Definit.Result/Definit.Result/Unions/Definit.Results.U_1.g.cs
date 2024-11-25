@@ -1,43 +1,111 @@
 ﻿#nullable enable
 
 using System.Diagnostics.CodeAnalysis;
-using Definit.Resultss.Examples;
 
 namespace Definit.Results;
 
 public readonly struct Success;
+public readonly struct NotFound;
 
-public static class U
+public static class R
 {
     public static Success Success { get; } = new Success();
 }
 
-public interface IUnionInfo<TError> : IUnionBase<(Or<Success>?, Or<TError>?)>
-	where TError : notnull;
+//[Union]
+public partial struct R<TError> : U<Success, TError>.Base
+    where TError : notnull;
 
-public readonly struct U<TError> : U<TError>.Base
-	where TError : notnull 
+
+readonly partial struct R<TError>
+	where TError : notnull
 {
-    public interface Base : IUnionInfo<TError>;
-
-    public (Or<Success>?, Or<TError>?) Value { get; }
-
+	public (Or<Definit.Results.Success>?, Or<TError>?) Value { get; }
+	
 	[Obsolete(DefaultConstructorException.Attribute, true)]
-	public U() => throw new DefaultConstructorException();
+	public R() => throw new DefaultConstructorException();
 	
-	public U(Success value) => Value = (value!, null);
-	public U(TError value) => Value = (null, value!);
+	public R(Definit.Results.Success value) => Value = (value!, null);
+	public R(TError value) => Value = (null, value!);
 	
-	public static implicit operator U<TError>([DisallowNull] Definit.Results.UnionMatchError _) => throw new Definit.Results.UnionMatchException<U<TError>>();
-	public static implicit operator U<TError>(Success value) => new (value);
-	public static implicit operator U<TError>(TError value) => new (value);
+	public static implicit operator Definit.Results.R<TError>([DisallowNull] Definit.Results.UnionMatchError _) => throw new Definit.Results.UnionMatchException<U<Definit.Results.Success, TError>>();
+	public static implicit operator Definit.Results.R<TError>(Definit.Results.Success value) => new (value);
+	public static implicit operator Definit.Results.R<TError>(TError value) => new (value);
 }
 
-public static class Extensions_U_1_1
+public static partial class R_Extensions_U
+{
+    public static void Deconstruct<TError>
+	(
+	    this Definit.Results.R<TError> either,
+	    out Definit.Results.Success? _arg_0,
+		out TError? _arg_1
+	)
+		where TError : struct
+	{
+	    var (_out_0, _out_1) = either.Value;
+	    _arg_0 = _out_0?.Out ?? null;
+		_arg_1 = _out_1?.Out ?? null;
+	}
+	
+	public static void Deconstruct<TError>
+	(
+	    this Definit.Results.R<TError>? either,
+	    out Definit.Results.Success? _arg_0,
+		out TError? _arg_1
+	)
+		where TError : struct
+	{
+	    if(either is null)
+	    {
+	        _arg_0 = null; _arg_1 = null;
+	        return;
+	    }
+	
+	    var (_out_0, _out_1) = either.Value.Value;
+	    _arg_0 = _out_0?.Out ?? null;
+		_arg_1 = _out_1?.Out ?? null;
+	}
+	
+	public static void Deconstruct<TError>
+	(
+	    this Definit.Results.R<TError> either,
+	    out Definit.Results.Success? _arg_0,
+		out TError? _arg_1
+	)
+		where TError : class
+	{
+	    var (_out_0, _out_1) = either.Value;
+	    _arg_0 = _out_0?.Out ?? null;
+		_arg_1 = _out_1?.Out ?? null;
+	}
+	
+	public static void Deconstruct<TError>
+	(
+	    this Definit.Results.R<TError>? either,
+	    out Definit.Results.Success? _arg_0,
+		out TError? _arg_1
+	)
+		where TError : class
+	{
+	    if(either is null)
+	    {
+	        _arg_0 = null; _arg_1 = null;
+	        return;
+	    }
+	
+	    var (_out_0, _out_1) = either.Value.Value;
+	    _arg_0 = _out_0?.Out ?? null;
+		_arg_1 = _out_1?.Out ?? null;
+	}
+}
+
+
+public static class Extensions_R_1_1
 {
     public static TError? Error<TError>
 	(
-	    this U<TError> either
+	    this R<TError> either
 	)
 		where TError : struct
 	{
@@ -46,11 +114,11 @@ public static class Extensions_U_1_1
 	}
 }
 
-public static class Extensions_U_1_2
+public static class Extensions_R_1_2
 {
     public static TError? Error<TError>
 	(
-	    this U<TError> either
+	    this R<TError> either
 	)
 		where TError : class
 	{
@@ -61,14 +129,14 @@ public static class Extensions_U_1_2
 
 public static class Test
 {
-    public static U<NotFound> GetNotFound()
+    public static R<NotFound> GetNotFound()
     {
-        return U.Success;
+        return R.Success;
     }
 
-    public static U<Exception> Get()
+    public static R<Exception> Get()
     {
-        return U.Success;
+        return R.Success;
     }
 
     public static void Run()

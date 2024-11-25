@@ -604,12 +604,12 @@ public static class StringBuilder_Extensions_U
 		    }
 		}
 		
-		public System.Exception? CopyTo(int sourceIndex, char[] destination, int destinationIndex, int count) 
+		public R<System.Exception> CopyTo(int sourceIndex, char[] destination, int destinationIndex, int count) 
 		{
 		    try
 		    {
 		        this.Value.CopyTo(sourceIndex, destination, destinationIndex, count);
-		        return null;
+		        return R.Success;
 		    }
 		    catch (Exception exception)
 		    {
@@ -617,12 +617,12 @@ public static class StringBuilder_Extensions_U
 		    }
 		}
 		
-		public System.Exception? CopyTo(int sourceIndex, System.Span<char> destination, int count) 
+		public R<System.Exception> CopyTo(int sourceIndex, System.Span<char> destination, int count) 
 		{
 		    try
 		    {
 		        this.Value.CopyTo(sourceIndex, destination, count);
-		        return null;
+		        return R.Success;
 		    }
 		    catch (Exception exception)
 		    {

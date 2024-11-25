@@ -1,28 +1,28 @@
 using System.Text;
 using Definit.Results;
 
-[assembly: GenerateUnion.Try(typeof(StringBuilder))]
-[assembly: GenerateUnion.Try<StringReader>]
-[assembly: GenerateUnion.Try(typeof(List<>))]
-[assembly: GenerateUnion.Try<Task<string>>]
+[assembly: Union.Try(typeof(StringBuilder))]
+[assembly: Union.Try<StringReader>]
+[assembly: Union.Try(typeof(List<>))]
+[assembly: Union.Try<Task<string>>]
 
 namespace Definit.Resultss.Examples;
 
-[GenerateUnion]
+[Union]
 public partial struct ResultExample<T> : U<T, NotFound>.Base
     where T : notnull;
 
-[GenerateUnion]
+[Union]
 public partial struct ResultExample2<T> : U<T, string, NotFound>.Base
     where T : notnull;
 
-[GenerateUnion]
+[Union]
 public partial struct EitherExample2<T> : U<T, string, int>.Base
     where T : notnull;
 
 public readonly record struct NotFound(ErrorPayload Payload) : IError<NotFound>;
 
-[GenerateUnion.Try.This]
+[Union.Try.This]
 public partial class Examples
 {
     public ResultExample2<int> PublicRun(int i, StringReader reader)

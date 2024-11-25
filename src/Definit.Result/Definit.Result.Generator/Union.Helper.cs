@@ -21,27 +21,27 @@ internal static class Helper
     public static string UnionError(string type) => $"{Helper.TypeName}<{type}, {Error}>";
     public static string UnionMaybeError(string type) => $"{Helper.TypeName}<{Maybe(type)}, {Error}>";
     public static string Maybe(string type) => $"{MaybeTypeName}<{type}>";
-    public static string ReturnsVoid => $"{Error}?";
+    public static string ReturnsVoid => $"R<{Error}>";
+    public const string ReturnsVoidSuccess = "R.Success";
 
     public const string CastingMethodName  = $"Try";
     public const string CastingWrapperName = $"UnionsWrapper";
 
-    public const string ReturnsVoidSuccess = "null";
 
     public const string Error = $"System.Exception";
 
     public static class Attributes
     {
-        public const string GenerateUnion = $"{Helper.Namespace}.GenerateUnionAttribute";
+        public const string GenerateUnion = $"{Helper.Namespace}.UnionAttribute";
 
-        public const string GenerateUnionThis     = $"{Helper.Namespace}.GenerateUnion.Try.ThisAttribute";
-        public const string GenerateUnionThisMeta = $"{Helper.Namespace}.GenerateUnion+Try+ThisAttribute";
+        public const string GenerateUnionThis     = $"{Helper.Namespace}.Union.Try.ThisAttribute";
+        public const string GenerateUnionThisMeta = $"{Helper.Namespace}.Union+Try+ThisAttribute";
 
-        public const string GenerateUnionObject     = $"{Helper.Namespace}.GenerateUnion.TryAttribute";
-        public const string GenerateUnionObjectMeta = $"{Helper.Namespace}.GenerateUnion+TryAttribute";
+        public const string GenerateUnionObject     = $"{Helper.Namespace}.Union.TryAttribute";
+        public const string GenerateUnionObjectMeta = $"{Helper.Namespace}.Union+TryAttribute";
 
-        public const string GenerateUnionObjectGeneric     = $"{Helper.Namespace}.GenerateUnion.TryAttribute";
-        public const string GenerateUnionObjectGenericMeta = $"{Helper.Namespace}.GenerateUnion+TryAttribute`1";
+        public const string GenerateUnionObjectGeneric     = $"{Helper.Namespace}.Union.TryAttribute";
+        public const string GenerateUnionObjectGenericMeta = $"{Helper.Namespace}.Union+TryAttribute`1";
     }
 
     public static class Async

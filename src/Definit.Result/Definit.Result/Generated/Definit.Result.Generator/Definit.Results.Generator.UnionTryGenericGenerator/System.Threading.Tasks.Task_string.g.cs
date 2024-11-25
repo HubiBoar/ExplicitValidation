@@ -40,12 +40,12 @@ public static class Task_string_Extensions_U
 		    }
 		}
 		
-		public async System.Threading.Tasks.Task<System.Exception?> ContinueWith(System.Action<System.Threading.Tasks.Task<string>, object?> continuationAction, object? state) 
+		public async System.Threading.Tasks.Task<R<System.Exception>> ContinueWith(System.Action<System.Threading.Tasks.Task<string>, object?> continuationAction, object? state) 
 		{
 		    try
 		    {
 		        await this.Value.ContinueWith(continuationAction, state);
-		        return null;
+		        return R.Success;
 		    }
 		    catch (Exception exception)
 		    {
@@ -53,12 +53,12 @@ public static class Task_string_Extensions_U
 		    }
 		}
 		
-		public async System.Threading.Tasks.Task<System.Exception?> ContinueWith(System.Action<System.Threading.Tasks.Task<string>, object?> continuationAction, object? state, System.Threading.CancellationToken cancellationToken) 
+		public async System.Threading.Tasks.Task<R<System.Exception>> ContinueWith(System.Action<System.Threading.Tasks.Task<string>, object?> continuationAction, object? state, System.Threading.CancellationToken cancellationToken) 
 		{
 		    try
 		    {
 		        await this.Value.ContinueWith(continuationAction, state, cancellationToken);
-		        return null;
+		        return R.Success;
 		    }
 		    catch (Exception exception)
 		    {
@@ -66,12 +66,12 @@ public static class Task_string_Extensions_U
 		    }
 		}
 		
-		public async System.Threading.Tasks.Task<System.Exception?> ContinueWith(System.Action<System.Threading.Tasks.Task<string>, object?> continuationAction, object? state, System.Threading.CancellationToken cancellationToken, System.Threading.Tasks.TaskContinuationOptions continuationOptions, System.Threading.Tasks.TaskScheduler scheduler) 
+		public async System.Threading.Tasks.Task<R<System.Exception>> ContinueWith(System.Action<System.Threading.Tasks.Task<string>, object?> continuationAction, object? state, System.Threading.CancellationToken cancellationToken, System.Threading.Tasks.TaskContinuationOptions continuationOptions, System.Threading.Tasks.TaskScheduler scheduler) 
 		{
 		    try
 		    {
 		        await this.Value.ContinueWith(continuationAction, state, cancellationToken, continuationOptions, scheduler);
-		        return null;
+		        return R.Success;
 		    }
 		    catch (Exception exception)
 		    {
@@ -79,12 +79,12 @@ public static class Task_string_Extensions_U
 		    }
 		}
 		
-		public async System.Threading.Tasks.Task<System.Exception?> ContinueWith(System.Action<System.Threading.Tasks.Task<string>, object?> continuationAction, object? state, System.Threading.Tasks.TaskContinuationOptions continuationOptions) 
+		public async System.Threading.Tasks.Task<R<System.Exception>> ContinueWith(System.Action<System.Threading.Tasks.Task<string>, object?> continuationAction, object? state, System.Threading.Tasks.TaskContinuationOptions continuationOptions) 
 		{
 		    try
 		    {
 		        await this.Value.ContinueWith(continuationAction, state, continuationOptions);
-		        return null;
+		        return R.Success;
 		    }
 		    catch (Exception exception)
 		    {
@@ -92,12 +92,12 @@ public static class Task_string_Extensions_U
 		    }
 		}
 		
-		public async System.Threading.Tasks.Task<System.Exception?> ContinueWith(System.Action<System.Threading.Tasks.Task<string>, object?> continuationAction, object? state, System.Threading.Tasks.TaskScheduler scheduler) 
+		public async System.Threading.Tasks.Task<R<System.Exception>> ContinueWith(System.Action<System.Threading.Tasks.Task<string>, object?> continuationAction, object? state, System.Threading.Tasks.TaskScheduler scheduler) 
 		{
 		    try
 		    {
 		        await this.Value.ContinueWith(continuationAction, state, scheduler);
-		        return null;
+		        return R.Success;
 		    }
 		    catch (Exception exception)
 		    {
@@ -105,12 +105,12 @@ public static class Task_string_Extensions_U
 		    }
 		}
 		
-		public async System.Threading.Tasks.Task<System.Exception?> ContinueWith(System.Action<System.Threading.Tasks.Task<string>> continuationAction) 
+		public async System.Threading.Tasks.Task<R<System.Exception>> ContinueWith(System.Action<System.Threading.Tasks.Task<string>> continuationAction) 
 		{
 		    try
 		    {
 		        await this.Value.ContinueWith(continuationAction);
-		        return null;
+		        return R.Success;
 		    }
 		    catch (Exception exception)
 		    {
@@ -118,12 +118,12 @@ public static class Task_string_Extensions_U
 		    }
 		}
 		
-		public async System.Threading.Tasks.Task<System.Exception?> ContinueWith(System.Action<System.Threading.Tasks.Task<string>> continuationAction, System.Threading.CancellationToken cancellationToken) 
+		public async System.Threading.Tasks.Task<R<System.Exception>> ContinueWith(System.Action<System.Threading.Tasks.Task<string>> continuationAction, System.Threading.CancellationToken cancellationToken) 
 		{
 		    try
 		    {
 		        await this.Value.ContinueWith(continuationAction, cancellationToken);
-		        return null;
+		        return R.Success;
 		    }
 		    catch (Exception exception)
 		    {
@@ -131,12 +131,12 @@ public static class Task_string_Extensions_U
 		    }
 		}
 		
-		public async System.Threading.Tasks.Task<System.Exception?> ContinueWith(System.Action<System.Threading.Tasks.Task<string>> continuationAction, System.Threading.CancellationToken cancellationToken, System.Threading.Tasks.TaskContinuationOptions continuationOptions, System.Threading.Tasks.TaskScheduler scheduler) 
+		public async System.Threading.Tasks.Task<R<System.Exception>> ContinueWith(System.Action<System.Threading.Tasks.Task<string>> continuationAction, System.Threading.CancellationToken cancellationToken, System.Threading.Tasks.TaskContinuationOptions continuationOptions, System.Threading.Tasks.TaskScheduler scheduler) 
 		{
 		    try
 		    {
 		        await this.Value.ContinueWith(continuationAction, cancellationToken, continuationOptions, scheduler);
-		        return null;
+		        return R.Success;
 		    }
 		    catch (Exception exception)
 		    {
@@ -144,12 +144,12 @@ public static class Task_string_Extensions_U
 		    }
 		}
 		
-		public async System.Threading.Tasks.Task<System.Exception?> ContinueWith(System.Action<System.Threading.Tasks.Task<string>> continuationAction, System.Threading.Tasks.TaskContinuationOptions continuationOptions) 
+		public async System.Threading.Tasks.Task<R<System.Exception>> ContinueWith(System.Action<System.Threading.Tasks.Task<string>> continuationAction, System.Threading.Tasks.TaskContinuationOptions continuationOptions) 
 		{
 		    try
 		    {
 		        await this.Value.ContinueWith(continuationAction, continuationOptions);
-		        return null;
+		        return R.Success;
 		    }
 		    catch (Exception exception)
 		    {
@@ -157,12 +157,12 @@ public static class Task_string_Extensions_U
 		    }
 		}
 		
-		public async System.Threading.Tasks.Task<System.Exception?> ContinueWith(System.Action<System.Threading.Tasks.Task<string>> continuationAction, System.Threading.Tasks.TaskScheduler scheduler) 
+		public async System.Threading.Tasks.Task<R<System.Exception>> ContinueWith(System.Action<System.Threading.Tasks.Task<string>> continuationAction, System.Threading.Tasks.TaskScheduler scheduler) 
 		{
 		    try
 		    {
 		        await this.Value.ContinueWith(continuationAction, scheduler);
-		        return null;
+		        return R.Success;
 		    }
 		    catch (Exception exception)
 		    {

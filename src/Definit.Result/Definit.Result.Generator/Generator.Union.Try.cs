@@ -286,7 +286,7 @@ internal sealed class UnionTryGenerator : IIncrementalGenerator
                     method;
 
                 return $$"""
-                public {{methodReturns}} {{returnTypeName}}{{genericArguments}}({{parameters}}){{genericConstraints}} 
+                public {{methodReturns}} {{name}}{{genericArguments}}({{parameters}}){{genericConstraints}} 
                 {
                     try
                     {

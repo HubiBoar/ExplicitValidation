@@ -16,12 +16,12 @@ public static class StringReader_Extensions_U
     {
         public required System.IO.StringReader Value { get; init; }
 
-        public System.Exception? Close() 
+        public R<System.Exception> Close() 
 		{
 		    try
 		    {
 		        this.Value.Close();
-		        return null;
+		        return R.Success;
 		    }
 		    catch (Exception exception)
 		    {

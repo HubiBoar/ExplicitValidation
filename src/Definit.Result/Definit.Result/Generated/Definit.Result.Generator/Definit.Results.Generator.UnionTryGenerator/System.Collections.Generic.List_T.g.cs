@@ -16,12 +16,12 @@ public static class List_T_Extensions_U
     {
         public required System.Collections.Generic.List<T> Value { get; init; }
 
-        public System.Exception? Add(T item) 
+        public R<System.Exception> Add(T item) 
 		{
 		    try
 		    {
 		        this.Value.Add(item);
-		        return null;
+		        return R.Success;
 		    }
 		    catch (Exception exception)
 		    {
@@ -29,12 +29,12 @@ public static class List_T_Extensions_U
 		    }
 		}
 		
-		public System.Exception? AddRange(System.Collections.Generic.IEnumerable<T> collection) 
+		public R<System.Exception> AddRange(System.Collections.Generic.IEnumerable<T> collection) 
 		{
 		    try
 		    {
 		        this.Value.AddRange(collection);
-		        return null;
+		        return R.Success;
 		    }
 		    catch (Exception exception)
 		    {
@@ -90,12 +90,12 @@ public static class List_T_Extensions_U
 		    }
 		}
 		
-		public System.Exception? Clear() 
+		public R<System.Exception> Clear() 
 		{
 		    try
 		    {
 		        this.Value.Clear();
-		        return null;
+		        return R.Success;
 		    }
 		    catch (Exception exception)
 		    {
@@ -127,12 +127,12 @@ public static class List_T_Extensions_U
 		    }
 		}
 		
-		public System.Exception? CopyTo(int index, T[] array, int arrayIndex, int count) 
+		public R<System.Exception> CopyTo(int index, T[] array, int arrayIndex, int count) 
 		{
 		    try
 		    {
 		        this.Value.CopyTo(index, array, arrayIndex, count);
-		        return null;
+		        return R.Success;
 		    }
 		    catch (Exception exception)
 		    {
@@ -140,12 +140,12 @@ public static class List_T_Extensions_U
 		    }
 		}
 		
-		public System.Exception? CopyTo(T[] array) 
+		public R<System.Exception> CopyTo(T[] array) 
 		{
 		    try
 		    {
 		        this.Value.CopyTo(array);
-		        return null;
+		        return R.Success;
 		    }
 		    catch (Exception exception)
 		    {
@@ -153,12 +153,12 @@ public static class List_T_Extensions_U
 		    }
 		}
 		
-		public System.Exception? CopyTo(T[] array, int arrayIndex) 
+		public R<System.Exception> CopyTo(T[] array, int arrayIndex) 
 		{
 		    try
 		    {
 		        this.Value.CopyTo(array, arrayIndex);
-		        return null;
+		        return R.Success;
 		    }
 		    catch (Exception exception)
 		    {
@@ -298,12 +298,12 @@ public static class List_T_Extensions_U
 		    }
 		}
 		
-		public System.Exception? ForEach(System.Action<T> action) 
+		public R<System.Exception> ForEach(System.Action<T> action) 
 		{
 		    try
 		    {
 		        this.Value.ForEach(action);
-		        return null;
+		        return R.Success;
 		    }
 		    catch (Exception exception)
 		    {
@@ -371,12 +371,12 @@ public static class List_T_Extensions_U
 		    }
 		}
 		
-		public System.Exception? Insert(int index, T item) 
+		public R<System.Exception> Insert(int index, T item) 
 		{
 		    try
 		    {
 		        this.Value.Insert(index, item);
-		        return null;
+		        return R.Success;
 		    }
 		    catch (Exception exception)
 		    {
@@ -384,12 +384,12 @@ public static class List_T_Extensions_U
 		    }
 		}
 		
-		public System.Exception? InsertRange(int index, System.Collections.Generic.IEnumerable<T> collection) 
+		public R<System.Exception> InsertRange(int index, System.Collections.Generic.IEnumerable<T> collection) 
 		{
 		    try
 		    {
 		        this.Value.InsertRange(index, collection);
-		        return null;
+		        return R.Success;
 		    }
 		    catch (Exception exception)
 		    {
@@ -457,12 +457,12 @@ public static class List_T_Extensions_U
 		    }
 		}
 		
-		public System.Exception? RemoveAt(int index) 
+		public R<System.Exception> RemoveAt(int index) 
 		{
 		    try
 		    {
 		        this.Value.RemoveAt(index);
-		        return null;
+		        return R.Success;
 		    }
 		    catch (Exception exception)
 		    {
@@ -470,12 +470,12 @@ public static class List_T_Extensions_U
 		    }
 		}
 		
-		public System.Exception? RemoveRange(int index, int count) 
+		public R<System.Exception> RemoveRange(int index, int count) 
 		{
 		    try
 		    {
 		        this.Value.RemoveRange(index, count);
-		        return null;
+		        return R.Success;
 		    }
 		    catch (Exception exception)
 		    {
@@ -483,12 +483,12 @@ public static class List_T_Extensions_U
 		    }
 		}
 		
-		public System.Exception? Reverse() 
+		public R<System.Exception> Reverse() 
 		{
 		    try
 		    {
 		        this.Value.Reverse();
-		        return null;
+		        return R.Success;
 		    }
 		    catch (Exception exception)
 		    {
@@ -496,12 +496,12 @@ public static class List_T_Extensions_U
 		    }
 		}
 		
-		public System.Exception? Reverse(int index, int count) 
+		public R<System.Exception> Reverse(int index, int count) 
 		{
 		    try
 		    {
 		        this.Value.Reverse(index, count);
-		        return null;
+		        return R.Success;
 		    }
 		    catch (Exception exception)
 		    {
@@ -521,12 +521,12 @@ public static class List_T_Extensions_U
 		    }
 		}
 		
-		public System.Exception? Sort() 
+		public R<System.Exception> Sort() 
 		{
 		    try
 		    {
 		        this.Value.Sort();
-		        return null;
+		        return R.Success;
 		    }
 		    catch (Exception exception)
 		    {
@@ -534,12 +534,12 @@ public static class List_T_Extensions_U
 		    }
 		}
 		
-		public System.Exception? Sort(System.Collections.Generic.IComparer<T>? comparer) 
+		public R<System.Exception> Sort(System.Collections.Generic.IComparer<T>? comparer) 
 		{
 		    try
 		    {
 		        this.Value.Sort(comparer);
-		        return null;
+		        return R.Success;
 		    }
 		    catch (Exception exception)
 		    {
@@ -547,12 +547,12 @@ public static class List_T_Extensions_U
 		    }
 		}
 		
-		public System.Exception? Sort(System.Comparison<T> comparison) 
+		public R<System.Exception> Sort(System.Comparison<T> comparison) 
 		{
 		    try
 		    {
 		        this.Value.Sort(comparison);
-		        return null;
+		        return R.Success;
 		    }
 		    catch (Exception exception)
 		    {
@@ -560,12 +560,12 @@ public static class List_T_Extensions_U
 		    }
 		}
 		
-		public System.Exception? Sort(int index, int count, System.Collections.Generic.IComparer<T>? comparer) 
+		public R<System.Exception> Sort(int index, int count, System.Collections.Generic.IComparer<T>? comparer) 
 		{
 		    try
 		    {
 		        this.Value.Sort(index, count, comparer);
-		        return null;
+		        return R.Success;
 		    }
 		    catch (Exception exception)
 		    {
@@ -585,12 +585,12 @@ public static class List_T_Extensions_U
 		    }
 		}
 		
-		public System.Exception? TrimExcess() 
+		public R<System.Exception> TrimExcess() 
 		{
 		    try
 		    {
 		        this.Value.TrimExcess();
-		        return null;
+		        return R.Success;
 		    }
 		    catch (Exception exception)
 		    {

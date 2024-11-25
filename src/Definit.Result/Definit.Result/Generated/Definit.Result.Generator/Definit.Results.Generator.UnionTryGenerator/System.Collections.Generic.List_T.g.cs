@@ -11,7 +11,7 @@ public static class TryList<T>
     
 }
 
-public static class List_T_Extensions_U
+public static class List1_Extensions_U
 {
     public static UnionsWrapper<T> Try<T>(this System.Collections.Generic.List<T> value)
     {

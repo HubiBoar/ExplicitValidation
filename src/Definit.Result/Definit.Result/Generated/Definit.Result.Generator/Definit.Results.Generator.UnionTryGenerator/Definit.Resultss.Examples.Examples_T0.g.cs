@@ -53,7 +53,7 @@ public static class TryExamples<T0>
 	}
 }
 
-public static class Examples_T0_Extensions_U
+public static class Examples1_Extensions_U
 {
     public static UnionsWrapper<T0> Try<T0>(this Definit.Resultss.Examples.Examples<T0> value)
 	where T0 : notnull

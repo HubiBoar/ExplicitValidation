@@ -5,7 +5,7 @@ using Definit.Results;
 [assembly: Union.Try<StringReader>]
 [assembly: Union.Try(typeof(List<>))]
 [assembly: Union.Try<Task<string>>]
-[assembly: Union.Try<Definit.Resultss.Examples.Examples<string, int>>]
+[assembly: Union.Try(typeof(Definit.Resultss.Examples.Examples<,>))]
 
 namespace Definit.Resultss.Examples;
 

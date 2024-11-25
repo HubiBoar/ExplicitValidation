@@ -2,6 +2,7 @@ using System.Collections.Immutable;
 using System.Text;
 using Definit.Utils.SourceGenerator;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Definit.Results.Generator;
 
@@ -9,6 +10,13 @@ namespace Definit.Results.Generator;
 internal sealed class UnionTryGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
+    {
+        InitializeObject(context);
+        InitializeGeneric(context);
+        InitializeThis(context);
+    }
+
+    private static void InitializeObject(IncrementalGeneratorInitializationContext context)
     {
         var provider = context.SyntaxProvider.ForAttributeWithMetadataName
         (
@@ -22,23 +30,93 @@ internal sealed class UnionTryGenerator : IIncrementalGenerator
         var compilation = context.CompilationProvider.Combine(provider.Collect());
 
         context.RegisterSourceOutput(compilation, (spc, source) => Execute(spc, source.Left, source.Right)); 
+
+        static void Execute
+        (
+            SourceProductionContext context,
+            Compilation compilation,
+            ImmutableArray<GeneratorAttributeSyntaxContext> typeList
+        )
+        {
+            SourceHelper.Run(context, () => 
+                typeList
+                .SelectMany(x => x.Attributes
+                    .Where(y => y.AttributeClass is not null && y.AttributeClass!
+                        .ToDisplayString() == Helper.Attributes.GenerateUnionObject)
+                    .Select<AttributeData, Func<(string, string)>>(x => () => GetType(context, compilation, x)))
+                    .ToImmutableArray());
+        }
     }
 
-    private static void Execute
-    (
-        SourceProductionContext context,
-        Compilation compilation,
-        ImmutableArray<GeneratorAttributeSyntaxContext> typeList
-    )
+    private static void InitializeGeneric(IncrementalGeneratorInitializationContext context)
     {
-        SourceHelper.Run(context, () => 
-            typeList
-            .SelectMany(x => x.Attributes
-                .Where(y => y.AttributeClass is not null && y.AttributeClass!
-                    .ToDisplayString() == Helper.Attributes.GenerateUnionObject)
-                .Select<AttributeData, Func<(string, string)>>(x => () => GetType(context, compilation, x)))
-                .ToImmutableArray());
+        var provider = context.SyntaxProvider.ForAttributeWithMetadataName
+        (
+            Helper.Attributes.GenerateUnionObjectGenericMeta,
+            predicate: (c, _) => true,
+
+            transform: (n, _) => n
+        );
+
+        var compilation = context.CompilationProvider.Combine(provider.Collect());
+
+        context.RegisterSourceOutput(compilation, (spc, source) => Execute(spc, source.Left, source.Right)); 
+        static void Execute
+        (
+            SourceProductionContext context,
+            Compilation compilation,
+            ImmutableArray<GeneratorAttributeSyntaxContext> typeList
+        )
+        {
+            SourceHelper.Run(context, () => 
+                typeList
+                .SelectMany(x => x.Attributes
+                    .Where(y => y.AttributeClass is not null && y.AttributeClass!
+                        .ToDisplayString()
+                        .StartsWith($"{Helper.Attributes.GenerateUnionObjectGeneric}<")) 
+                    .Select<AttributeData, Func<(string, string)>>(x => () => GetType(context, x)))
+                    .ToImmutableArray());
+        }
+
+        static (string Code, string ClassName) GetType
+        (
+            SourceProductionContext context,
+            AttributeData attribute
+        )
+        {
+            var type = attribute.AttributeClass!.TypeArguments.Single() as INamedTypeSymbol;
+            
+            return UnionTryGenerator.Generate(context, type!);
+        }
     }
+
+    private static void InitializeThis(IncrementalGeneratorInitializationContext context)
+    {
+        var provider = context.SyntaxProvider.ForAttributeWithMetadataName
+        (
+            Helper.Attributes.GenerateUnionThisMeta,
+            predicate: (c, _) => c is TypeDeclarationSyntax,
+
+            transform: (n, _) => (n.TargetSymbol as INamedTypeSymbol)!
+        );
+
+        var compilation = context.CompilationProvider.Combine(provider.Collect());
+
+        context.RegisterSourceOutput(compilation, (spc, source) => Execute(spc, source.Left, source.Right)); 
+
+        static void Execute
+        (
+            SourceProductionContext context,
+            Compilation compilation,
+            ImmutableArray<INamedTypeSymbol> typeList
+        )
+        {
+            SourceHelper.RunNullable(context, () => typeList
+                .Select<INamedTypeSymbol, Func<(string, string)?>>(x => () => UnionTryGenerator.Generate(context, x))
+                .ToImmutableArray());
+        }
+    }
+
 
     public static (string Code, string ClassName) Generate
     (
@@ -58,9 +136,9 @@ internal sealed class UnionTryGenerator : IIncrementalGenerator
         var typeName = type.Name;
         if(type.IsGenericType)
         {
-            var types = string.Join("_", type.TypeArguments.Select(x => x.ToDisplayString()));
+            type = type.ConstructedFrom;
 
-            typeName = $"{typeName}_{types}";
+            typeName = $"{typeName}{type.TypeArguments.Length}";
 
             var generics = type.TypeArguments.GetGenericParameterArguments();
 
@@ -126,25 +204,12 @@ internal sealed class UnionTryGenerator : IIncrementalGenerator
         var typeName = type.Name;
         var callPrefix = type.ToDisplayString();
 
-        if(type.IsUnboundGenericType)
-        {
-            type = type.ConstructedFrom;
-        }
-
         if(type.IsGenericType)
         {
-            var nonParameterGenericTypes = type.TypeArguments.Where(x => x is not ITypeParameterSymbol).Select(x => x.ToDisplayString()).ToImmutableArray();
+            type = type.ConstructedFrom;
 
-            if(nonParameterGenericTypes.Length > 0)
-            {
-                var generics = string.Join("_", nonParameterGenericTypes);
-                typeName = $"{typeName}_{generics}";
-            }
-            else
-            {
-                var generics = type.TypeArguments.GetGenericParameterArguments();
-                typeName = $"{typeName}{generics.ArgumentNamesFull}{generics.ConstraintsString}";
-            }
+            var generics = type.TypeArguments.GetGenericParameterArguments();
+            typeName = $"{typeName}{generics.ArgumentNamesFull}{generics.ConstraintsString}";
         }
 
         var typeMethods = type

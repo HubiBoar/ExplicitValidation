@@ -6,13 +6,14 @@ using System.Diagnostics.CodeAnalysis;
 namespace Definit.Resultss.Examples;
 
 
-public static class TryExamples_string_int
+public static class TryExamples<T0, T1>
+	where T0 : notnull
 {
     public static U<int, string, Definit.Resultss.Examples.NotFound, System.Exception> PublicRun(int i, System.IO.StringReader reader) 
 	{
 	    try
 	    {
-	        var (_arg_0, _arg_1, _arg_2) = Definit.Resultss.Examples.Examples<string, int>.PublicRun(i, reader);
+	        var (_arg_0, _arg_1, _arg_2) = Definit.Resultss.Examples.Examples<T0, T1>.PublicRun(i, reader);
 	
 	        if (_arg_0 is not null)
 	        {
@@ -42,7 +43,7 @@ public static class TryExamples_string_int
 	{
 	    try
 	    {
-	        Definit.Resultss.Examples.Examples<string, int>.PrivateRun2<T2>(t);
+	        Definit.Resultss.Examples.Examples<T0, T1>.PrivateRun2<T2>(t);
 	        return R.Success;
 	    }
 	    catch (Exception exception)
@@ -52,16 +53,18 @@ public static class TryExamples_string_int
 	}
 }
 
-public static class Examples_string_int_Extensions_U
+public static class Examples2_Extensions_U
 {
-    public static UnionsWrapper Try(this Definit.Resultss.Examples.Examples<string, int> value)
+    public static UnionsWrapper<T0, T1> Try<T0, T1>(this Definit.Resultss.Examples.Examples<T0, T1> value)
+	where T0 : notnull
     {
-        return new UnionsWrapper() { Value = value };
+        return new UnionsWrapper<T0, T1>() { Value = value };
     }
 
-    public readonly struct UnionsWrapper
+    public readonly struct UnionsWrapper<T0, T1>
+	where T0 : notnull
     {
-        public required Definit.Resultss.Examples.Examples<string, int> Value { get; init; }
+        public required Definit.Resultss.Examples.Examples<T0, T1> Value { get; init; }
 
         public U<int, string, Definit.Resultss.Examples.NotFound, System.Exception> PrivateRun(int i) 
 		{

@@ -6,13 +6,14 @@ using System.Diagnostics.CodeAnalysis;
 namespace Definit.Resultss.Examples;
 
 
-public static class TryExamples
+public static class TryExamples<T0, T1>
+	where T0 : notnull
 {
     public static U<int, string, Definit.Resultss.Examples.NotFound, System.Exception> PublicRun(int i, System.IO.StringReader reader) 
 	{
 	    try
 	    {
-	        var (_arg_0, _arg_1, _arg_2) = Definit.Resultss.Examples.Examples.PublicRun(i, reader);
+	        var (_arg_0, _arg_1, _arg_2) = Definit.Resultss.Examples.Examples<string, int>.PublicRun(i, reader);
 	
 	        if (_arg_0 is not null)
 	        {
@@ -38,11 +39,11 @@ public static class TryExamples
 	    }
 	}
 	
-	public static R<System.Exception> PrivateRun2(string t) 
+	public static R<System.Exception> PrivateRun2<T2>(string t) 
 	{
 	    try
 	    {
-	        Definit.Resultss.Examples.Examples.PrivateRun2(t);
+	        Definit.Resultss.Examples.Examples<string, int>.PrivateRun2<T2>(t);
 	        return R.Success;
 	    }
 	    catch (Exception exception)
@@ -52,16 +53,16 @@ public static class TryExamples
 	}
 }
 
-public static class Examples_Extensions_U
+public static class Examples_string_int_Extensions_U
 {
-    public static UnionsWrapper Try(this Definit.Resultss.Examples.Examples value)
+    public static UnionsWrapper Try(this Definit.Resultss.Examples.Examples<string, int> value)
     {
         return new UnionsWrapper() { Value = value };
     }
 
     public readonly struct UnionsWrapper
     {
-        public required Definit.Resultss.Examples.Examples Value { get; init; }
+        public required Definit.Resultss.Examples.Examples<string, int> Value { get; init; }
 
         public U<int, string, Definit.Resultss.Examples.NotFound, System.Exception> PrivateRun(int i) 
 		{

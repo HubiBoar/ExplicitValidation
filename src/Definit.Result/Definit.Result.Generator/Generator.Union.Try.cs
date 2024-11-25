@@ -53,12 +53,6 @@ internal sealed class UnionTryGenerator : IIncrementalGenerator
         if(type.IsUnboundGenericType)
         {
             type = type.ConstructedFrom;
-            var generics = type.TypeArguments.GetGenericArguments();
-
-            wrapperGenericArgs = generics.ArgumentNamesFull;
-            wrapperGenericConstraints = generics.ConstraintsString;
-
-            wrapperName = $"{wrapperName}{wrapperGenericArgs}";
         }
 
         var typeName = type.Name;
@@ -67,6 +61,13 @@ internal sealed class UnionTryGenerator : IIncrementalGenerator
             var types = string.Join("_", type.TypeArguments.Select(x => x.ToDisplayString()));
 
             typeName = $"{typeName}_{types}";
+
+            var generics = type.TypeArguments.GetGenericParameterArguments();
+
+            wrapperGenericArgs = generics.ArgumentNamesFull;
+            wrapperGenericConstraints = generics.ConstraintsString;
+
+            wrapperName = $"{wrapperName}{wrapperGenericArgs}";
         }
 
         var typeMethods = type
@@ -77,13 +78,15 @@ internal sealed class UnionTryGenerator : IIncrementalGenerator
                 && x.IsExtern == false 
                 && x.MethodKind == MethodKind.Ordinary
                 && x.DeclaredAccessibility == Accessibility.Public)
-            .Select(x => GenerateMethod(context, x))
+            .Select(x => GenerateMethod(context, x, string.Empty, "this.Value."))
             .Where(x => x is not null)
             .ToArray();
 
         var methods = string.Join("\n\n", typeMethods); 
 
         var allMethods = string.Join("\n\t\t", methods.ToString().Split('\n'));
+
+        var staticMethods = GetStaticMethodsAndConstructors(context, type);
 
         var code = $$"""
         #nullable enable
@@ -92,6 +95,8 @@ internal sealed class UnionTryGenerator : IIncrementalGenerator
         using System.Diagnostics.CodeAnalysis;
 
         namespace {{type.ContainingNamespace.ToDisplayString()}};
+
+        {{staticMethods}}
 
         public static class {{Helper.ExtensionsTypeName(typeName)}}
         {
@@ -112,6 +117,46 @@ internal sealed class UnionTryGenerator : IIncrementalGenerator
         return (code, type.ToDisplayString());
     }
 
+    private static string GetStaticMethodsAndConstructors
+    (
+        SourceProductionContext context,
+        INamedTypeSymbol type 
+    )
+    {
+        var typeName = type.Name;
+        var callPrefix = type.ToDisplayString();
+
+        if(type.IsGenericType)
+        {
+            var generics = type.ConstructedFrom.TypeArguments.GetGenericParameterArguments();
+            typeName = $"{typeName}{generics.ArgumentNamesFull}{generics.ConstraintsString}";
+        }
+
+        var typeMethods = type
+            .GetMembers()
+            .OfType<IMethodSymbol>()
+            .Where(x => 
+                x.IsStatic == true 
+                && x.IsExtern == false 
+                && x.MethodKind == MethodKind.Ordinary
+                && x.DeclaredAccessibility == Accessibility.Public)
+            .Select(x => GenerateMethod(context, x, "static ", $"{callPrefix}."))
+            .Where(x => x is not null)
+            .ToArray();
+
+        var methods = string.Join("\n\n", typeMethods); 
+
+        var allMethods = string.Join("\n\t", methods.ToString().Split('\n'));
+
+        return $$"""
+
+        public static class {{Helper.StaticTypeName(typeName)}}
+        {
+            {{allMethods}}
+        }
+        """;
+    }
+
     private static (string Code, string ClassName) GetType
     (
         SourceProductionContext context,
@@ -127,7 +172,9 @@ internal sealed class UnionTryGenerator : IIncrementalGenerator
     public static string? GenerateMethod
     (
         SourceProductionContext context,
-        IMethodSymbol method
+        IMethodSymbol method,
+        string prefix,
+        string callPrefix
     )
     {
         try
@@ -144,10 +191,10 @@ internal sealed class UnionTryGenerator : IIncrementalGenerator
             var parameters = string.Join(", ", method.Parameters.Select(x => x.ToDisplayString()));
             var returnType = method.GetReturnType();
             var call = string.Join(", ", method.GetCallingParameters());
-            var methodCall = $"this.Value.{name}({call})";
             var generics = method.GetMethodGenericArguments();
             var genericArguments = generics.ArgumentNamesFull;
             var genericConstraints = generics.ConstraintsString;
+            var methodCall = $"{callPrefix}{name}{genericArguments}({call})";
 
             if(returnType is Method.Return.Void)
             {
@@ -182,7 +229,7 @@ internal sealed class UnionTryGenerator : IIncrementalGenerator
             string Returns(string methodReturns, string method)
             {
                 return $$"""
-                public {{methodReturns}} {{name}}{{genericArguments}}({{parameters}}){{genericConstraints}} 
+                public {{prefix}}{{methodReturns}} {{name}}{{genericArguments}}({{parameters}}){{genericConstraints}} 
                 {
                     try
                     {
@@ -246,7 +293,7 @@ internal sealed class UnionTryGenerator : IIncrementalGenerator
                 }
 
                 return $$"""
-                public {{methodReturns}} {{name}}{{genericArguments}}({{parameters}}){{genericConstraints}} 
+                public {{prefix}}{{methodReturns}} {{name}}{{genericArguments}}({{parameters}}){{genericConstraints}} 
                 {
                     try
                     {
@@ -286,7 +333,7 @@ internal sealed class UnionTryGenerator : IIncrementalGenerator
                     method;
 
                 return $$"""
-                public {{methodReturns}} {{name}}{{genericArguments}}({{parameters}}){{genericConstraints}} 
+                public {{prefix}}{{methodReturns}} {{name}}{{genericArguments}}({{parameters}}){{genericConstraints}} 
                 {
                     try
                     {

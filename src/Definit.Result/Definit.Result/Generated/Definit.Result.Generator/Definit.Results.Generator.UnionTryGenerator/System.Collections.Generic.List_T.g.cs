@@ -5,6 +5,12 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace System.Collections.Generic;
 
+
+public static class TryList<T>
+{
+    
+}
+
 public static class List_T_Extensions_U
 {
     public static UnionsWrapper<T> Try<T>(this System.Collections.Generic.List<T> value)
@@ -119,7 +125,7 @@ public static class List_T_Extensions_U
 		{
 		    try
 		    {
-		        return this.Value.ConvertAll(converter);
+		        return this.Value.ConvertAll<TOutput>(converter);
 		    }
 		    catch (Exception exception)
 		    {

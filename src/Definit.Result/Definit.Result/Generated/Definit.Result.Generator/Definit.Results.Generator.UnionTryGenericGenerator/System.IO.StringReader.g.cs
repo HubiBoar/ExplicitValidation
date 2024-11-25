@@ -5,6 +5,12 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace System.IO;
 
+
+public static class TryStringReader
+{
+    
+}
+
 public static class StringReader_Extensions_U
 {
     public static UnionsWrapper Try(this System.IO.StringReader value)

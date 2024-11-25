@@ -5,6 +5,12 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace System.Text;
 
+
+public static class TryStringBuilder
+{
+    
+}
+
 public static class StringBuilder_Extensions_U
 {
     public static UnionsWrapper Try(this System.Text.StringBuilder value)
@@ -416,7 +422,7 @@ public static class StringBuilder_Extensions_U
 		{
 		    try
 		    {
-		        return this.Value.AppendFormat(provider, format, arg0);
+		        return this.Value.AppendFormat<TArg0>(provider, format, arg0);
 		    }
 		    catch (Exception exception)
 		    {
@@ -428,7 +434,7 @@ public static class StringBuilder_Extensions_U
 		{
 		    try
 		    {
-		        return this.Value.AppendFormat(provider, format, arg0, arg1);
+		        return this.Value.AppendFormat<TArg0, TArg1>(provider, format, arg0, arg1);
 		    }
 		    catch (Exception exception)
 		    {
@@ -440,7 +446,7 @@ public static class StringBuilder_Extensions_U
 		{
 		    try
 		    {
-		        return this.Value.AppendFormat(provider, format, arg0, arg1, arg2);
+		        return this.Value.AppendFormat<TArg0, TArg1, TArg2>(provider, format, arg0, arg1, arg2);
 		    }
 		    catch (Exception exception)
 		    {
@@ -524,7 +530,7 @@ public static class StringBuilder_Extensions_U
 		{
 		    try
 		    {
-		        return this.Value.AppendJoin(separator, values);
+		        return this.Value.AppendJoin<T>(separator, values);
 		    }
 		    catch (Exception exception)
 		    {
@@ -536,7 +542,7 @@ public static class StringBuilder_Extensions_U
 		{
 		    try
 		    {
-		        return this.Value.AppendJoin(separator, values);
+		        return this.Value.AppendJoin<T>(separator, values);
 		    }
 		    catch (Exception exception)
 		    {

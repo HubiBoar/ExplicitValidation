@@ -211,6 +211,22 @@ public static class Generic
         return new Type(type.ToDisplayString());
     }
 
+    public static Elements GetGenericParameterArguments(this ImmutableArray<ITypeSymbol> parameters)
+    {
+        var types = parameters.OfType<ITypeParameterSymbol>().ToImmutableArray();
+        if(types.Length == 0)
+        {
+            return new Elements(ImmutableArray<Generic.Element>.Empty);
+        }
+
+        return new Elements
+        (
+            types
+                .Select(GetGenericArgument)
+                .ToImmutableArray()
+        );
+    }
+
     public static Elements GetGenericArguments(this ImmutableArray<ITypeSymbol> parameters)
     {
         if(parameters.Length == 0)

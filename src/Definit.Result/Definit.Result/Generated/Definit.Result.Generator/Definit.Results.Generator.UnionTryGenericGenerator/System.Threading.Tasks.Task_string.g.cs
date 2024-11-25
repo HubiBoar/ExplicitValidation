@@ -5,6 +5,12 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace System.Threading.Tasks;
 
+
+public static class TryTask<TResult>
+{
+    
+}
+
 public static class Task_string_Extensions_U
 {
     public static UnionsWrapper Try(this System.Threading.Tasks.Task<string> value)
@@ -174,7 +180,7 @@ public static class Task_string_Extensions_U
 		{
 		    try
 		    {
-		        return new Opt<TNewResult>(await this.Value.ContinueWith(continuationFunction, state));
+		        return new Opt<TNewResult>(await this.Value.ContinueWith<TNewResult>(continuationFunction, state));
 		    }
 		    catch (Exception exception)
 		    {
@@ -186,7 +192,7 @@ public static class Task_string_Extensions_U
 		{
 		    try
 		    {
-		        return new Opt<TNewResult>(await this.Value.ContinueWith(continuationFunction, state, cancellationToken));
+		        return new Opt<TNewResult>(await this.Value.ContinueWith<TNewResult>(continuationFunction, state, cancellationToken));
 		    }
 		    catch (Exception exception)
 		    {
@@ -198,7 +204,7 @@ public static class Task_string_Extensions_U
 		{
 		    try
 		    {
-		        return new Opt<TNewResult>(await this.Value.ContinueWith(continuationFunction, state, cancellationToken, continuationOptions, scheduler));
+		        return new Opt<TNewResult>(await this.Value.ContinueWith<TNewResult>(continuationFunction, state, cancellationToken, continuationOptions, scheduler));
 		    }
 		    catch (Exception exception)
 		    {
@@ -210,7 +216,7 @@ public static class Task_string_Extensions_U
 		{
 		    try
 		    {
-		        return new Opt<TNewResult>(await this.Value.ContinueWith(continuationFunction, state, continuationOptions));
+		        return new Opt<TNewResult>(await this.Value.ContinueWith<TNewResult>(continuationFunction, state, continuationOptions));
 		    }
 		    catch (Exception exception)
 		    {
@@ -222,7 +228,7 @@ public static class Task_string_Extensions_U
 		{
 		    try
 		    {
-		        return new Opt<TNewResult>(await this.Value.ContinueWith(continuationFunction, state, scheduler));
+		        return new Opt<TNewResult>(await this.Value.ContinueWith<TNewResult>(continuationFunction, state, scheduler));
 		    }
 		    catch (Exception exception)
 		    {
@@ -234,7 +240,7 @@ public static class Task_string_Extensions_U
 		{
 		    try
 		    {
-		        return new Opt<TNewResult>(await this.Value.ContinueWith(continuationFunction));
+		        return new Opt<TNewResult>(await this.Value.ContinueWith<TNewResult>(continuationFunction));
 		    }
 		    catch (Exception exception)
 		    {
@@ -246,7 +252,7 @@ public static class Task_string_Extensions_U
 		{
 		    try
 		    {
-		        return new Opt<TNewResult>(await this.Value.ContinueWith(continuationFunction, cancellationToken));
+		        return new Opt<TNewResult>(await this.Value.ContinueWith<TNewResult>(continuationFunction, cancellationToken));
 		    }
 		    catch (Exception exception)
 		    {
@@ -258,7 +264,7 @@ public static class Task_string_Extensions_U
 		{
 		    try
 		    {
-		        return new Opt<TNewResult>(await this.Value.ContinueWith(continuationFunction, cancellationToken, continuationOptions, scheduler));
+		        return new Opt<TNewResult>(await this.Value.ContinueWith<TNewResult>(continuationFunction, cancellationToken, continuationOptions, scheduler));
 		    }
 		    catch (Exception exception)
 		    {
@@ -270,7 +276,7 @@ public static class Task_string_Extensions_U
 		{
 		    try
 		    {
-		        return new Opt<TNewResult>(await this.Value.ContinueWith(continuationFunction, continuationOptions));
+		        return new Opt<TNewResult>(await this.Value.ContinueWith<TNewResult>(continuationFunction, continuationOptions));
 		    }
 		    catch (Exception exception)
 		    {
@@ -282,7 +288,7 @@ public static class Task_string_Extensions_U
 		{
 		    try
 		    {
-		        return new Opt<TNewResult>(await this.Value.ContinueWith(continuationFunction, scheduler));
+		        return new Opt<TNewResult>(await this.Value.ContinueWith<TNewResult>(continuationFunction, scheduler));
 		    }
 		    catch (Exception exception)
 		    {

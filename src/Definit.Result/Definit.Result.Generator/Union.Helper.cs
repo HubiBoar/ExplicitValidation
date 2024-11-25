@@ -60,6 +60,7 @@ internal static class Helper
     public static string GenericTypeName(Generic.Elements elements) => $"{TypeName}{elements.ArgumentNamesFull}";
     public static string ExtensionsTypeName(int count) => $"Extensions_{TypeName}_{count}";
     public static string ExtensionsTypeName(string typeName) => $"{typeName}_Extensions_{TypeName}";
+    public static string StaticTypeName(string typeName) => $"Try{typeName}";
     public static string FileTypeName(int count) => $"{TypeNameWithNamespace}_{count}";
 
     public static Generic.Elements Generics(int count) => 

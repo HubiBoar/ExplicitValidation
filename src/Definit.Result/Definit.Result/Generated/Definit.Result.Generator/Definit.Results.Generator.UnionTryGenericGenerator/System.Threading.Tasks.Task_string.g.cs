@@ -6,7 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace System.Threading.Tasks;
 
 
-public static class TryTask<TResult>
+public static class TryTask_string
 {
     
 }

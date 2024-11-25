@@ -126,10 +126,25 @@ internal sealed class UnionTryGenerator : IIncrementalGenerator
         var typeName = type.Name;
         var callPrefix = type.ToDisplayString();
 
+        if(type.IsUnboundGenericType)
+        {
+            type = type.ConstructedFrom;
+        }
+
         if(type.IsGenericType)
         {
-            var generics = type.ConstructedFrom.TypeArguments.GetGenericParameterArguments();
-            typeName = $"{typeName}{generics.ArgumentNamesFull}{generics.ConstraintsString}";
+            var nonParameterGenericTypes = type.TypeArguments.Where(x => x is not ITypeParameterSymbol).Select(x => x.ToDisplayString()).ToImmutableArray();
+
+            if(nonParameterGenericTypes.Length > 0)
+            {
+                var generics = string.Join("_", nonParameterGenericTypes);
+                typeName = $"{typeName}_{generics}";
+            }
+            else
+            {
+                var generics = type.TypeArguments.GetGenericParameterArguments();
+                typeName = $"{typeName}{generics.ArgumentNamesFull}{generics.ConstraintsString}";
+            }
         }
 
         var typeMethods = type

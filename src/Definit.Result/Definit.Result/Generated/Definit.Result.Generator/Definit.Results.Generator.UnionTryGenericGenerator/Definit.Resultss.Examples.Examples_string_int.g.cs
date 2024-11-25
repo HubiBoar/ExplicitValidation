@@ -6,8 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace Definit.Resultss.Examples;
 
 
-public static class TryExamples<T0, T1>
-	where T0 : notnull
+public static class TryExamples_string_int
 {
     public static U<int, string, Definit.Resultss.Examples.NotFound, System.Exception> PublicRun(int i, System.IO.StringReader reader) 
 	{

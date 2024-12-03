@@ -64,7 +64,7 @@ public class ValueGenerator : IIncrementalGenerator
     {
         var (code, info) = type.BuildTypeHierarchy
         (
-            name => $"readonly {name}: {IsValidName}<{genericTypeSymbol.ToDisplayString()}>",
+            name => $"readonly {name}: {IsValidName}<{genericTypeSymbol.ToDisplayString()}, {type.Name}.Valid>",
             "Definit.Results",
             "Definit.Validation"
         );
@@ -76,6 +76,8 @@ public class ValueGenerator : IIncrementalGenerator
 
         code.AddBlock($$"""
         private readonly static Rule<{{valueType}}> _rule;
+
+        private const string _NAME = "{{constructorName}}";
 
         static {{constructorName}}()
         {
@@ -94,11 +96,14 @@ public class ValueGenerator : IIncrementalGenerator
 
         public static implicit operator {{valueType}}({{name}} value) => value.Value;
 
+        public U<Valid, ValidationError> IsValid(string? propertyName = null) => Valid.Create(this, propertyName);
 
-        public Either<Valid, ValidationError> IsValid(string? propertyName = null) => Valid.Create(this, propertyName);
+        public R<ValidationError> Validate(string? propertyName = null) => _rule.Validate(this.Value, propertyName ?? _NAME); 
 
         public readonly struct Valid
         {
+            private const string _NAME = "{{constructorName}}";
+
             public {{name}} Value { get; }
 
             private Valid({{name}} value)
@@ -106,12 +111,12 @@ public class ValueGenerator : IIncrementalGenerator
                 Value = value;
             }
 
-            public static Either<Valid, ValidationError> Create({{name}} value, string? propertyName = null)
+            public static U<Valid, ValidationError> Create({{name}} value, string? propertyName = null)
             {
-                var error = value.Validate(propertyName);
+                var (_, error) = value.Validate(propertyName ?? _NAME);
                 if(error is not null)
                 {
-                    return error;
+                    return error.Value;
                 }
 
                 return new Valid(value);

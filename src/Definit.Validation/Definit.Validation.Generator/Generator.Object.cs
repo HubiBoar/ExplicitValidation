@@ -75,21 +75,18 @@ public class ObjectGenerator : IIncrementalGenerator
 
         var validation = CreateValidation(properties.Select(x => x.Name).ToImmutableArray());
 
-        var validAssignment = string.Join(" ", properties.Select(x => $"{x.Type} valid_{x.Name} = default!;"));
-        var validCreation = string.Join(", ", properties.Select(x => $"valid_{x.Name}.Value!.NotNull()")).TrimEnd(',');
+        var validCreation = string.Join(", ", properties.Select(x => $"valid_{x.Name}!.Value")).TrimEnd(',');
 
         code.AddBlock($$"""
-        public ValidationError? Validate(string? propertyName = null)
-        {
-            if(IsValid(propertyName).IsError(out var error))
-            {
-                return error;
-            }
+        
+        private const string _NAME = "{{constructorName}}";
 
-            return null;
+        public R<ValidationError> Validate(string? propertyName = null)
+        {
+            return IsValid(propertyName ?? _NAME).ToResult();
         }
 
-        public Either<Valid, ValidationError> IsValid(string? propertyName = null) => Valid.Create(this, propertyName);
+        public U<Valid, ValidationError> IsValid(string? propertyName = null) => Valid.Create(this, propertyName);
 
         public readonly struct Valid
         {
@@ -103,11 +100,9 @@ public class ObjectGenerator : IIncrementalGenerator
                 {{constructorAssignment}}
             }
 
-            public static Either<Valid, ValidationError> Create({{name}} value, string? propertyName = null)
+            public static U<Valid, ValidationError> Create({{name}} value, string? propertyName = null)
             {
-                var name = propertyName is null ? "{{constructorName}}" : propertyName; 
-
-                {{validAssignment}}
+                var name = propertyName is null ? _NAME : propertyName; 
 
         {{validation}}
 
@@ -159,11 +154,11 @@ public class ObjectGenerator : IIncrementalGenerator
         static string Interior(string property)
         {
             return $$"""
-                    var (valid_{{property}}, error_{{property}}) = value.{{property}}.IsValid({{property}});
+                    var (valid_{{property}}, error_{{property}}) = value.{{property}}.IsValid("{{property}}");
 
                     if(error_{{property}} is not null)
                     {
-                        errors.Add(error_{{property}}.NotNull());
+                        errors.Add(error_{{property}}.Value);
                     }
 
             """;

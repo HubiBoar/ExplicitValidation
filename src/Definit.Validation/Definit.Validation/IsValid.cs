@@ -24,26 +24,33 @@ public sealed class IsValidAttribute<T> : Attribute
 
 public interface IIsValid
 {
-    ValidationError? Validate(string? propertyName = null);
+    R<ValidationError> Validate(string? propertyName = null);
 }
 
-public interface IIsValid<TValue> : IIsValid
+public interface IIsValid<TValue, TValid> : IIsValid
+    where TValid: notnull
 {
     public TValue Value { get; }
 
     abstract static void Rule(Rule<TValue> rule);
+
+    U<TValid, ValidationError> IsValid(string? propertyName = null);
 }
 
-public readonly struct ValidationError : IError<ValidationError. ArgumentException>
+public readonly struct ValidationError : IError<ValidationError>
 {
     public readonly record struct Property
     (
         ImmutableArray<string> Messages
     )
-    : IError
+    : IError<ValidationError.Property>
     {
+        public ErrorPayload Payload { get; init; }
+
         public override string ToString() => Formatting.ValidationError(this);
     };
+
+    public ErrorPayload Payload { get; init; }
 
     public ImmutableArray<(string Property, ValidationError.Property Value)> Errors { get; }
 
@@ -91,11 +98,35 @@ public readonly struct ValidationError : IError<ValidationError. ArgumentExcepti
     public override string ToString() => Formatting.ValidationError(this);
 }
 
-public static class Rule
+public static class RuleExtensions0
 {
-    public static Rule<TValue> Get<TValue>()
+    public static R<ValidationError> ToResult<T>(this U<T, ValidationError> result)
+        where T : struct
     {
-        return new Rule<TValue>();
+        var (_, error) = result;
+
+        if (error is not null)
+        {
+            return error.Value;
+        }
+
+        return R.Success;
+    }
+}
+
+public static class RuleExtensions1
+{
+    public static R<ValidationError> ToResult<T>(this U<T, ValidationError> result)
+        where T : class
+    {
+        var (_, error) = result;
+
+        if (error is not null)
+        {
+            return error.Value;
+        }
+
+        return R.Success;
     }
 }
 
@@ -103,13 +134,17 @@ public static class Exx
 {
     public record Class(Value Value1, Value Value2)
     {
-        public ValidationError? Validate(string? propertyName = null)
+        public R<ValidationError> Validate(string? propertyName = null)
         {
             var name = propertyName is null ? "Class" : propertyName; 
 
-            if(Value1.Validate("Value1").IsError(out var error0))
+            var (_, error0) = Value1.Validate("Value1");
+
+            if(error0 is not null)
             {
-                if(Value2.Validate("Value2").IsError(out var error1))
+                var (_, error1) = Value1.Validate("Value1");
+
+                if(error1 is not null)
                 {
                     return new ValidationError(name, [error0.Value, error1.Value]);
                 }
@@ -117,13 +152,13 @@ public static class Exx
                 return new ValidationError(name, [error0.Value]);
             }
 
-            return null;
+            return R.Success;
         }
     }
 
     public record Value(string Val)
     {
-        public ValidationError? Validate(string? propertyName = null)
+        public R<ValidationError> Validate(string? propertyName = null)
         {
             return new Rule<string>().Validate(Val, propertyName ?? "Value");
         }

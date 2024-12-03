@@ -25,6 +25,7 @@
     <ItemGroup>
         <ProjectReference Include="..\..\Definit.Result\Definit.Result\Definit.Result.csproj" />
         <ProjectReference Include="..\..\Definit.Utils\Definit.Utils\Definit.Utils.csproj" />
+        <ProjectReference Include="..\..\Definit.Utils\Definit.Utils.SourceGeneration\Definit.Utils.SourceGeneration.csproj" OutputItemType="Analyzer"/>
         <ProjectReference Include="..\Definit.Validation.Generator\Definit.Validation.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
     </ItemGroup>
 

@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using Definit.Results;
+using Definit.Utils;
 
 namespace Definit.Validation;
 
@@ -37,10 +38,16 @@ public interface IIsValid<TValue, TValid> : IIsValid
     U<TValid, ValidationError> IsValid(string? propertyName = null);
 }
 
+public interface IValidationError
+{
+    public ValidationError ToValidationError();
+}
+
 public readonly struct ValidationError : IError<ValidationError>
 {
     public readonly record struct Property
     (
+        string Name,
         ImmutableArray<string> Messages
     )
     : IError<ValidationError.Property>
@@ -52,9 +59,15 @@ public readonly struct ValidationError : IError<ValidationError>
 
     public ErrorPayload Payload { get; init; }
 
-    public ImmutableArray<(string Property, ValidationError.Property Value)> Errors { get; }
+    public ImmutableArray<ValidationError.Property> Errors { get; }
 
-    public ValidationError(ImmutableArray<(string Property, ValidationError.Property Value)> errors)
+    public ValidationError(string propertyName, string error)
+    {
+        var property = new Property(propertyName, [error]);
+        Errors = [ property ]; 
+    }
+
+    public ValidationError(ImmutableArray<ValidationError.Property> errors)
     {
         Errors = errors;
     }
@@ -69,7 +82,12 @@ public readonly struct ValidationError : IError<ValidationError>
         Errors = Create(string.Empty, errors);
     }
 
-    private static ImmutableArray<(string Property, ValidationError.Property Value)> Create
+    public static ValidationError Null<T>(string propertyName)
+    {
+        return new ValidationError($"{DefinitType.GetTypeVerboseName<T>()}::{propertyName}", "Value is Null"); 
+    }
+
+    private static ImmutableArray<ValidationError.Property> Create
     (
         string propertyName, 
         ImmutableArray<ValidationError> errors
@@ -81,14 +99,14 @@ public readonly struct ValidationError : IError<ValidationError>
             errorsCount += errors[i].Errors.Length;
         }
 
-        var props = new (string, ValidationError.Property)[errorsCount];
+        var props = new ValidationError.Property[errorsCount];
         for(int i = 0; i < errors.Length; i++)
         {
             var error = errors[i];
             for(int a = 0; a < error.Errors.Length; a++)
             {
                 var property = error.Errors[a];
-                props[i + a] = ($"{propertyName}{property.Property}", property.Value);
+                props[i + a] = new ValidationError.Property($"{propertyName}{property.Name}", property.Messages);
             }
         }
 

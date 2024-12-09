@@ -6,7 +6,7 @@ internal static class Formatting
         => $"[{rule}] :: {message}";
 
     public static string ValidationError(ValidationError error)
-        => string.Join("\n", error.Errors.Select(x => $"{x.Property} => {x.Value.ToString()}"));
+        => string.Join("\n", error.Errors.Select(x => $"{x.Name} => {x.ToString()}"));
 
     public static string ValidationError(ValidationError.Property property)
         => string.Join(string.Empty, property.Messages.Select(x => $"\n\t -> {x};"));    

@@ -20,9 +20,33 @@ public interface ISectionName
     public abstract static string SectionName { get; }
 }
 
+public sealed record NotFound(string Property) : IValidationError
+{
+    private readonly string _message = $"[{Property}] NotFound";
+
+    private readonly ValidationError _error = new (Property, $"[{Property}] NotFound");
+
+    public override string ToString() => _message;
+
+    public ValidationError ToValidationError() => _error;
+}
+
+public sealed record Null<T>(string Property) : IValidationError
+{
+    private static string Type = DefinitType.GetTypeVerboseName<T>();
+
+    private readonly string _message = $"[{Type}::{Property}] Is Null";
+
+    private readonly ValidationError _error = new (Property, $"[{Type}::{Property}] Is Null");
+
+    public override string ToString() => _message;
+
+    public ValidationError ToValidationError() => _error;
+}
+
 public static class ConfigHelper
 {
-    public static Result<TValue, ValidationError> GetValue<TValue>(IConfiguration configuration, string sectionName)
+    public static U<TValue, NotFound, Null<TValue>, Exception> GetValue<TValue>(IConfiguration configuration, string sectionName)
         where TValue : notnull
     {
         try
@@ -30,13 +54,13 @@ public static class ConfigHelper
             var section = configuration.GetSection(sectionName);
             if(section.Exists() == false)
             {
-                return new ValidationErrors(sectionName, $"Section: [{sectionName}] Is Missing");
+                return new NotFound($"ConfigSection: {sectionName}");
             }
 
             var value = section.Get<TValue>();
             if (value is null)
             {
-                return ValidationError.Null(DefinitType.GetTypeVerboseName<TValue>());
+                return new Null<TValue>(sectionName);
             }
 
             return value;

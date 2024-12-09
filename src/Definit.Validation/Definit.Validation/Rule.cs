@@ -7,7 +7,7 @@ public sealed record Rule<TValue>()
 {
     private readonly List<Func<TValue, (string Rule, string Message)?>> _rules = [];
 
-    public R<ValidationError.Property> Validate(TValue value)
+    public R<ValidationError.Property> ValidateProperty(TValue value, string propertyName)
     {
         List<(string Rule, string Message)> errors = [];
         foreach(var rule in _rules)
@@ -21,7 +21,7 @@ public sealed record Rule<TValue>()
 
         if(errors.Count > 0)
         {
-            return new ValidationError.Property(errors.Select(x => Formatting.Rule(x.Rule, x.Message)).ToImmutableArray());
+            return new ValidationError.Property(propertyName, errors.Select(x => Formatting.Rule(x.Rule, x.Message)).ToImmutableArray());
         }
 
         return R.Success;
@@ -29,11 +29,11 @@ public sealed record Rule<TValue>()
 
     public R<ValidationError> Validate(TValue value, string propertyName)
     {
-        var (_, error) = Validate(value);
+        var (_, error) = Validate(value, propertyName);
 
         if(error is not null)
         {
-            return new ValidationError([(propertyName, error.Value)]);  
+            return new ValidationError([error.Value]);  
         }
 
         return R.Success;

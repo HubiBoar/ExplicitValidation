@@ -1,80 +1,36 @@
-﻿
-namespace Definit.Configuration;
+﻿namespace Definit.Configuration;
 
-public interface IConfigValue : ISectionName, IConfigObject
+[System.AttributeUsage
+(
+    System.AttributeTargets.Class,
+    AllowMultiple = false
+)]
+public sealed class ConfigAttribute : Attribute
 {
-
 }
 
-public interface IConfigValue<TValue> : IValidate<TValue>, IConfigValue
-{
-}
-
-public interface IConfigValue<TValue, TMethod> : IConfigValue<TValue>
+[System.AttributeUsage
+(
+    System.AttributeTargets.Class,
+    AllowMultiple = false
+)]
+public sealed class ConfigAttribute<TValue> : Attribute
     where TValue : notnull
-    where TMethod : IValidate<TValue>
 {
-    public static IsValid<Value<TValue, TMethod>> Create(IConfiguration configuration, string sectionName)
-    {
-        return ConfigHelper.GetValue<TValue>(configuration, sectionName)
-            .Match(
-                value => value.IsValid<TValue, TMethod>(),
-                error => error,
-                error => error);
-    }
 }
 
-public abstract class ConfigValueBase<TSection, TValue, TMethod> : IConfigObject<Value<TValue, TMethod>>
-    where TSection : ISectionName
-    where TValue : notnull
-    where TMethod : IValidate<TValue>
+[Config<string>]
+public partial record TestValue
 {
-    public delegate IsValid<Value<TValue, TMethod>> Get();
+    public static string SectionName => "Value";
 
-    public static ValidationResult Validate(Validator<TValue> context)
-    {
-        return TMethod.Validate(context);
-    }
-
-    public static IsValid<Value<TValue, TMethod>> Create(IServiceProvider _, IConfiguration configuration)
-    {
-        return Create(configuration);
-    }
-
-    public static ValidationResult Register(IServiceCollection services, IConfiguration configuration)
-    {
-        services.AddSingleton<Get>(provider => () => Create(configuration));
-
-        return Create(configuration).Success;
-    }
-
-    public static IsValid<Value<TValue, TMethod>> Create(IConfiguration configuration)
-    {
-        return IConfigValue<TValue, TMethod>.Create(configuration, TSection.SectionName);
-    }
-
-    public static ValidationResult ValidateConfiguration(IConfiguration configuration)
-    {
-        return Create(configuration).Success;
-    }
+    public static void Rule(Rule<string> rule) => rule.NotNull();
 }
 
-public abstract class ConfigValue<TSelf, TValue, TMethod> : ConfigValueBase<TSelf, TValue, TMethod>, ISectionName, IConfigValue<TValue> 
-    where TSelf : ConfigValue<TSelf, TValue, TMethod>, new()
-    where TValue : notnull
-    where TMethod : IValidate<TValue>
+[Config<int>]
+public partial record TestIntValue
 {
-    static string ISectionName.SectionName => new TSelf().SectionName;
+    public static string SectionName => "Value";
 
-    protected abstract string SectionName { get; }
-}
-
-public static class ConfigValue<TValue, TMethod>
-    where TValue : notnull
-    where TMethod : IValidate<TValue>
-{
-    public abstract class As<TSelf> : ConfigValue<TSelf, TValue, TMethod>
-        where TSelf : As<TSelf>, new()
-    {
-    }
+    public static void Rule(Rule<int> rule) => rule.NotNull();
 }

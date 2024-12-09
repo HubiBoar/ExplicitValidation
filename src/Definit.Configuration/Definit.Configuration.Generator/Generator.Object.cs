@@ -4,14 +4,13 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Definit.Validation.Generator;
+namespace Definit.Configuration.Generator;
 
 [Generator]
 public class ObjectGenerator : IIncrementalGenerator
 {
-    private const string Attribute = "Definit.Validation.IsValidAttribute";
-    private const string IsValidName = "Definit.Validation.IIsValid";
-    private const string ValidInterface = "Definit.Validation.IValid";
+    private const string Attribute = "Definit.Configuration.ConfigAttribute";
+    private const string IsValidName = "Definit.Configuration.IConfig";
     
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
@@ -89,7 +88,7 @@ public class ObjectGenerator : IIncrementalGenerator
 
         public U<Valid, ValidationError> IsValid(string? propertyName = null) => Valid.Create(this, propertyName);
 
-        public readonly struct Valid : {{ValidInterface}}<{{name}}>
+        public readonly struct Valid
         {
             public {{name}} Value { get; } 
     

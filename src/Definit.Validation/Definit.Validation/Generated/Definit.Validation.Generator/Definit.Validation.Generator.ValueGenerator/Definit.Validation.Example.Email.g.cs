@@ -7,7 +7,7 @@ namespace Definit.Validation;
 
 partial class Example
 {
-	readonly partial struct Email: Definit.Validation.IIsValid<string, Email.Valid>
+	partial struct Email: Definit.Validation.IIsValid<string, Email.Valid>
 	{
 		private readonly static Rule<string> _rule;
 		
@@ -30,17 +30,17 @@ partial class Example
 		
 		public static implicit operator string(Definit.Validation.Example.Email value) => value.Value;
 		
-		public U<Valid, ValidationError> IsValid(string? propertyName = null) => Valid.Create(this, propertyName);
+		public U<Valid, ValidationError> IsValid(string? propertyName = null) => Valid.Create(this.Value, propertyName);
 		
 		public R<ValidationError> Validate(string? propertyName = null) => _rule.Validate(this.Value, propertyName ?? _NAME); 
 		
-		public readonly struct Valid
+		public readonly struct Valid : Definit.Validation.IValid<string>
 		{
 		    private const string _NAME = "Email";
 		
-		    public Definit.Validation.Example.Email Value { get; }
+		    public string Value { get; }
 		
-		    private Valid(Definit.Validation.Example.Email value)
+		    private Valid(string value)
 		    {
 		        Value = value;
 		    }
@@ -53,7 +53,7 @@ partial class Example
 		            return error.Value;
 		        }
 		
-		        return new Valid(value);
+		        return new Valid(value.Value);
 		    }
 		}
 	}

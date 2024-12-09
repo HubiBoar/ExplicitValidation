@@ -9,7 +9,7 @@ partial class Example
 {
 	partial class Parent1
 	{
-		readonly partial struct Value1: Definit.Validation.IIsValid<string, Value1.Valid>
+		partial struct Value1: Definit.Validation.IIsValid<string, Value1.Valid>
 		{
 			private readonly static Rule<string> _rule;
 			
@@ -32,17 +32,17 @@ partial class Example
 			
 			public static implicit operator string(Definit.Validation.Example.Parent1.Value1 value) => value.Value;
 			
-			public U<Valid, ValidationError> IsValid(string? propertyName = null) => Valid.Create(this, propertyName);
+			public U<Valid, ValidationError> IsValid(string? propertyName = null) => Valid.Create(this.Value, propertyName);
 			
 			public R<ValidationError> Validate(string? propertyName = null) => _rule.Validate(this.Value, propertyName ?? _NAME); 
 			
-			public readonly struct Valid
+			public readonly struct Valid : Definit.Validation.IValid<string>
 			{
 			    private const string _NAME = "Value1";
 			
-			    public Definit.Validation.Example.Parent1.Value1 Value { get; }
+			    public string Value { get; }
 			
-			    private Valid(Definit.Validation.Example.Parent1.Value1 value)
+			    private Valid(string value)
 			    {
 			        Value = value;
 			    }
@@ -55,7 +55,7 @@ partial class Example
 			            return error.Value;
 			        }
 			
-			        return new Valid(value);
+			        return new Valid(value.Value);
 			    }
 			}
 		}

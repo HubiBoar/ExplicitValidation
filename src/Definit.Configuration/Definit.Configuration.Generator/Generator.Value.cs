@@ -4,14 +4,14 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Definit.Validation.Generator;
+namespace Definit.Configuration.Generator;
 
 [Generator]
 public class ValueGenerator : IIncrementalGenerator
 {
-    private const string Attribute = "Definit.Validation.IsValidAttribute`1";
-    private const string AttributeName = "Definit.Validation.IsValidAttribute<";
-    private const string IsValidName = "Definit.Validation.IIsValid";
+    private const string Attribute = "Definit.Configuration.ConfigAttribute`1";
+    private const string AttributeName = "Definit.Configuration.ConfigAttribute<";
+    private const string InterfaceName = "Definit.Configuration.IConfig";
     private const string ValidInterface = "Definit.Validation.IValid";
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -65,8 +65,9 @@ public class ValueGenerator : IIncrementalGenerator
     {
         var (code, info) = type.BuildTypeHierarchy
         (
-            name => $"{name}: {IsValidName}<{genericTypeSymbol.ToDisplayString()}, {type.Name}.Valid>",
+            name => $"sealed {name}: {InterfaceName}<{genericTypeSymbol.ToDisplayString()}, {type.Name}.Valid>",
             "Definit.Results",
+            "Definit.Configuration",
             "Definit.Validation"
         );
 
@@ -78,33 +79,37 @@ public class ValueGenerator : IIncrementalGenerator
         code.AddBlock($$"""
         private readonly static Rule<{{valueType}}> _rule;
 
-        private const string _NAME = "{{constructorName}}";
-
         static {{constructorName}}()
         {
             _rule = new();
             Rule(_rule);
         }
 
-        public {{valueType}} Value { get; }
+        public Func<U<Valid, ValidationError>> Value { get; init; }
 
-        public {{constructorName}}({{valueType}} value)
+        public {{constructorName}}(Func<U<Valid, ValidationError>> value)
         {
             Value = value;
         }
 
-        public static implicit operator {{name}}({{valueType}} value) => new (value);
+        public {{constructorName}}(IConfiguration configuration)
+        {
+            Value = () => Valid.Create(configuration);
+        }
 
-        public static implicit operator {{valueType}}({{name}} value) => value.Value;
+        public U<Valid, ValidationError> IsValid(string? propertyName = null) => Value();
 
-        public U<Valid, ValidationError> IsValid(string? propertyName = null) => Valid.Create(this.Value, propertyName);
+        public R<ValidationError> Validate(string? propertyName = null) => Value().ToResult(); 
 
-        public R<ValidationError> Validate(string? propertyName = null) => _rule.Validate(this.Value, propertyName ?? _NAME); 
+        public static R<ValidationError> Register(IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddSingleton<{{name}}>(_ => new {{name}}(configuration));
+
+            return new {{name}}(configuration).Validate();
+        }
 
         public readonly struct Valid : {{ValidInterface}}<{{valueType}}>
         {
-            private const string _NAME = "{{constructorName}}";
-
             public {{valueType}} Value { get; }
 
             private Valid({{valueType}} value)
@@ -112,15 +117,21 @@ public class ValueGenerator : IIncrementalGenerator
                 Value = value;
             }
 
-            public static U<Valid, ValidationError> Create({{name}} value, string? propertyName = null)
+            public static U<Valid, ValidationError> Create(IConfiguration configuration)
             {
-                var (_, error) = value.Validate(propertyName ?? _NAME);
-                if(error is not null)
+                var (value, error) = ConfigHelper.GetValue<{{valueType}}>(configuration, {{name}}.SectionName);  
+                if (error is not null)
                 {
                     return error.Value;
                 }
 
-                return new Valid(value.Value);
+                (var _, error) = _rule.Validate(({{valueType}})value!, SectionName);
+                if (error is not null)
+                {
+                    return error.Value;
+                }
+
+                return new Valid(({{valueType}})value!);
             }
         }
         """);

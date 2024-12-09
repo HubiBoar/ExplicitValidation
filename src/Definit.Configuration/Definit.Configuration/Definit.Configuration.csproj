@@ -4,8 +4,24 @@
         <Title>Definit.Configuration</Title>
         <Description>Definit Configuration</Description>
         <PackageTags>configuration</PackageTags>
+        <Nullable>enable</Nullable>
+        <WarningsAsErrors>Nullable</WarningsAsErrors>
     </PropertyGroup>
     
+    <PropertyGroup>
+        <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+        <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
+    </PropertyGroup>
+
+    <Target Name="CleanSourceGeneratedFiles" BeforeTargets="BeforeBuild" DependsOnTargets="$(BeforeBuildDependsOn)">
+        <RemoveDir Directories="Generated" />
+    </Target>
+
+    <ItemGroup>
+        <Compile Remove="Generated\**" />
+        <Content Include="Generated\**" />
+    </ItemGroup> 
+
     <ItemGroup>
         <PackageReference Include="Microsoft.FeatureManagement.AspNetCore" />
         <PackageReference Include="Microsoft.Extensions.Options" />
@@ -18,6 +34,8 @@
         <ProjectReference Include="..\..\Definit.Result\Definit.Result\Definit.Result.csproj" />
         <ProjectReference Include="..\..\Definit.Utils\Definit.Utils\Definit.Utils.csproj" />
         <ProjectReference Include="..\..\Definit.Validation\Definit.Validation\Definit.Validation.csproj" />
+        <ProjectReference Include="..\..\Definit.Utils\Definit.Utils.SourceGeneration\Definit.Utils.SourceGeneration.csproj" OutputItemType="Analyzer"/>
+        <ProjectReference Include="..\Definit.Configuration.Generator\Definit.Configuration.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
     </ItemGroup>
 
 </Project>

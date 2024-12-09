@@ -19,7 +19,8 @@ public sealed class IsValidAttribute : Attribute
     System.AttributeTargets.Struct,
     AllowMultiple = false
 )]
-public sealed class IsValidAttribute<T> : Attribute
+public sealed class IsValidAttribute<TValue> : Attribute
+    where TValue : notnull
 {
 }
 
@@ -28,14 +29,22 @@ public interface IIsValid
     R<ValidationError> Validate(string? propertyName = null);
 }
 
-public interface IIsValid<TValue, TValid> : IIsValid
-    where TValid: notnull
+public interface IIsValid<TValue> : IIsValid
+{
+    abstract static void Rule(Rule<TValue> rule);
+}
+
+public interface IIsValid<TValue, TValid> : IIsValid<TValue>
+    where TValue: notnull
+    where TValid: IValid<TValue>
+{
+    U<TValid, ValidationError> IsValid(string? propertyName = null);
+}
+
+public interface IValid<TValue>
+    where TValue: notnull
 {
     public TValue Value { get; }
-
-    abstract static void Rule(Rule<TValue> rule);
-
-    U<TValid, ValidationError> IsValid(string? propertyName = null);
 }
 
 public interface IValidationError
@@ -80,6 +89,11 @@ public readonly struct ValidationError : IError<ValidationError>
     public ValidationError(ImmutableArray<ValidationError> errors)
     {
         Errors = Create(string.Empty, errors);
+    }
+
+    public static ValidationError Exception(Exception exception)
+    {
+        return new ValidationError($"Exception: {exception.GetType()}", exception.Message); 
     }
 
     public static ValidationError Null<T>(string propertyName)

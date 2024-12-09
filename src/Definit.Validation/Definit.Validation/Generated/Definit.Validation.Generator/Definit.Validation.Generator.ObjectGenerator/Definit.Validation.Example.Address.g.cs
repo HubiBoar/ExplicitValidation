@@ -20,7 +20,7 @@ partial class Example
 		
 		public U<Valid, ValidationError> IsValid(string? propertyName = null) => Valid.Create(this, propertyName);
 		
-		public readonly struct Valid
+		public readonly struct Valid : Definit.Validation.IValid<Definit.Validation.Example.Address>
 		{
 		    public Definit.Validation.Example.Address Value { get; } 
 		

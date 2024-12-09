@@ -2,22 +2,18 @@
 
 namespace Definit.Configuration;
 
-public interface IConfigObject
+public interface IConfig : IIsValid
 {
-    public static abstract ValidationResult Register(IServiceCollection services, IConfiguration configuration);
+    abstract static string SectionName { get; }
 
-    public static abstract ValidationResult ValidateConfiguration(IConfiguration configuration);
+    abstract static R<ValidationError> Register(IServiceCollection services, IConfiguration configuration);
 }
 
-public interface IConfigObject<TValue> : IConfigObject
-    where TValue : IValidate<TValue>
+public interface IConfig<TValue, TValid> : IConfig, IIsValid<TValue, TValid>
+    where TValue : notnull
+    where TValid : IValid<TValue>
 {
-    public static abstract IsValid<TValue> Create(IServiceProvider services, IConfiguration configuration);
-}
-
-public interface ISectionName
-{
-    public abstract static string SectionName { get; }
+    Func<U<TValid, ValidationError>> Value { get; init; }
 }
 
 public sealed record NotFound(string Property) : IValidationError
@@ -46,33 +42,33 @@ public sealed record Null<T>(string Property) : IValidationError
 
 public static class ConfigHelper
 {
-    public static U<TValue, NotFound, Null<TValue>, Exception> GetValue<TValue>(IConfiguration configuration, string sectionName)
+    public static U<TValue, ValidationError> GetValue<TValue>(IConfiguration configuration, string sectionName)
         where TValue : notnull
     {
         try
         {
             var section = configuration.GetSection(sectionName);
-            if(section.Exists() == false)
+            if (section.Exists() is false)
             {
-                return new NotFound($"ConfigSection: {sectionName}");
+                return new ValidationError(sectionName, $"Config Section: Not Found");
             }
 
             var value = section.Get<TValue>();
             if (value is null)
             {
-                return new Null<TValue>(sectionName);
+                return ValidationError.Null<TValue>(sectionName);
             }
 
             return value;
         }
-        catch(Exception exception)
+        catch (Exception exception)
         {
-            return exception;
+            return ValidationError.Exception(exception);
         }
     }
 
-    public static ValidationResult Register<T>(this IServiceCollection services, IConfiguration configuration)
-        where T : IConfigObject
+    public static R<ValidationError> Register<T>(this IServiceCollection services, IConfiguration configuration)
+        where T : IConfig
     {
         return T.Register(services, configuration);
     }

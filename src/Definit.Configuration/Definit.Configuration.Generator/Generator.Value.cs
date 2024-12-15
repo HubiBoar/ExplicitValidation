@@ -127,6 +127,17 @@ public class ValueGenerator : IIncrementalGenerator
                 Value = value;
             }
 
+            public static U<Valid, ValidationError> Create({{valueType}} value)
+            {
+                (var _, error) = _rule.Validate(value, Config.SectionName);
+                if (error is not null)
+                {
+                    return error.Value;
+                }
+
+                return new Valid(value);
+            }
+
             public static U<Valid, ValidationError> Create(IConfiguration configuration)
             {
                 var (value, error) = ConfigHelper.GetValue<{{valueType}}>(configuration, Config.SectionName);  
@@ -135,13 +146,7 @@ public class ValueGenerator : IIncrementalGenerator
                     return error.Value;
                 }
 
-                (var _, error) = _rule.Validate(({{valueType}})value!, Config.SectionName);
-                if (error is not null)
-                {
-                    return error.Value;
-                }
-
-                return new Valid(({{valueType}})value!);
+                return Create(({{valueType}})value!)
             }
         }
         """);

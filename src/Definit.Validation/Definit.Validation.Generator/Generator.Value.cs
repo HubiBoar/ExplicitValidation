@@ -65,7 +65,7 @@ public class ValueGenerator : IIncrementalGenerator
     {
         var (code, info) = type.BuildTypeHierarchy
         (
-            name => $"{name}: {IsValidName}<{genericTypeSymbol.ToDisplayString()}, {type.Name}.Valid>",
+            name => $"{name}: {IsValidName}<{genericTypeSymbol.ToDisplayString()}>, {IsValidName}<{type.Name}, {type.Name}.Valid>",
             "Definit.Results",
             "Definit.Validation"
         );
@@ -101,15 +101,21 @@ public class ValueGenerator : IIncrementalGenerator
 
         public U<ValidationError> Validate(string? propertyName = null) => _rule.Validate(this.Value, propertyName ?? _NAME); 
 
-        public readonly struct Valid : {{ValidInterface}}<{{valueType}}>
+        public static U<Valid, ValidationError> Create({{name}} value, string? propertyName = null) => Valid.Create(value, propertyName); 
+
+        public readonly struct Valid : {{ValidInterface}}<{{name}}>
         {
             private const string _NAME = "{{constructorName}}";
 
-            public {{valueType}} Value { get; }
+            {{name}} {{ValidInterface}}<{{name}}>.Value => this.Parent;
 
-            private Valid({{valueType}} value)
+            public {{valueType}} Value => Parent.Value;
+
+            public {{name}} Parent { get; }
+
+            private Valid({{name}} parent)
             {
-                Value = value;
+                this.Parent = parent;
             }
 
             public static U<Valid, ValidationError> Create({{name}} value, string? propertyName = null)
@@ -120,7 +126,7 @@ public class ValueGenerator : IIncrementalGenerator
                     return error.Value;
                 }
 
-                return new Valid(value.Value);
+                return new Valid(value);
             }
         }
         """);

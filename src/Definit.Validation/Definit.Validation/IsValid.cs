@@ -34,11 +34,15 @@ public interface IIsValid<TValue> : IIsValid
     abstract static void Rule(Rule<TValue> rule);
 }
 
-public interface IIsValid<TValue, TValid> : IIsValid<TValue>
+public interface IIsValid<TValue, TValid> : IIsValid
     where TValue: notnull
     where TValid: IValid<TValue>
 {
     U<TValid, ValidationError> IsValid(string? propertyName = null);
+
+    public abstract static U<TValid, ValidationError> Create(TValue value, string? propertyName = null);
+
+    public abstract static TValue Parse(string json);
 }
 
 public interface IValid<TValue>

@@ -50,9 +50,10 @@ public class ObjectGenerator : IIncrementalGenerator
         INamedTypeSymbol type
     )
     {
+        var typeName = type.ToDisplayString();
         var (code, info) = type.BuildTypeHierarchy
         (
-            name => $"{name}: {IsValidName}",
+            name => $"{name}: {IsValidName}<{typeName}, {typeName}.Valid>",
             "System.Collections.Immutable",
             "Definit.Results",
             "Definit.Validation"
@@ -88,6 +89,8 @@ public class ObjectGenerator : IIncrementalGenerator
         }
 
         public U<Valid, ValidationError> IsValid(string? propertyName = null) => Valid.Create(this, propertyName);
+
+        public static U<Valid, ValidationError> Create({{name}} value, string? propertyName = null) => Valid.Create(value, propertyName); 
 
         public readonly struct Valid : {{ValidInterface}}<{{name}}>
         {

@@ -79,15 +79,36 @@ public class ObjectGenerator : IIncrementalGenerator
         var validCreation = string.Join(", ", properties.Select(x => $"valid_{x.Name}!.Value")).TrimEnd(',');
 
         code.AddBlock($$"""
-        
-        private const string _NAME = "{{constructorName}}";
+         
+        public static U<ValidationError> Register(IServiceCollection services, IConfiguration configuration) => Config.Register(services, configuration);
 
-        public U<ValidationError> Validate(string? propertyName = null)
+        public sealed class Config : {{InterfaceName}}<{{genericTypeSymbol.ToDisplayString()}}, {{type.Name}}.Valid>
         {
-            return IsValid(propertyName ?? _NAME).ToResult();
-        }
+            public static string SectionName => {{name}}.SectionName;
 
-        public U<Valid, ValidationError> IsValid(string? propertyName = null) => Valid.Create(this, propertyName);
+            private Func<U<Valid, ValidationError>> Value { get; init; }
+
+            public Config(Func<U<Valid, ValidationError>> value)
+            {
+                Value = value;
+            }
+
+            public Config(IConfiguration configuration)
+            {
+                Value = () => Valid.Create(configuration);
+            }
+
+            public U<Valid, ValidationError> IsValid(string? propertyName = null) => Value();
+
+            public U<ValidationError> Validate(string? propertyName = null) => Value().ToResult();
+
+            public static U<ValidationError> Register(IServiceCollection services, IConfiguration configuration)
+            {
+                services.AddSingleton<Config>(_ => new Config(configuration));
+
+                return new Config(configuration).Validate();
+            }
+        }
 
         public readonly struct Valid
         {
@@ -103,7 +124,11 @@ public class ObjectGenerator : IIncrementalGenerator
 
             public static U<Valid, ValidationError> Create(IConfiguration configuration)
             {
-                var name = propertyName is null ? _NAME : propertyName; 
+                var (value, error) = ConfigHelper.GetValue<{{valueType}}>(configuration, Config.SectionName);  
+                if (error is not null)
+                {
+                    return error.Value;
+                }
 
         {{validation}}
 

@@ -12,12 +12,14 @@ internal static partial class Example
         public static void Rule(Rule<string> rule) => rule.NotNull();
     }
 
-    [Config<int>]
-    public partial record TestIntValue
+    [Config]
+    public partial record TestObject
+    (
+        string Name,
+        TestValue Value
+    )
     {
         public static string SectionName => "Value";
-
-        public static void Rule(Rule<int> rule) => rule.NotNull();
     }
 
     private class Test

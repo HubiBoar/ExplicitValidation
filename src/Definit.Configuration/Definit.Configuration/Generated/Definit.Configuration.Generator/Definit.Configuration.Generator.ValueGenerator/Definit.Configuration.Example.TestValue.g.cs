@@ -8,41 +8,50 @@ namespace Definit.Configuration;
 
 partial class Example
 {
-	sealed partial record TestValue: Definit.Configuration.IConfig<string, TestValue.Valid>
+	sealed partial record TestValue: Definit.Configuration.IConfig<string, TestValue.Config, TestValue.Valid>
 	{
-		private readonly static Rule<string> _rule;
+		public static U<ValidationError> Register(IServiceCollection services, IConfiguration configuration) => Config.Register(services, configuration);
 		
-		static TestValue()
+		public sealed class Config : Definit.Configuration.IConfig<string, TestValue.Valid>
 		{
-		    _rule = new();
-		    Rule(_rule);
-		}
+		    public static string SectionName => Definit.Configuration.Example.TestValue.SectionName;
 		
-		private Func<U<Valid, ValidationError>> Value { get; init; }
+		    public static void Rule(Rule<string> rule) => Definit.Configuration.Example.TestValue.Rule(rule);
 		
-		public TestValue(Func<U<Valid, ValidationError>> value)
-		{
-		    Value = value;
-		}
+		    private Func<U<Valid, ValidationError>> Value { get; init; }
 		
-		public TestValue(IConfiguration configuration)
-		{
-		    Value = () => Valid.Create(configuration);
-		}
+		    public Config(Func<U<Valid, ValidationError>> value)
+		    {
+		        Value = value;
+		    }
 		
-		public U<Valid, ValidationError> IsValid(string? propertyName = null) => Value();
+		    public Config(IConfiguration configuration)
+		    {
+		        Value = () => Valid.Create(configuration);
+		    }
 		
-		public U<ValidationError> Validate(string? propertyName = null) => Value().ToResult(); 
+		    public U<Valid, ValidationError> IsValid(string? propertyName = null) => Value();
 		
-		public static U<ValidationError> Register(IServiceCollection services, IConfiguration configuration)
-		{
-		    services.AddSingleton<Definit.Configuration.Example.TestValue>(_ => new Definit.Configuration.Example.TestValue(configuration));
+		    public U<ValidationError> Validate(string? propertyName = null) => Value().ToResult(); 
 		
-		    return new Definit.Configuration.Example.TestValue(configuration).Validate();
+		    public static U<ValidationError> Register(IServiceCollection services, IConfiguration configuration)
+		    {
+		        services.AddSingleton<Config>(_ => new Config(configuration));
+		
+		        return new Config(configuration).Validate();
+		    }
 		}
 		
 		public readonly struct Valid : Definit.Validation.IValid<string>
 		{
+		    private readonly static Rule<string> _rule;
+		
+		    static Valid()
+		    {
+		        _rule = new();
+		        Config.Rule(_rule);
+		    }
+		
 		    public string Value { get; }
 		
 		    private Valid(string value)
@@ -52,13 +61,13 @@ partial class Example
 		
 		    public static U<Valid, ValidationError> Create(IConfiguration configuration)
 		    {
-		        var (value, error) = ConfigHelper.GetValue<string>(configuration, Definit.Configuration.Example.TestValue.SectionName);  
+		        var (value, error) = ConfigHelper.GetValue<string>(configuration, Config.SectionName);  
 		        if (error is not null)
 		        {
 		            return error.Value;
 		        }
 		
-		        (var _, error) = _rule.Validate((string)value!, SectionName);
+		        (var _, error) = _rule.Validate((string)value!, Config.SectionName);
 		        if (error is not null)
 		        {
 		            return error.Value;

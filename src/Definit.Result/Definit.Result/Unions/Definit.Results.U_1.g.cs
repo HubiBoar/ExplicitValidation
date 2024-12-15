@@ -34,7 +34,7 @@ readonly partial struct U<TError>
 	public static implicit operator Definit.Results.U<TError>(Definit.Results.Success value) => new (value);
 	public static implicit operator Definit.Results.U<TError>(TError value) => new (value);
 	
-	public void Switch<TReturn>
+	public void Switch
 	(
 	    Action<Definit.Results.Success> switch0,
 		Action<TError> switch1,
@@ -64,7 +64,7 @@ readonly partial struct U<TError>
 	    throw new Definit.Results.UnionMatchException<Definit.Results.U<TError>>(); 
 	}
 	
-	public async Task Switch<TReturn>
+	public async Task Switch
 	(
 	    Func<Async, Definit.Results.Success, Task> switch0,
 		Action<TError> switch1,
@@ -94,7 +94,7 @@ readonly partial struct U<TError>
 	    throw new Definit.Results.UnionMatchException<Definit.Results.U<TError>>(); 
 	}
 	
-	public async Task Switch<TReturn>
+	public async Task Switch
 	(
 	    Action<Definit.Results.Success> switch0,
 		Func<Async, TError, Task> switch1,
@@ -124,7 +124,7 @@ readonly partial struct U<TError>
 	    throw new Definit.Results.UnionMatchException<Definit.Results.U<TError>>(); 
 	}
 	
-	public async Task Switch<TReturn>
+	public async Task Switch
 	(
 	    Func<Async, Definit.Results.Success, Task> switch0,
 		Func<Async, TError, Task> switch1,

@@ -31,11 +31,12 @@ internal static partial class Example
 
         private void Run()
         {
-            var (x, error) = value.IsValid(); 
-            
-            if (x is not null)
-            {
-            }
+            value.IsValid().Switch
+            (
+                valid => Logic(valid),
+                error => {},
+                ex => {}
+            ); 
         }
 
         private void Logic(TestValue.Valid valid)

@@ -35,7 +35,7 @@ public readonly struct U<T0, T1, T2, T3> : U<T0, T1, T2, T3>.Base
 	public static implicit operator U<T0, T1, T2, T3>(T2 value) => new (value);
 	public static implicit operator U<T0, T1, T2, T3>(T3 value) => new (value);
 	
-	public void Switch<TReturn>
+	public void Switch
 	(
 	    Action<T0> switch0,
 		Action<T1> switch1,
@@ -77,7 +77,7 @@ public readonly struct U<T0, T1, T2, T3> : U<T0, T1, T2, T3>.Base
 	    throw new Definit.Results.UnionMatchException<U<T0, T1, T2, T3>>(); 
 	}
 	
-	public async Task Switch<TReturn>
+	public async Task Switch
 	(
 	    Func<Async, T0, Task> switch0,
 		Action<T1> switch1,
@@ -119,7 +119,7 @@ public readonly struct U<T0, T1, T2, T3> : U<T0, T1, T2, T3>.Base
 	    throw new Definit.Results.UnionMatchException<U<T0, T1, T2, T3>>(); 
 	}
 	
-	public async Task Switch<TReturn>
+	public async Task Switch
 	(
 	    Action<T0> switch0,
 		Func<Async, T1, Task> switch1,
@@ -161,7 +161,7 @@ public readonly struct U<T0, T1, T2, T3> : U<T0, T1, T2, T3>.Base
 	    throw new Definit.Results.UnionMatchException<U<T0, T1, T2, T3>>(); 
 	}
 	
-	public async Task Switch<TReturn>
+	public async Task Switch
 	(
 	    Func<Async, T0, Task> switch0,
 		Func<Async, T1, Task> switch1,
@@ -203,7 +203,7 @@ public readonly struct U<T0, T1, T2, T3> : U<T0, T1, T2, T3>.Base
 	    throw new Definit.Results.UnionMatchException<U<T0, T1, T2, T3>>(); 
 	}
 	
-	public async Task Switch<TReturn>
+	public async Task Switch
 	(
 	    Action<T0> switch0,
 		Action<T1> switch1,
@@ -245,7 +245,7 @@ public readonly struct U<T0, T1, T2, T3> : U<T0, T1, T2, T3>.Base
 	    throw new Definit.Results.UnionMatchException<U<T0, T1, T2, T3>>(); 
 	}
 	
-	public async Task Switch<TReturn>
+	public async Task Switch
 	(
 	    Func<Async, T0, Task> switch0,
 		Action<T1> switch1,
@@ -287,7 +287,7 @@ public readonly struct U<T0, T1, T2, T3> : U<T0, T1, T2, T3>.Base
 	    throw new Definit.Results.UnionMatchException<U<T0, T1, T2, T3>>(); 
 	}
 	
-	public async Task Switch<TReturn>
+	public async Task Switch
 	(
 	    Action<T0> switch0,
 		Func<Async, T1, Task> switch1,
@@ -329,7 +329,7 @@ public readonly struct U<T0, T1, T2, T3> : U<T0, T1, T2, T3>.Base
 	    throw new Definit.Results.UnionMatchException<U<T0, T1, T2, T3>>(); 
 	}
 	
-	public async Task Switch<TReturn>
+	public async Task Switch
 	(
 	    Func<Async, T0, Task> switch0,
 		Func<Async, T1, Task> switch1,
@@ -371,7 +371,7 @@ public readonly struct U<T0, T1, T2, T3> : U<T0, T1, T2, T3>.Base
 	    throw new Definit.Results.UnionMatchException<U<T0, T1, T2, T3>>(); 
 	}
 	
-	public async Task Switch<TReturn>
+	public async Task Switch
 	(
 	    Action<T0> switch0,
 		Action<T1> switch1,
@@ -413,7 +413,7 @@ public readonly struct U<T0, T1, T2, T3> : U<T0, T1, T2, T3>.Base
 	    throw new Definit.Results.UnionMatchException<U<T0, T1, T2, T3>>(); 
 	}
 	
-	public async Task Switch<TReturn>
+	public async Task Switch
 	(
 	    Func<Async, T0, Task> switch0,
 		Action<T1> switch1,
@@ -455,7 +455,7 @@ public readonly struct U<T0, T1, T2, T3> : U<T0, T1, T2, T3>.Base
 	    throw new Definit.Results.UnionMatchException<U<T0, T1, T2, T3>>(); 
 	}
 	
-	public async Task Switch<TReturn>
+	public async Task Switch
 	(
 	    Action<T0> switch0,
 		Func<Async, T1, Task> switch1,
@@ -497,7 +497,7 @@ public readonly struct U<T0, T1, T2, T3> : U<T0, T1, T2, T3>.Base
 	    throw new Definit.Results.UnionMatchException<U<T0, T1, T2, T3>>(); 
 	}
 	
-	public async Task Switch<TReturn>
+	public async Task Switch
 	(
 	    Func<Async, T0, Task> switch0,
 		Func<Async, T1, Task> switch1,
@@ -539,7 +539,7 @@ public readonly struct U<T0, T1, T2, T3> : U<T0, T1, T2, T3>.Base
 	    throw new Definit.Results.UnionMatchException<U<T0, T1, T2, T3>>(); 
 	}
 	
-	public async Task Switch<TReturn>
+	public async Task Switch
 	(
 	    Action<T0> switch0,
 		Action<T1> switch1,
@@ -581,7 +581,7 @@ public readonly struct U<T0, T1, T2, T3> : U<T0, T1, T2, T3>.Base
 	    throw new Definit.Results.UnionMatchException<U<T0, T1, T2, T3>>(); 
 	}
 	
-	public async Task Switch<TReturn>
+	public async Task Switch
 	(
 	    Func<Async, T0, Task> switch0,
 		Action<T1> switch1,
@@ -623,7 +623,7 @@ public readonly struct U<T0, T1, T2, T3> : U<T0, T1, T2, T3>.Base
 	    throw new Definit.Results.UnionMatchException<U<T0, T1, T2, T3>>(); 
 	}
 	
-	public async Task Switch<TReturn>
+	public async Task Switch
 	(
 	    Action<T0> switch0,
 		Func<Async, T1, Task> switch1,
@@ -665,7 +665,7 @@ public readonly struct U<T0, T1, T2, T3> : U<T0, T1, T2, T3>.Base
 	    throw new Definit.Results.UnionMatchException<U<T0, T1, T2, T3>>(); 
 	}
 	
-	public async Task Switch<TReturn>
+	public async Task Switch
 	(
 	    Func<Async, T0, Task> switch0,
 		Func<Async, T1, Task> switch1,

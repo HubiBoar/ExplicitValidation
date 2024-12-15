@@ -54,8 +54,7 @@ internal static class Helper
     public static class Base
     {
         public const bool Activated = false;
-        public const int Count = 10;
-        public const int MaxDeconstructorsCount = 8;
+        public const int Count = 9;
     }
 
     public static string GenericTypeName(Generic.Elements elements) => $"{TypeName}{elements.ArgumentNamesFull}";

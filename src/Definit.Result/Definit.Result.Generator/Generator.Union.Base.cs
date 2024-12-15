@@ -201,7 +201,7 @@ internal sealed class UnionBaseGenerator : IIncrementalGenerator
                 })
                 .ToArray();
 
-            string match = anyAsync ? "async Task Switch<TReturn>" : "void Switch<TReturn>";  
+            string match = anyAsync ? "async Task Switch" : "void Switch";  
             var signatures = string.Join(",\n\t", generic.Select(x => x.Signature));
 
             var methodResult = string.Join(",", allGenericParams.Value.Select((_, i) => $"_arg{i}"));
@@ -327,165 +327,77 @@ internal sealed class UnionBaseGenerator : IIncrementalGenerator
             :
             string.Empty;
 
-        if (length <= Helper.Base.MaxDeconstructorsCount)
+        var generic = allGenericParams.Value.Select((x, i) => (Type: x, Return: $"_arg_{i}", Assign: $"_out_{i}")).ToArray();
+        var outArgs = string.Join(",\n\t", generic.Select(x => $"out {x.Type.Name}? {x.Return}"));
+        var returns = string.Join(", ", generic.Select(x => x.Assign));
+        var assignments = string.Join("\n\t", generic.Select(x => $"{x.Return} = {x.Assign}?.Out ?? null;"));
+        var nullValues = string.Join(" ", generic.Select(x => $"{x.Return} = null;"));
+        var states = GenerateAllStates(typeGenericParams.Value.Length);
+
+        return string.Join("\n\n", states.Select(state => 
         {
-            return GenerateDeconstructors();
-        }
-        
-        return GenerateDeconstructorsAboveMaxCount();
-
-        string GenerateDeconstructors()
-        {
-            var generic = allGenericParams.Value.Select((x, i) => (Type: x, Return: $"_arg_{i}", Assign: $"_out_{i}")).ToArray();
-            var outArgs = string.Join(",\n\t", generic.Select(x => $"out {x.Type.Name}? {x.Return}"));
-            var returns = string.Join(", ", generic.Select(x => x.Assign));
-            var assignments = string.Join("\n\t", generic.Select(x => $"{x.Return} = {x.Assign}?.Out ?? null;"));
-            var nullValues = string.Join(" ", generic.Select(x => $"{x.Return} = null;"));
-            var states = GenerateAllStates(typeGenericParams.Value.Length);
-
-            return string.Join("\n\n", states.Select(state => 
+            var genericConstraints = new Generic.Elements(state.Select<bool, Generic.Element>((isClass, i) =>
             {
-                var genericConstraints = new Generic.Elements(state.Select<bool, Generic.Element>((isClass, i) =>
+                var (type, argument) = typeGenericParams.Value[i];
+                if(type is not null)
                 {
-                    var (type, argument) = typeGenericParams.Value[i];
-                    if(type is not null)
-                    {
-                        return type.Value;
-                    }
-                    
-                    var genericParam = argument!.Value;
-
-                    var main = genericParam.Constraint;
-
-                    if(isClass)
-                    {
-                        var cantBeClass = 
-                           main is Generic.Constraint.Struct
-                        || main is Generic.Constraint.Unmanaged;
-                         
-                        if(cantBeClass)
-                        {
-                            return genericParam;
-                        }
-
-                        var newMain = main.IsNew() ? Generic.Constraint.ClassNew : Generic.Constraint.Class;
-
-                        return new Generic.Argument(genericParam.Name, newMain, false, genericParam.Types);
-                    }
-                    else
-                    {
-                        var canBeStruct = 
-                           main is Generic.Constraint.Struct
-                        || main is Generic.Constraint.New
-                        || main is Generic.Constraint.NotnullNew
-                        || main is Generic.Constraint.Notnull;
-                         
-                        if(canBeStruct == false)
-                        {
-                            return genericParam;
-                        }
-
-                        var newMain = Generic.Constraint.Struct;
-
-                        return new Generic.Argument(genericParam.Name, newMain, false, genericParam.Types);
-                    }
-                }).ToImmutableArray()); 
-
-                return $$"""
-                public static void Deconstruct{{typeGenericArgs}}
-                (
-                    this {{typeName}} either,
-                    {{outArgs}}
-                ){{genericConstraints.ConstraintsString}}
-                {
-                    var ({{returns}}) = either.Value;
-                    {{assignments}}
+                    return type.Value;
                 }
+                
+                var genericParam = argument!.Value;
 
-                public static void Deconstruct{{typeGenericArgs}}
-                (
-                    this {{typeName}}? either,
-                    {{outArgs}}
-                ){{genericConstraints.ConstraintsString}}
+                var main = genericParam.Constraint;
+
+                if(isClass)
                 {
-                    if(either is null)
+                    var cantBeClass = 
+                       main is Generic.Constraint.Struct
+                    || main is Generic.Constraint.Unmanaged;
+                     
+                    if(cantBeClass)
                     {
-                        {{nullValues}}
-                        return;
+                        return genericParam;
                     }
 
-                    var ({{returns}}) = either.Value.Value;
-                    {{assignments}}
-                }
-                """;
-            }));
-        }
+                    var newMain = main.IsNew() ? Generic.Constraint.ClassNew : Generic.Constraint.Class;
 
-        string GenerateDeconstructorsAboveMaxCount()
-        {
-            int roundedUp = (int)Math.Ceiling((double)length / Helper.Base.MaxDeconstructorsCount); 
-            var parts = new int[roundedUp];
-            var total = length;
-            while(total > 0)
-            {
-                for(int i = 0; i < roundedUp; i++)
+                    return new Generic.Argument(genericParam.Name, newMain, false, genericParam.Types);
+                }
+                else
                 {
-                    parts[i]++; 
-                    total --;
-                    if(total == 0)
+                    var canBeStruct = 
+                       main is Generic.Constraint.Struct
+                    || main is Generic.Constraint.New
+                    || main is Generic.Constraint.NotnullNew
+                    || main is Generic.Constraint.Notnull;
+                     
+                    if(canBeStruct == false)
                     {
-                        break;
+                        return genericParam;
                     }
+
+                    var newMain = Generic.Constraint.Struct;
+
+                    return new Generic.Argument(genericParam.Name, newMain, false, genericParam.Types);
                 }
-            }
-            
-            int starter = 0;
-            var eitherGenerics = parts.Select(x =>
-            {
-                var indexes = Enumerable.Range(starter, x).ToArray();
-                var result = indexes.Select(i => allGenericParams.Value[i]).ToArray();             
-                starter += x;
-                return (Generics: result, ArgsIndexes: indexes);
-            })
-            .ToArray();
-
-            var eitherGenericsArgs = eitherGenerics
-                .Select((x, i) => (Type: $"{Helper.TypeName}<" + string.Join(", ", x.Generics.Select(e => e.Name)) + ">", Name: $"_arg_{i}", Generic: x))
-                .ToArray();
-
-            var outArgs = string.Join(",\n\t", eitherGenericsArgs.Select((x) => $"out {x.Type}? {x.Name}"));
-            var nullValues = string.Join(" ", eitherGenericsArgs.Select(x => $"{x.Name} = null;"));
-            var genericConstraints = allGenericParams.ConstraintsString;
-            var results = Enumerable.Range(0, length).Select(x => $"_out_{x}").ToArray();
-            var assignOut = string.Join(", ", results);
-
-            var returns = string.Join("\n\t", eitherGenericsArgs
-                .Select(x => $"{x.Name} = " + string.Join("", x
-                    .Generic
-                    .ArgsIndexes
-                    .Select(i => 
-                    {
-                        var result = results[i];
-                        return $"{result} is not null ? new ({result}.Value.Out) : ";
-                    }))
-                    + "null;" )); 
+            }).ToImmutableArray()); 
 
             return $$"""
             public static void Deconstruct{{typeGenericArgs}}
             (
                 this {{typeName}} either,
                 {{outArgs}}
-            ){{genericConstraints}}
+            ){{genericConstraints.ConstraintsString}}
             {
-                var ({{assignOut}}) = either.Value;
-                {{returns}}
+                var ({{returns}}) = either.Value;
+                {{assignments}}
             }
 
             public static void Deconstruct{{typeGenericArgs}}
             (
                 this {{typeName}}? either,
                 {{outArgs}}
-            ){{genericConstraints}}
+            ){{genericConstraints.ConstraintsString}}
             {
                 if(either is null)
                 {
@@ -493,11 +405,11 @@ internal sealed class UnionBaseGenerator : IIncrementalGenerator
                     return;
                 }
 
-                var ({{assignOut}}) = either.Value.Value;
-                {{returns}}
+                var ({{returns}}) = either.Value.Value;
+                {{assignments}}
             }
             """;
-        }
+        }));
     }
 
     private static bool[][] GenerateAllStates(int size)

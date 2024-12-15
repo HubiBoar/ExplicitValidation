@@ -12,6 +12,7 @@ public class ValueGenerator : IIncrementalGenerator
     private const string Attribute = "Definit.Configuration.ConfigAttribute`1";
     private const string AttributeName = "Definit.Configuration.ConfigAttribute<";
     private const string InterfaceName = "Definit.Configuration.IConfig";
+    private const string InterfaceBaseName = "Definit.Configuration.IConfig";
     private const string ValidInterface = "Definit.Validation.IValid";
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -65,7 +66,7 @@ public class ValueGenerator : IIncrementalGenerator
     {
         var (code, info) = type.BuildTypeHierarchy
         (
-            name => $"sealed {name}",
+            name => $"sealed {name}: {InterfaceBaseName}<{genericTypeSymbol.ToDisplayString()}, {type.Name}.Config, {type.Name}.Valid>",
             "Definit.Results",
             "Definit.Configuration",
             "Definit.Validation"
@@ -77,15 +78,13 @@ public class ValueGenerator : IIncrementalGenerator
         var valueType = genericTypeSymbol.ToDisplayString();
 
         code.AddBlock($$"""
+        public static U<ValidationError> Register(IServiceCollection services, IConfiguration configuration) => Config.Register(services, configuration);
+
         public sealed class Config : {{InterfaceName}}<{{genericTypeSymbol.ToDisplayString()}}, {{type.Name}}.Valid>
         {
-            private readonly static Rule<{{valueType}}> _rule;
+            public static string SectionName => {{name}}.SectionName;
 
-            static Config()
-            {
-                _rule = new();
-                {{name}}.Rule(_rule);
-            }
+            public static void Rule(Rule<{{valueType}}> rule) => {{name}}.Rule(rule);
 
             private Func<U<Valid, ValidationError>> Value { get; init; }
 
@@ -113,6 +112,14 @@ public class ValueGenerator : IIncrementalGenerator
 
         public readonly struct Valid : {{ValidInterface}}<{{valueType}}>
         {
+            private readonly static Rule<{{valueType}}> _rule;
+
+            static Valid()
+            {
+                _rule = new();
+                Config.Rule(_rule);
+            }
+
             public {{valueType}} Value { get; }
 
             private Valid({{valueType}} value)
@@ -122,13 +129,13 @@ public class ValueGenerator : IIncrementalGenerator
 
             public static U<Valid, ValidationError> Create(IConfiguration configuration)
             {
-                var (value, error) = ConfigHelper.GetValue<{{valueType}}>(configuration, {{name}}.SectionName);  
+                var (value, error) = ConfigHelper.GetValue<{{valueType}}>(configuration, Config.SectionName);  
                 if (error is not null)
                 {
                     return error.Value;
                 }
 
-                (var _, error) = _rule.Validate(({{valueType}})value!, SectionName);
+                (var _, error) = _rule.Validate(({{valueType}})value!, Config.SectionName);
                 if (error is not null)
                 {
                     return error.Value;

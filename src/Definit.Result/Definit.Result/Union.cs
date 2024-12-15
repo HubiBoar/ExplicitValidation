@@ -1,5 +1,10 @@
 namespace Definit.Results;
 
+public readonly struct Async
+{
+    public static Async Instance { get; } = new ();
+}
+
 [AttributeUsage(AttributeTargets.Struct, AllowMultiple = false)]
 public sealed class UnionAttribute : Attribute;
 

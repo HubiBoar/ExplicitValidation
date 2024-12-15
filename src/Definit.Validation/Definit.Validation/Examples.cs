@@ -34,7 +34,7 @@ internal static partial class Example
         Email EmailProp
     );
 
-    private static async Task<R<ValidationError>> Endpoint(UserData body)
+    private static async Task<U<ValidationError>> Endpoint(UserData body)
     {
         var (valid, error) = body.IsValid();
 
@@ -46,13 +46,13 @@ internal static partial class Example
         return await Run(valid!.Value.Address);
     }
 
-    private static async Task<R<ValidationError>> Run(Address.Valid valid)
+    private static async Task<U<ValidationError>> Run(Address.Valid valid)
     {
         await Task.CompletedTask;
-        return R.Success;
+        return U.Success;
     }
 
-    private static async Task<R<ValidationError>> Endpoint(Email body)
+    private static async Task<U<ValidationError>> Endpoint(Email body)
     {
         var (valid, error) = body.IsValid();
 
@@ -64,10 +64,10 @@ internal static partial class Example
         return await Run(valid!.Value);
     }
 
-    private static async Task<R<ValidationError>> Run(Email.Valid valid)
+    private static async Task<U<ValidationError>> Run(Email.Valid valid)
     {
         await Task.CompletedTask;
-        return R.Success;
+        return U.Success;
     }
 }
 

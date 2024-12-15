@@ -26,7 +26,7 @@ public sealed class IsValidAttribute<TValue> : Attribute
 
 public interface IIsValid
 {
-    R<ValidationError> Validate(string? propertyName = null);
+    U<ValidationError> Validate(string? propertyName = null);
 }
 
 public interface IIsValid<TValue> : IIsValid
@@ -132,7 +132,7 @@ public readonly struct ValidationError : IError<ValidationError>
 
 public static class RuleExtensions0
 {
-    public static R<ValidationError> ToResult<T>(this U<T, ValidationError> result)
+    public static U<ValidationError> ToResult<T>(this U<T, ValidationError> result)
         where T : struct
     {
         var (_, error) = result;
@@ -142,13 +142,13 @@ public static class RuleExtensions0
             return error.Value;
         }
 
-        return R.Success;
+        return U.Success;
     }
 }
 
 public static class RuleExtensions1
 {
-    public static R<ValidationError> ToResult<T>(this U<T, ValidationError> result)
+    public static U<ValidationError> ToResult<T>(this U<T, ValidationError> result)
         where T : class
     {
         var (_, error) = result;
@@ -158,7 +158,7 @@ public static class RuleExtensions1
             return error.Value;
         }
 
-        return R.Success;
+        return U.Success;
     }
 }
 
@@ -166,7 +166,7 @@ public static class Exx
 {
     public record Class(Value Value1, Value Value2)
     {
-        public R<ValidationError> Validate(string? propertyName = null)
+        public U<ValidationError> Validate(string? propertyName = null)
         {
             var name = propertyName is null ? "Class" : propertyName; 
 
@@ -184,13 +184,13 @@ public static class Exx
                 return new ValidationError(name, [error0.Value]);
             }
 
-            return R.Success;
+            return U.Success;
         }
     }
 
     public record Value(string Val)
     {
-        public R<ValidationError> Validate(string? propertyName = null)
+        public U<ValidationError> Validate(string? propertyName = null)
         {
             return new Rule<string>().Validate(Val, propertyName ?? "Value");
         }

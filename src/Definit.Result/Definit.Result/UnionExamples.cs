@@ -101,10 +101,21 @@ public partial class Examples<T0>
 public partial class Examples<T0, T1>
     where T0 : notnull
 {
-    public static ResultExample2<int> PublicRun(int i, StringReader reader)
+    public async Task<ResultExample2<int>> PublicRun(int i, StringReader reader)
     {
-        //var (str, notFound, u, exception) = this.Try().PublicRun(i, reader);
-        return string.Empty;
+        return await (await this.Try().PublicRun(i, reader)).Match<ResultExample2<int>>
+        (
+            async (_, i) => await GetInt(i),
+            str => str,
+            async (_, notFound) => await GetInt(50),
+            ex => new NotFound(),
+            ex => new NotFound()
+        );
+
+        static Task<int> GetInt(int i)
+        {
+            return Task.FromResult<int>(i);
+        }
     }
 
     public ResultExample2<int> PrivateRun(int i)

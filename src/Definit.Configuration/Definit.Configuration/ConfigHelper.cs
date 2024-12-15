@@ -6,14 +6,13 @@ public interface IConfig : IIsValid
 {
     abstract static string SectionName { get; }
 
-    abstract static R<ValidationError> Register(IServiceCollection services, IConfiguration configuration);
+    abstract static U<ValidationError> Register(IServiceCollection services, IConfiguration configuration);
 }
 
 public interface IConfig<TValue, TValid> : IConfig, IIsValid<TValue, TValid>
     where TValue : notnull
     where TValid : IValid<TValue>
 {
-    Func<U<TValid, ValidationError>> Value { get; init; }
 }
 
 public sealed record NotFound(string Property) : IValidationError
@@ -67,7 +66,7 @@ public static class ConfigHelper
         }
     }
 
-    public static R<ValidationError> Register<T>(this IServiceCollection services, IConfiguration configuration)
+    public static U<ValidationError> Register<T>(this IServiceCollection services, IConfiguration configuration)
         where T : IConfig
     {
         return T.Register(services, configuration);

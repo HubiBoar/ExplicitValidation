@@ -99,7 +99,7 @@ public class ValueGenerator : IIncrementalGenerator
 
         public U<Valid, ValidationError> IsValid(string? propertyName = null) => Valid.Create(this.Value, propertyName);
 
-        public R<ValidationError> Validate(string? propertyName = null) => _rule.Validate(this.Value, propertyName ?? _NAME); 
+        public U<ValidationError> Validate(string? propertyName = null) => _rule.Validate(this.Value, propertyName ?? _NAME); 
 
         public readonly struct Valid : {{ValidInterface}}<{{valueType}}>
         {

@@ -1,43 +1,30 @@
 ﻿#nullable enable
 
+using Definit.Results;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Definit.Results;
+namespace Definit.Resultss.Examples;
 
-public readonly struct Success;
-public readonly struct NotFound;
-
-public static class U
+readonly partial struct ResultExample<T>
+	where T : notnull
 {
-    public static Success Success { get; } = new Success();
-}
-
-//[Union]
-public readonly partial struct U<TError> : U<Success, TError>.Base
-    where TError : notnull
-{
-}
-
-readonly partial struct U<TError>
-	where TError : notnull
-{
-	public (Or<Definit.Results.Success>?, Or<TError>?) Value { get; }
+	public (Or<T>?, Or<Definit.Resultss.Examples.NotFound>?) Value { get; }
 	
 	[Obsolete(DefaultConstructorException.Attribute, true)]
-	public U() => throw new DefaultConstructorException();
+	public ResultExample() => throw new DefaultConstructorException();
 	
-	public U(Definit.Results.Success value) => Value = (value!, null);
-	public U(TError value) => Value = (null, value!);
+	public ResultExample(T value) => Value = (value!, null);
+	public ResultExample(Definit.Resultss.Examples.NotFound value) => Value = (null, value!);
 	
-	public static implicit operator Definit.Results.U<TError>([DisallowNull] Definit.Results.UnionMatchError _) => throw new Definit.Results.UnionMatchException<Definit.Results.U<TError>>();
+	public static implicit operator Definit.Resultss.Examples.ResultExample<T>([DisallowNull] Definit.Results.UnionMatchError _) => throw new Definit.Results.UnionMatchException<Definit.Resultss.Examples.ResultExample<T>>();
 	
-	public static implicit operator Definit.Results.U<TError>(Definit.Results.Success value) => new (value);
-	public static implicit operator Definit.Results.U<TError>(TError value) => new (value);
+	public static implicit operator Definit.Resultss.Examples.ResultExample<T>(T value) => new (value);
+	public static implicit operator Definit.Resultss.Examples.ResultExample<T>(Definit.Resultss.Examples.NotFound value) => new (value);
 	
 	public void Switch<TReturn>
 	(
-	    Action<Definit.Results.Success> switch0,
-		Action<TError> switch1,
+	    Action<T> switch0,
+		Action<Definit.Resultss.Examples.NotFound> switch1,
 	    Action<System.Exception> onException
 	)
 	{
@@ -61,13 +48,13 @@ readonly partial struct U<TError>
 	        onException(exception);
 	    }
 	
-	    throw new Definit.Results.UnionMatchException<Definit.Results.U<TError>>(); 
+	    throw new Definit.Results.UnionMatchException<Definit.Resultss.Examples.ResultExample<T>>(); 
 	}
 	
 	public async Task Switch<TReturn>
 	(
-	    Func<Async, Definit.Results.Success, Task> switch0,
-		Action<TError> switch1,
+	    Func<Async, T, Task> switch0,
+		Action<Definit.Resultss.Examples.NotFound> switch1,
 	    Action<System.Exception> onException
 	)
 	{
@@ -91,13 +78,13 @@ readonly partial struct U<TError>
 	        onException(exception);
 	    }
 	
-	    throw new Definit.Results.UnionMatchException<Definit.Results.U<TError>>(); 
+	    throw new Definit.Results.UnionMatchException<Definit.Resultss.Examples.ResultExample<T>>(); 
 	}
 	
 	public async Task Switch<TReturn>
 	(
-	    Action<Definit.Results.Success> switch0,
-		Func<Async, TError, Task> switch1,
+	    Action<T> switch0,
+		Func<Async, Definit.Resultss.Examples.NotFound, Task> switch1,
 	    Action<System.Exception> onException
 	)
 	{
@@ -121,13 +108,13 @@ readonly partial struct U<TError>
 	        onException(exception);
 	    }
 	
-	    throw new Definit.Results.UnionMatchException<Definit.Results.U<TError>>(); 
+	    throw new Definit.Results.UnionMatchException<Definit.Resultss.Examples.ResultExample<T>>(); 
 	}
 	
 	public async Task Switch<TReturn>
 	(
-	    Func<Async, Definit.Results.Success, Task> switch0,
-		Func<Async, TError, Task> switch1,
+	    Func<Async, T, Task> switch0,
+		Func<Async, Definit.Resultss.Examples.NotFound, Task> switch1,
 	    Action<System.Exception> onException
 	)
 	{
@@ -151,13 +138,13 @@ readonly partial struct U<TError>
 	        onException(exception);
 	    }
 	
-	    throw new Definit.Results.UnionMatchException<Definit.Results.U<TError>>(); 
+	    throw new Definit.Results.UnionMatchException<Definit.Resultss.Examples.ResultExample<T>>(); 
 	}
 	
 	public TReturn Match<TReturn>
 	(
-	    Func<Definit.Results.Success, TReturn> match0,
-		Func<TError, TReturn> match1,
+	    Func<T, TReturn> match0,
+		Func<Definit.Resultss.Examples.NotFound, TReturn> match1,
 	    Func<System.Exception, TReturn> onException
 	)
 	{
@@ -181,13 +168,13 @@ readonly partial struct U<TError>
 	        return onException(exception);
 	    }
 	
-	    throw new Definit.Results.UnionMatchException<Definit.Results.U<TError>>(); 
+	    throw new Definit.Results.UnionMatchException<Definit.Resultss.Examples.ResultExample<T>>(); 
 	}
 	
 	public async Task<TReturn> Match<TReturn>
 	(
-	    Func<Async, Definit.Results.Success, Task<TReturn>> match0,
-		Func<TError, TReturn> match1,
+	    Func<Async, T, Task<TReturn>> match0,
+		Func<Definit.Resultss.Examples.NotFound, TReturn> match1,
 	    Func<System.Exception, TReturn> onException
 	)
 	{
@@ -211,13 +198,13 @@ readonly partial struct U<TError>
 	        return onException(exception);
 	    }
 	
-	    throw new Definit.Results.UnionMatchException<Definit.Results.U<TError>>(); 
+	    throw new Definit.Results.UnionMatchException<Definit.Resultss.Examples.ResultExample<T>>(); 
 	}
 	
 	public async Task<TReturn> Match<TReturn>
 	(
-	    Func<Definit.Results.Success, TReturn> match0,
-		Func<Async, TError, Task<TReturn>> match1,
+	    Func<T, TReturn> match0,
+		Func<Async, Definit.Resultss.Examples.NotFound, Task<TReturn>> match1,
 	    Func<System.Exception, TReturn> onException
 	)
 	{
@@ -241,13 +228,13 @@ readonly partial struct U<TError>
 	        return onException(exception);
 	    }
 	
-	    throw new Definit.Results.UnionMatchException<Definit.Results.U<TError>>(); 
+	    throw new Definit.Results.UnionMatchException<Definit.Resultss.Examples.ResultExample<T>>(); 
 	}
 	
 	public async Task<TReturn> Match<TReturn>
 	(
-	    Func<Async, Definit.Results.Success, Task<TReturn>> match0,
-		Func<Async, TError, Task<TReturn>> match1,
+	    Func<Async, T, Task<TReturn>> match0,
+		Func<Async, Definit.Resultss.Examples.NotFound, Task<TReturn>> match1,
 	    Func<System.Exception, TReturn> onException
 	)
 	{
@@ -271,32 +258,32 @@ readonly partial struct U<TError>
 	        return onException(exception);
 	    }
 	
-	    throw new Definit.Results.UnionMatchException<Definit.Results.U<TError>>(); 
+	    throw new Definit.Results.UnionMatchException<Definit.Resultss.Examples.ResultExample<T>>(); 
 	}
 }
 
-public static partial class U_Extensions_U
+public static partial class ResultExample_Extensions_U
 {
-    public static void Deconstruct<TError>
+    public static void Deconstruct<T>
 	(
-	    this Definit.Results.U<TError> either,
-	    out Definit.Results.Success? _arg_0,
-		out TError? _arg_1
+	    this Definit.Resultss.Examples.ResultExample<T> either,
+	    out T? _arg_0,
+		out Definit.Resultss.Examples.NotFound? _arg_1
 	)
-		where TError : struct
+		where T : struct
 	{
 	    var (_out_0, _out_1) = either.Value;
 	    _arg_0 = _out_0?.Out ?? null;
 		_arg_1 = _out_1?.Out ?? null;
 	}
 	
-	public static void Deconstruct<TError>
+	public static void Deconstruct<T>
 	(
-	    this Definit.Results.U<TError>? either,
-	    out Definit.Results.Success? _arg_0,
-		out TError? _arg_1
+	    this Definit.Resultss.Examples.ResultExample<T>? either,
+	    out T? _arg_0,
+		out Definit.Resultss.Examples.NotFound? _arg_1
 	)
-		where TError : struct
+		where T : struct
 	{
 	    if(either is null)
 	    {
@@ -309,26 +296,26 @@ public static partial class U_Extensions_U
 		_arg_1 = _out_1?.Out ?? null;
 	}
 	
-	public static void Deconstruct<TError>
+	public static void Deconstruct<T>
 	(
-	    this Definit.Results.U<TError> either,
-	    out Definit.Results.Success? _arg_0,
-		out TError? _arg_1
+	    this Definit.Resultss.Examples.ResultExample<T> either,
+	    out T? _arg_0,
+		out Definit.Resultss.Examples.NotFound? _arg_1
 	)
-		where TError : class
+		where T : class
 	{
 	    var (_out_0, _out_1) = either.Value;
 	    _arg_0 = _out_0?.Out ?? null;
 		_arg_1 = _out_1?.Out ?? null;
 	}
 	
-	public static void Deconstruct<TError>
+	public static void Deconstruct<T>
 	(
-	    this Definit.Results.U<TError>? either,
-	    out Definit.Results.Success? _arg_0,
-		out TError? _arg_1
+	    this Definit.Resultss.Examples.ResultExample<T>? either,
+	    out T? _arg_0,
+		out Definit.Resultss.Examples.NotFound? _arg_1
 	)
-		where TError : class
+		where T : class
 	{
 	    if(either is null)
 	    {

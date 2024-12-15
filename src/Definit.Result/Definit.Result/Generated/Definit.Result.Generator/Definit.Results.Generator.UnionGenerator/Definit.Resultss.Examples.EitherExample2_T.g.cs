@@ -1,41 +1,33 @@
 ﻿#nullable enable
 
+using Definit.Results;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Definit.Results;
+namespace Definit.Resultss.Examples;
 
-public interface IUnionInfo<T0, T1, T2> : IUnionBase<(Or<T0>?, Or<T1>?, Or<T2>?)>
-	where T0 : notnull
-	where T1 : notnull
-	where T2 : notnull;
-
-public readonly struct U<T0, T1, T2> : U<T0, T1, T2>.Base
-	where T0 : notnull
-	where T1 : notnull
-	where T2 : notnull 
+readonly partial struct EitherExample2<T>
+	where T : notnull
 {
-    public interface Base : IUnionInfo<T0, T1, T2>;
-
-    public (Or<T0>?, Or<T1>?, Or<T2>?) Value { get; }
+	public (Or<T>?, Or<string>?, Or<int>?) Value { get; }
 	
 	[Obsolete(DefaultConstructorException.Attribute, true)]
-	public U() => throw new DefaultConstructorException();
+	public EitherExample2() => throw new DefaultConstructorException();
 	
-	public U(T0 value) => Value = (value!, null, null);
-	public U(T1 value) => Value = (null, value!, null);
-	public U(T2 value) => Value = (null, null, value!);
+	public EitherExample2(T value) => Value = (value!, null, null);
+	public EitherExample2(string value) => Value = (null, value!, null);
+	public EitherExample2(int value) => Value = (null, null, value!);
 	
-	public static implicit operator U<T0, T1, T2>([DisallowNull] Definit.Results.UnionMatchError _) => throw new Definit.Results.UnionMatchException<U<T0, T1, T2>>();
+	public static implicit operator Definit.Resultss.Examples.EitherExample2<T>([DisallowNull] Definit.Results.UnionMatchError _) => throw new Definit.Results.UnionMatchException<Definit.Resultss.Examples.EitherExample2<T>>();
 	
-	public static implicit operator U<T0, T1, T2>(T0 value) => new (value);
-	public static implicit operator U<T0, T1, T2>(T1 value) => new (value);
-	public static implicit operator U<T0, T1, T2>(T2 value) => new (value);
+	public static implicit operator Definit.Resultss.Examples.EitherExample2<T>(T value) => new (value);
+	public static implicit operator Definit.Resultss.Examples.EitherExample2<T>(string value) => new (value);
+	public static implicit operator Definit.Resultss.Examples.EitherExample2<T>(int value) => new (value);
 	
 	public void Switch<TReturn>
 	(
-	    Action<T0> switch0,
-		Action<T1> switch1,
-		Action<T2> switch2,
+	    Action<T> switch0,
+		Action<string> switch1,
+		Action<int> switch2,
 	    Action<System.Exception> onException
 	)
 	{
@@ -64,14 +56,14 @@ public readonly struct U<T0, T1, T2> : U<T0, T1, T2>.Base
 	        onException(exception);
 	    }
 	
-	    throw new Definit.Results.UnionMatchException<U<T0, T1, T2>>(); 
+	    throw new Definit.Results.UnionMatchException<Definit.Resultss.Examples.EitherExample2<T>>(); 
 	}
 	
 	public async Task Switch<TReturn>
 	(
-	    Func<Async, T0, Task> switch0,
-		Action<T1> switch1,
-		Action<T2> switch2,
+	    Func<Async, T, Task> switch0,
+		Action<string> switch1,
+		Action<int> switch2,
 	    Action<System.Exception> onException
 	)
 	{
@@ -100,14 +92,14 @@ public readonly struct U<T0, T1, T2> : U<T0, T1, T2>.Base
 	        onException(exception);
 	    }
 	
-	    throw new Definit.Results.UnionMatchException<U<T0, T1, T2>>(); 
+	    throw new Definit.Results.UnionMatchException<Definit.Resultss.Examples.EitherExample2<T>>(); 
 	}
 	
 	public async Task Switch<TReturn>
 	(
-	    Action<T0> switch0,
-		Func<Async, T1, Task> switch1,
-		Action<T2> switch2,
+	    Action<T> switch0,
+		Func<Async, string, Task> switch1,
+		Action<int> switch2,
 	    Action<System.Exception> onException
 	)
 	{
@@ -136,14 +128,14 @@ public readonly struct U<T0, T1, T2> : U<T0, T1, T2>.Base
 	        onException(exception);
 	    }
 	
-	    throw new Definit.Results.UnionMatchException<U<T0, T1, T2>>(); 
+	    throw new Definit.Results.UnionMatchException<Definit.Resultss.Examples.EitherExample2<T>>(); 
 	}
 	
 	public async Task Switch<TReturn>
 	(
-	    Func<Async, T0, Task> switch0,
-		Func<Async, T1, Task> switch1,
-		Action<T2> switch2,
+	    Func<Async, T, Task> switch0,
+		Func<Async, string, Task> switch1,
+		Action<int> switch2,
 	    Action<System.Exception> onException
 	)
 	{
@@ -172,14 +164,14 @@ public readonly struct U<T0, T1, T2> : U<T0, T1, T2>.Base
 	        onException(exception);
 	    }
 	
-	    throw new Definit.Results.UnionMatchException<U<T0, T1, T2>>(); 
+	    throw new Definit.Results.UnionMatchException<Definit.Resultss.Examples.EitherExample2<T>>(); 
 	}
 	
 	public async Task Switch<TReturn>
 	(
-	    Action<T0> switch0,
-		Action<T1> switch1,
-		Func<Async, T2, Task> switch2,
+	    Action<T> switch0,
+		Action<string> switch1,
+		Func<Async, int, Task> switch2,
 	    Action<System.Exception> onException
 	)
 	{
@@ -208,14 +200,14 @@ public readonly struct U<T0, T1, T2> : U<T0, T1, T2>.Base
 	        onException(exception);
 	    }
 	
-	    throw new Definit.Results.UnionMatchException<U<T0, T1, T2>>(); 
+	    throw new Definit.Results.UnionMatchException<Definit.Resultss.Examples.EitherExample2<T>>(); 
 	}
 	
 	public async Task Switch<TReturn>
 	(
-	    Func<Async, T0, Task> switch0,
-		Action<T1> switch1,
-		Func<Async, T2, Task> switch2,
+	    Func<Async, T, Task> switch0,
+		Action<string> switch1,
+		Func<Async, int, Task> switch2,
 	    Action<System.Exception> onException
 	)
 	{
@@ -244,14 +236,14 @@ public readonly struct U<T0, T1, T2> : U<T0, T1, T2>.Base
 	        onException(exception);
 	    }
 	
-	    throw new Definit.Results.UnionMatchException<U<T0, T1, T2>>(); 
+	    throw new Definit.Results.UnionMatchException<Definit.Resultss.Examples.EitherExample2<T>>(); 
 	}
 	
 	public async Task Switch<TReturn>
 	(
-	    Action<T0> switch0,
-		Func<Async, T1, Task> switch1,
-		Func<Async, T2, Task> switch2,
+	    Action<T> switch0,
+		Func<Async, string, Task> switch1,
+		Func<Async, int, Task> switch2,
 	    Action<System.Exception> onException
 	)
 	{
@@ -280,14 +272,14 @@ public readonly struct U<T0, T1, T2> : U<T0, T1, T2>.Base
 	        onException(exception);
 	    }
 	
-	    throw new Definit.Results.UnionMatchException<U<T0, T1, T2>>(); 
+	    throw new Definit.Results.UnionMatchException<Definit.Resultss.Examples.EitherExample2<T>>(); 
 	}
 	
 	public async Task Switch<TReturn>
 	(
-	    Func<Async, T0, Task> switch0,
-		Func<Async, T1, Task> switch1,
-		Func<Async, T2, Task> switch2,
+	    Func<Async, T, Task> switch0,
+		Func<Async, string, Task> switch1,
+		Func<Async, int, Task> switch2,
 	    Action<System.Exception> onException
 	)
 	{
@@ -316,14 +308,14 @@ public readonly struct U<T0, T1, T2> : U<T0, T1, T2>.Base
 	        onException(exception);
 	    }
 	
-	    throw new Definit.Results.UnionMatchException<U<T0, T1, T2>>(); 
+	    throw new Definit.Results.UnionMatchException<Definit.Resultss.Examples.EitherExample2<T>>(); 
 	}
 	
 	public TReturn Match<TReturn>
 	(
-	    Func<T0, TReturn> match0,
-		Func<T1, TReturn> match1,
-		Func<T2, TReturn> match2,
+	    Func<T, TReturn> match0,
+		Func<string, TReturn> match1,
+		Func<int, TReturn> match2,
 	    Func<System.Exception, TReturn> onException
 	)
 	{
@@ -352,14 +344,14 @@ public readonly struct U<T0, T1, T2> : U<T0, T1, T2>.Base
 	        return onException(exception);
 	    }
 	
-	    throw new Definit.Results.UnionMatchException<U<T0, T1, T2>>(); 
+	    throw new Definit.Results.UnionMatchException<Definit.Resultss.Examples.EitherExample2<T>>(); 
 	}
 	
 	public async Task<TReturn> Match<TReturn>
 	(
-	    Func<Async, T0, Task<TReturn>> match0,
-		Func<T1, TReturn> match1,
-		Func<T2, TReturn> match2,
+	    Func<Async, T, Task<TReturn>> match0,
+		Func<string, TReturn> match1,
+		Func<int, TReturn> match2,
 	    Func<System.Exception, TReturn> onException
 	)
 	{
@@ -388,14 +380,14 @@ public readonly struct U<T0, T1, T2> : U<T0, T1, T2>.Base
 	        return onException(exception);
 	    }
 	
-	    throw new Definit.Results.UnionMatchException<U<T0, T1, T2>>(); 
+	    throw new Definit.Results.UnionMatchException<Definit.Resultss.Examples.EitherExample2<T>>(); 
 	}
 	
 	public async Task<TReturn> Match<TReturn>
 	(
-	    Func<T0, TReturn> match0,
-		Func<Async, T1, Task<TReturn>> match1,
-		Func<T2, TReturn> match2,
+	    Func<T, TReturn> match0,
+		Func<Async, string, Task<TReturn>> match1,
+		Func<int, TReturn> match2,
 	    Func<System.Exception, TReturn> onException
 	)
 	{
@@ -424,14 +416,14 @@ public readonly struct U<T0, T1, T2> : U<T0, T1, T2>.Base
 	        return onException(exception);
 	    }
 	
-	    throw new Definit.Results.UnionMatchException<U<T0, T1, T2>>(); 
+	    throw new Definit.Results.UnionMatchException<Definit.Resultss.Examples.EitherExample2<T>>(); 
 	}
 	
 	public async Task<TReturn> Match<TReturn>
 	(
-	    Func<Async, T0, Task<TReturn>> match0,
-		Func<Async, T1, Task<TReturn>> match1,
-		Func<T2, TReturn> match2,
+	    Func<Async, T, Task<TReturn>> match0,
+		Func<Async, string, Task<TReturn>> match1,
+		Func<int, TReturn> match2,
 	    Func<System.Exception, TReturn> onException
 	)
 	{
@@ -460,14 +452,14 @@ public readonly struct U<T0, T1, T2> : U<T0, T1, T2>.Base
 	        return onException(exception);
 	    }
 	
-	    throw new Definit.Results.UnionMatchException<U<T0, T1, T2>>(); 
+	    throw new Definit.Results.UnionMatchException<Definit.Resultss.Examples.EitherExample2<T>>(); 
 	}
 	
 	public async Task<TReturn> Match<TReturn>
 	(
-	    Func<T0, TReturn> match0,
-		Func<T1, TReturn> match1,
-		Func<Async, T2, Task<TReturn>> match2,
+	    Func<T, TReturn> match0,
+		Func<string, TReturn> match1,
+		Func<Async, int, Task<TReturn>> match2,
 	    Func<System.Exception, TReturn> onException
 	)
 	{
@@ -496,14 +488,14 @@ public readonly struct U<T0, T1, T2> : U<T0, T1, T2>.Base
 	        return onException(exception);
 	    }
 	
-	    throw new Definit.Results.UnionMatchException<U<T0, T1, T2>>(); 
+	    throw new Definit.Results.UnionMatchException<Definit.Resultss.Examples.EitherExample2<T>>(); 
 	}
 	
 	public async Task<TReturn> Match<TReturn>
 	(
-	    Func<Async, T0, Task<TReturn>> match0,
-		Func<T1, TReturn> match1,
-		Func<Async, T2, Task<TReturn>> match2,
+	    Func<Async, T, Task<TReturn>> match0,
+		Func<string, TReturn> match1,
+		Func<Async, int, Task<TReturn>> match2,
 	    Func<System.Exception, TReturn> onException
 	)
 	{
@@ -532,14 +524,14 @@ public readonly struct U<T0, T1, T2> : U<T0, T1, T2>.Base
 	        return onException(exception);
 	    }
 	
-	    throw new Definit.Results.UnionMatchException<U<T0, T1, T2>>(); 
+	    throw new Definit.Results.UnionMatchException<Definit.Resultss.Examples.EitherExample2<T>>(); 
 	}
 	
 	public async Task<TReturn> Match<TReturn>
 	(
-	    Func<T0, TReturn> match0,
-		Func<Async, T1, Task<TReturn>> match1,
-		Func<Async, T2, Task<TReturn>> match2,
+	    Func<T, TReturn> match0,
+		Func<Async, string, Task<TReturn>> match1,
+		Func<Async, int, Task<TReturn>> match2,
 	    Func<System.Exception, TReturn> onException
 	)
 	{
@@ -568,14 +560,14 @@ public readonly struct U<T0, T1, T2> : U<T0, T1, T2>.Base
 	        return onException(exception);
 	    }
 	
-	    throw new Definit.Results.UnionMatchException<U<T0, T1, T2>>(); 
+	    throw new Definit.Results.UnionMatchException<Definit.Resultss.Examples.EitherExample2<T>>(); 
 	}
 	
 	public async Task<TReturn> Match<TReturn>
 	(
-	    Func<Async, T0, Task<TReturn>> match0,
-		Func<Async, T1, Task<TReturn>> match1,
-		Func<Async, T2, Task<TReturn>> match2,
+	    Func<Async, T, Task<TReturn>> match0,
+		Func<Async, string, Task<TReturn>> match1,
+		Func<Async, int, Task<TReturn>> match2,
 	    Func<System.Exception, TReturn> onException
 	)
 	{
@@ -604,22 +596,20 @@ public readonly struct U<T0, T1, T2> : U<T0, T1, T2>.Base
 	        return onException(exception);
 	    }
 	
-	    throw new Definit.Results.UnionMatchException<U<T0, T1, T2>>(); 
+	    throw new Definit.Results.UnionMatchException<Definit.Resultss.Examples.EitherExample2<T>>(); 
 	}
 }
 
-public static class Extensions_U_3
+public static partial class EitherExample2_Extensions_U
 {
-    public static void Deconstruct<T0, T1, T2>
+    public static void Deconstruct<T>
 	(
-	    this U<T0, T1, T2> either,
-	    out T0? _arg_0,
-		out T1? _arg_1,
-		out T2? _arg_2
+	    this Definit.Resultss.Examples.EitherExample2<T> either,
+	    out T? _arg_0,
+		out string? _arg_1,
+		out int? _arg_2
 	)
-		where T0 : struct
-		where T1 : struct
-		where T2 : struct
+		where T : struct
 	{
 	    var (_out_0, _out_1, _out_2) = either.Value;
 	    _arg_0 = _out_0?.Out ?? null;
@@ -627,16 +617,14 @@ public static class Extensions_U_3
 		_arg_2 = _out_2?.Out ?? null;
 	}
 	
-	public static void Deconstruct<T0, T1, T2>
+	public static void Deconstruct<T>
 	(
-	    this U<T0, T1, T2>? either,
-	    out T0? _arg_0,
-		out T1? _arg_1,
-		out T2? _arg_2
+	    this Definit.Resultss.Examples.EitherExample2<T>? either,
+	    out T? _arg_0,
+		out string? _arg_1,
+		out int? _arg_2
 	)
-		where T0 : struct
-		where T1 : struct
-		where T2 : struct
+		where T : struct
 	{
 	    if(either is null)
 	    {
@@ -650,16 +638,14 @@ public static class Extensions_U_3
 		_arg_2 = _out_2?.Out ?? null;
 	}
 	
-	public static void Deconstruct<T0, T1, T2>
+	public static void Deconstruct<T>
 	(
-	    this U<T0, T1, T2> either,
-	    out T0? _arg_0,
-		out T1? _arg_1,
-		out T2? _arg_2
+	    this Definit.Resultss.Examples.EitherExample2<T> either,
+	    out T? _arg_0,
+		out string? _arg_1,
+		out int? _arg_2
 	)
-		where T0 : class
-		where T1 : struct
-		where T2 : struct
+		where T : class
 	{
 	    var (_out_0, _out_1, _out_2) = either.Value;
 	    _arg_0 = _out_0?.Out ?? null;
@@ -667,256 +653,14 @@ public static class Extensions_U_3
 		_arg_2 = _out_2?.Out ?? null;
 	}
 	
-	public static void Deconstruct<T0, T1, T2>
+	public static void Deconstruct<T>
 	(
-	    this U<T0, T1, T2>? either,
-	    out T0? _arg_0,
-		out T1? _arg_1,
-		out T2? _arg_2
+	    this Definit.Resultss.Examples.EitherExample2<T>? either,
+	    out T? _arg_0,
+		out string? _arg_1,
+		out int? _arg_2
 	)
-		where T0 : class
-		where T1 : struct
-		where T2 : struct
-	{
-	    if(either is null)
-	    {
-	        _arg_0 = null; _arg_1 = null; _arg_2 = null;
-	        return;
-	    }
-	
-	    var (_out_0, _out_1, _out_2) = either.Value.Value;
-	    _arg_0 = _out_0?.Out ?? null;
-		_arg_1 = _out_1?.Out ?? null;
-		_arg_2 = _out_2?.Out ?? null;
-	}
-	
-	public static void Deconstruct<T0, T1, T2>
-	(
-	    this U<T0, T1, T2> either,
-	    out T0? _arg_0,
-		out T1? _arg_1,
-		out T2? _arg_2
-	)
-		where T0 : struct
-		where T1 : class
-		where T2 : struct
-	{
-	    var (_out_0, _out_1, _out_2) = either.Value;
-	    _arg_0 = _out_0?.Out ?? null;
-		_arg_1 = _out_1?.Out ?? null;
-		_arg_2 = _out_2?.Out ?? null;
-	}
-	
-	public static void Deconstruct<T0, T1, T2>
-	(
-	    this U<T0, T1, T2>? either,
-	    out T0? _arg_0,
-		out T1? _arg_1,
-		out T2? _arg_2
-	)
-		where T0 : struct
-		where T1 : class
-		where T2 : struct
-	{
-	    if(either is null)
-	    {
-	        _arg_0 = null; _arg_1 = null; _arg_2 = null;
-	        return;
-	    }
-	
-	    var (_out_0, _out_1, _out_2) = either.Value.Value;
-	    _arg_0 = _out_0?.Out ?? null;
-		_arg_1 = _out_1?.Out ?? null;
-		_arg_2 = _out_2?.Out ?? null;
-	}
-	
-	public static void Deconstruct<T0, T1, T2>
-	(
-	    this U<T0, T1, T2> either,
-	    out T0? _arg_0,
-		out T1? _arg_1,
-		out T2? _arg_2
-	)
-		where T0 : class
-		where T1 : class
-		where T2 : struct
-	{
-	    var (_out_0, _out_1, _out_2) = either.Value;
-	    _arg_0 = _out_0?.Out ?? null;
-		_arg_1 = _out_1?.Out ?? null;
-		_arg_2 = _out_2?.Out ?? null;
-	}
-	
-	public static void Deconstruct<T0, T1, T2>
-	(
-	    this U<T0, T1, T2>? either,
-	    out T0? _arg_0,
-		out T1? _arg_1,
-		out T2? _arg_2
-	)
-		where T0 : class
-		where T1 : class
-		where T2 : struct
-	{
-	    if(either is null)
-	    {
-	        _arg_0 = null; _arg_1 = null; _arg_2 = null;
-	        return;
-	    }
-	
-	    var (_out_0, _out_1, _out_2) = either.Value.Value;
-	    _arg_0 = _out_0?.Out ?? null;
-		_arg_1 = _out_1?.Out ?? null;
-		_arg_2 = _out_2?.Out ?? null;
-	}
-	
-	public static void Deconstruct<T0, T1, T2>
-	(
-	    this U<T0, T1, T2> either,
-	    out T0? _arg_0,
-		out T1? _arg_1,
-		out T2? _arg_2
-	)
-		where T0 : struct
-		where T1 : struct
-		where T2 : class
-	{
-	    var (_out_0, _out_1, _out_2) = either.Value;
-	    _arg_0 = _out_0?.Out ?? null;
-		_arg_1 = _out_1?.Out ?? null;
-		_arg_2 = _out_2?.Out ?? null;
-	}
-	
-	public static void Deconstruct<T0, T1, T2>
-	(
-	    this U<T0, T1, T2>? either,
-	    out T0? _arg_0,
-		out T1? _arg_1,
-		out T2? _arg_2
-	)
-		where T0 : struct
-		where T1 : struct
-		where T2 : class
-	{
-	    if(either is null)
-	    {
-	        _arg_0 = null; _arg_1 = null; _arg_2 = null;
-	        return;
-	    }
-	
-	    var (_out_0, _out_1, _out_2) = either.Value.Value;
-	    _arg_0 = _out_0?.Out ?? null;
-		_arg_1 = _out_1?.Out ?? null;
-		_arg_2 = _out_2?.Out ?? null;
-	}
-	
-	public static void Deconstruct<T0, T1, T2>
-	(
-	    this U<T0, T1, T2> either,
-	    out T0? _arg_0,
-		out T1? _arg_1,
-		out T2? _arg_2
-	)
-		where T0 : class
-		where T1 : struct
-		where T2 : class
-	{
-	    var (_out_0, _out_1, _out_2) = either.Value;
-	    _arg_0 = _out_0?.Out ?? null;
-		_arg_1 = _out_1?.Out ?? null;
-		_arg_2 = _out_2?.Out ?? null;
-	}
-	
-	public static void Deconstruct<T0, T1, T2>
-	(
-	    this U<T0, T1, T2>? either,
-	    out T0? _arg_0,
-		out T1? _arg_1,
-		out T2? _arg_2
-	)
-		where T0 : class
-		where T1 : struct
-		where T2 : class
-	{
-	    if(either is null)
-	    {
-	        _arg_0 = null; _arg_1 = null; _arg_2 = null;
-	        return;
-	    }
-	
-	    var (_out_0, _out_1, _out_2) = either.Value.Value;
-	    _arg_0 = _out_0?.Out ?? null;
-		_arg_1 = _out_1?.Out ?? null;
-		_arg_2 = _out_2?.Out ?? null;
-	}
-	
-	public static void Deconstruct<T0, T1, T2>
-	(
-	    this U<T0, T1, T2> either,
-	    out T0? _arg_0,
-		out T1? _arg_1,
-		out T2? _arg_2
-	)
-		where T0 : struct
-		where T1 : class
-		where T2 : class
-	{
-	    var (_out_0, _out_1, _out_2) = either.Value;
-	    _arg_0 = _out_0?.Out ?? null;
-		_arg_1 = _out_1?.Out ?? null;
-		_arg_2 = _out_2?.Out ?? null;
-	}
-	
-	public static void Deconstruct<T0, T1, T2>
-	(
-	    this U<T0, T1, T2>? either,
-	    out T0? _arg_0,
-		out T1? _arg_1,
-		out T2? _arg_2
-	)
-		where T0 : struct
-		where T1 : class
-		where T2 : class
-	{
-	    if(either is null)
-	    {
-	        _arg_0 = null; _arg_1 = null; _arg_2 = null;
-	        return;
-	    }
-	
-	    var (_out_0, _out_1, _out_2) = either.Value.Value;
-	    _arg_0 = _out_0?.Out ?? null;
-		_arg_1 = _out_1?.Out ?? null;
-		_arg_2 = _out_2?.Out ?? null;
-	}
-	
-	public static void Deconstruct<T0, T1, T2>
-	(
-	    this U<T0, T1, T2> either,
-	    out T0? _arg_0,
-		out T1? _arg_1,
-		out T2? _arg_2
-	)
-		where T0 : class
-		where T1 : class
-		where T2 : class
-	{
-	    var (_out_0, _out_1, _out_2) = either.Value;
-	    _arg_0 = _out_0?.Out ?? null;
-		_arg_1 = _out_1?.Out ?? null;
-		_arg_2 = _out_2?.Out ?? null;
-	}
-	
-	public static void Deconstruct<T0, T1, T2>
-	(
-	    this U<T0, T1, T2>? either,
-	    out T0? _arg_0,
-		out T1? _arg_1,
-		out T2? _arg_2
-	)
-		where T0 : class
-		where T1 : class
-		where T2 : class
+		where T : class
 	{
 	    if(either is null)
 	    {

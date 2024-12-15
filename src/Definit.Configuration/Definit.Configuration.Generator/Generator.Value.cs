@@ -65,7 +65,7 @@ public class ValueGenerator : IIncrementalGenerator
     {
         var (code, info) = type.BuildTypeHierarchy
         (
-            name => $"sealed {name}: {InterfaceName}<{genericTypeSymbol.ToDisplayString()}, {type.Name}.Valid>",
+            name => $"sealed {name}",
             "Definit.Results",
             "Definit.Configuration",
             "Definit.Validation"
@@ -77,35 +77,38 @@ public class ValueGenerator : IIncrementalGenerator
         var valueType = genericTypeSymbol.ToDisplayString();
 
         code.AddBlock($$"""
-        private readonly static Rule<{{valueType}}> _rule;
-
-        static {{constructorName}}()
+        public sealed class Config : {{InterfaceName}}<{{genericTypeSymbol.ToDisplayString()}}, {{type.Name}}.Valid>
         {
-            _rule = new();
-            Rule(_rule);
-        }
+            private readonly static Rule<{{valueType}}> _rule;
 
-        public Func<U<Valid, ValidationError>> Value { get; init; }
+            static Config()
+            {
+                _rule = new();
+                {{name}}.Rule(_rule);
+            }
 
-        public {{constructorName}}(Func<U<Valid, ValidationError>> value)
-        {
-            Value = value;
-        }
+            private Func<U<Valid, ValidationError>> Value { get; init; }
 
-        public {{constructorName}}(IConfiguration configuration)
-        {
-            Value = () => Valid.Create(configuration);
-        }
+            public Config(Func<U<Valid, ValidationError>> value)
+            {
+                Value = value;
+            }
 
-        public U<Valid, ValidationError> IsValid(string? propertyName = null) => Value();
+            public Config(IConfiguration configuration)
+            {
+                Value = () => Valid.Create(configuration);
+            }
 
-        public R<ValidationError> Validate(string? propertyName = null) => Value().ToResult(); 
+            public U<Valid, ValidationError> IsValid(string? propertyName = null) => Value();
 
-        public static R<ValidationError> Register(IServiceCollection services, IConfiguration configuration)
-        {
-            services.AddSingleton<{{name}}>(_ => new {{name}}(configuration));
+            public U<ValidationError> Validate(string? propertyName = null) => Value().ToResult(); 
 
-            return new {{name}}(configuration).Validate();
+            public static U<ValidationError> Register(IServiceCollection services, IConfiguration configuration)
+            {
+                services.AddSingleton<Config>(_ => new Config(configuration));
+
+                return new Config(configuration).Validate();
+            }
         }
 
         public readonly struct Valid : {{ValidInterface}}<{{valueType}}>

@@ -22,8 +22,8 @@ internal static class Helper
     public static string UnionError(string type) => $"{Helper.TypeName}<{type}, {Error}>";
     public static string UnionMaybeError(string type) => $"{Helper.TypeName}<{Maybe(type)}, {Error}>";
     public static string Maybe(string type) => $"{MaybeTypeName}<{type}>";
-    public static string ReturnsVoid => $"R<{Error}>";
-    public const string ReturnsVoidSuccess = "R.Success";
+    public static string ReturnsVoid => $"U<{Error}>";
+    public const string ReturnsVoidSuccess = "U.Success";
 
     public const string CastingMethodName  = $"Try";
     public const string CastingWrapperName = $"UnionsWrapper";

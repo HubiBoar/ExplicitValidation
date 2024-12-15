@@ -129,6 +129,9 @@ internal sealed class UnionBaseGenerator : IIncrementalGenerator
         var operators = string.Join("\n", allGenericParams.Value
             .Select(x => $"public static implicit operator {typeName}({x.Name} value) => new (value);"));
 
+        var switches = GenerateSwitches(allGenericParams, typeGenericParams, typeName);
+        var matches = GenerateMatches(allGenericParams, typeGenericParams, typeName);
+
         var interior = $$"""
         public ({{genericOrArgs}}) Value { get; }
 
@@ -137,13 +140,176 @@ internal sealed class UnionBaseGenerator : IIncrementalGenerator
 
         {{constructors}}
 
-        public static implicit operator {{typeName}}([DisallowNull] {{Helper.UnionMatchError}} _) => throw new {{Helper.UnionMatchException}}<{{Helper.TypeName}}<{{genericArgs}}>>();
+        public static implicit operator {{typeName}}([DisallowNull] {{Helper.UnionMatchError}} _) => throw new {{Helper.UnionMatchException}}<{{typeName}}>();
+
         {{operators}}
+
+        {{switches}}
+
+        {{matches}}
         """;
 
         var extension = GenerateExtensions(allGenericParams, typeGenericParams, typeName);
         
         return (interior, extension, genericOrArgs);
+    }
+
+    private static string GenerateSwitches
+    (
+        Generic.Elements allGenericParams,
+        Generic.Elements typeGenericParams,
+        string typeName
+    )
+    {
+        var states = GenerateAllStates(allGenericParams.Value.Length);
+
+        return string.Join("\n\n", states.Select(x => GenerateSwitch(x)));
+
+        string GenerateSwitch(bool[] isAsync)
+        {
+            var anyAsync = isAsync.Any(x => x is true);
+
+            var generic = allGenericParams.Value
+                .Select((x, i) => {
+                    var type = x.Name;
+
+                    string signature = string.Empty;
+                    string call = string.Empty;
+
+                    if (isAsync[i])
+                    {
+                        signature = $"Func<Async, {x.Name}, Task> switch{i}";
+                        call = $$"""
+                        if (_arg{{i}} is not null)
+                        {
+                            await switch{{i}}(Async.Instance, _arg{{i}}.Value.Out);
+                        }
+                        """;  
+                    }
+                    else
+                    {
+                        signature = $"Action<{x.Name}> switch{i}";
+                        call = $$"""
+                        if (_arg{{i}} is not null)
+                        {
+                            switch{{i}}(_arg{{i}}.Value.Out);
+                        }
+                        """; 
+                    }
+
+                    return (Signature: signature, Call: call); 
+                })
+                .ToArray();
+
+            string match = anyAsync ? "async Task Switch<TReturn>" : "void Switch<TReturn>";  
+            var signatures = string.Join(",\n\t", generic.Select(x => x.Signature));
+
+            var methodResult = string.Join(",", allGenericParams.Value.Select((_, i) => $"_arg{i}"));
+
+            var calls = string.Join("\n\t\t", string.Join("\n\n", generic.Select(x => x.Call)).Split('\n'));
+
+            return $$"""
+            public {{match}}
+            (
+                {{signatures}},
+                Action<System.Exception> onException
+            )
+            {
+                try
+                {
+                    var ({{methodResult}}) = this.Value;
+
+                    {{calls}} 
+
+                }
+                catch (System.Exception exception)
+                {
+                    onException(exception);
+                }
+
+                throw new {{Helper.UnionMatchException}}<{{typeName}}>(); 
+            }
+            """;
+        }
+    }
+
+    private static string GenerateMatches
+    (
+        Generic.Elements allGenericParams,
+        Generic.Elements typeGenericParams,
+        string typeName
+    )
+    {
+        var states = GenerateAllStates(allGenericParams.Value.Length);
+
+        return string.Join("\n\n", states.Select(x => GenerateMatch(x)));
+
+        string GenerateMatch(bool[] isAsync)
+        {
+            var anyAsync = isAsync.Any(x => x is true);
+
+            var generic = allGenericParams.Value
+                .Select((x, i) => {
+                    var type = x.Name;
+
+                    string signature = string.Empty;
+                    string call = string.Empty;
+
+                    if (isAsync[i])
+                    {
+                        signature = $"Func<Async, {x.Name}, Task<TReturn>> match{i}";
+                        call = $$"""
+                        if (_arg{{i}} is not null)
+                        {
+                            return await match{{i}}(Async.Instance, _arg{{i}}.Value.Out);
+                        }
+                        """;  
+                    }
+                    else
+                    {
+                        signature = $"Func<{x.Name}, TReturn> match{i}";
+                        call = $$"""
+                        if (_arg{{i}} is not null)
+                        {
+                            return match{{i}}(_arg{{i}}.Value.Out);
+                        }
+                        """; 
+                    }
+
+                    return (Signature: signature, Call: call); 
+                })
+                .ToArray();
+
+            string match = anyAsync ? "async Task<TReturn> Match<TReturn>" : "TReturn Match<TReturn>";  
+            var signatures = string.Join(",\n\t", generic.Select(x => x.Signature));
+
+            var methodResult = string.Join(",", allGenericParams.Value.Select((_, i) => $"_arg{i}"));
+
+            var calls = string.Join("\n\t\t", string.Join("\n\n", generic.Select(x => x.Call)).Split('\n'));
+
+            return $$"""
+            public {{match}}
+            (
+                {{signatures}},
+                Func<System.Exception, TReturn> onException
+            )
+            {
+                try
+                {
+                    var ({{methodResult}}) = this.Value;
+
+                    {{calls}} 
+
+                }
+                catch (System.Exception exception)
+                {
+                    return onException(exception);
+                }
+
+                throw new {{Helper.UnionMatchException}}<{{typeName}}>(); 
+            }
+            """;
+        }
     }
 
     private static string GenerateExtensions
@@ -161,7 +327,14 @@ internal sealed class UnionBaseGenerator : IIncrementalGenerator
             :
             string.Empty;
 
-        if(length <= Helper.Base.MaxDeconstructorsCount)
+        if (length <= Helper.Base.MaxDeconstructorsCount)
+        {
+            return GenerateDeconstructors();
+        }
+        
+        return GenerateDeconstructorsAboveMaxCount();
+
+        string GenerateDeconstructors()
         {
             var generic = allGenericParams.Value.Select((x, i) => (Type: x, Return: $"_arg_{i}", Assign: $"_out_{i}")).ToArray();
             var outArgs = string.Join(",\n\t", generic.Select(x => $"out {x.Type.Name}? {x.Return}"));
@@ -247,7 +420,8 @@ internal sealed class UnionBaseGenerator : IIncrementalGenerator
                 """;
             }));
         }
-        else
+
+        string GenerateDeconstructorsAboveMaxCount()
         {
             int roundedUp = (int)Math.Ceiling((double)length / Helper.Base.MaxDeconstructorsCount); 
             var parts = new int[roundedUp];

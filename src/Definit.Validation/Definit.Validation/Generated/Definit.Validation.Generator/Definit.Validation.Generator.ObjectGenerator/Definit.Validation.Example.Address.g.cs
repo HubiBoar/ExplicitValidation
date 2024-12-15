@@ -13,7 +13,7 @@ partial class Example
 		
 		private const string _NAME = "Address";
 		
-		public R<ValidationError> Validate(string? propertyName = null)
+		public U<ValidationError> Validate(string? propertyName = null)
 		{
 		    return IsValid(propertyName ?? _NAME).ToResult();
 		}

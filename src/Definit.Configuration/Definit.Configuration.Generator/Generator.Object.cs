@@ -54,6 +54,7 @@ public class ObjectGenerator : IIncrementalGenerator
             name => $"{name}: {IsValidName}",
             "System.Collections.Immutable",
             "Definit.Results",
+            "Definit.Configuration",
             "Definit.Validation"
         );
 
@@ -81,7 +82,7 @@ public class ObjectGenerator : IIncrementalGenerator
         
         private const string _NAME = "{{constructorName}}";
 
-        public R<ValidationError> Validate(string? propertyName = null)
+        public U<ValidationError> Validate(string? propertyName = null)
         {
             return IsValid(propertyName ?? _NAME).ToResult();
         }
@@ -100,7 +101,7 @@ public class ObjectGenerator : IIncrementalGenerator
                 {{constructorAssignment}}
             }
 
-            public static U<Valid, ValidationError> Create({{name}} value, string? propertyName = null)
+            public static U<Valid, ValidationError> Create(IConfiguration configuration)
             {
                 var name = propertyName is null ? _NAME : propertyName; 
 

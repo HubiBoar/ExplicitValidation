@@ -13,6 +13,7 @@ public class ValueGenerator : IIncrementalGenerator
     private const string AttributeName = "Definit.Validation.IsValidAttribute<";
     private const string IsValidName = "Definit.Validation.IIsValid";
     private const string ValidInterface = "Definit.Validation.IValid";
+    private const string ValidBaseInterface = "Definit.Validation.IValidBase";
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
@@ -67,7 +68,8 @@ public class ValueGenerator : IIncrementalGenerator
         (
             name => $"{name}: {IsValidName}<{genericTypeSymbol.ToDisplayString()}>, {IsValidName}<{type.Name}, {type.Name}.Valid>",
             "Definit.Results",
-            "Definit.Validation"
+            "Definit.Validation",
+            "System.Text.Json"
         );
 
         var constructorName = info.ConstructorName;
@@ -101,9 +103,12 @@ public class ValueGenerator : IIncrementalGenerator
 
         public U<ValidationError> Validate(string? propertyName = null) => _rule.Validate(this.Value, propertyName ?? _NAME); 
 
+        public static {{name}} Deserialize(string json) => new {{name}}(JsonSerializer.Deserialize<{{valueType}}>(json)!);  
+        public static string Serialize({{name}} value) => JsonSerializer.Serialize(value.Value); 
+
         public static U<Valid, ValidationError> Create({{name}} value, string? propertyName = null) => Valid.Create(value, propertyName); 
 
-        public readonly struct Valid : {{ValidInterface}}<{{name}}>
+        public readonly struct Valid : {{ValidInterface}}<{{name}}>, {{ValidBaseInterface}}<{{name}}.Valid>
         {
             private const string _NAME = "{{constructorName}}";
 
@@ -117,6 +122,9 @@ public class ValueGenerator : IIncrementalGenerator
             {
                 this.Parent = parent;
             }
+
+            public static U<Valid, ValidationError> Deserialize(string json) => Create({{name}}.Deserialize(json));
+            public static string Serialize(Valid valid) => {{name}}.Serialize(valid.Parent);
 
             public static U<Valid, ValidationError> Create({{name}} value, string? propertyName = null)
             {

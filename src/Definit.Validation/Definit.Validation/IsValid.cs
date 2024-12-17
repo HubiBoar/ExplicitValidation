@@ -42,10 +42,18 @@ public interface IIsValid<TValue, TValid> : IIsValid
 
     public abstract static U<TValid, ValidationError> Create(TValue value, string? propertyName = null);
 
-    public abstract static TValue Parse(string json);
+    public abstract static TValue Deserialize(string json);
+    public abstract static string Serialize(TValue value);
 }
 
-public interface IValid<TValue>
+public interface IValidBase<TSelf>
+    where TSelf : IValidBase<TSelf>
+{
+    public abstract static U<TSelf, ValidationError> Deserialize(string json);
+    public abstract static string Serialize(TSelf value);
+}
+
+public interface IValid<TValue> 
     where TValue: notnull
 {
     public TValue Value { get; }

@@ -4,36 +4,36 @@ namespace Definit.Configuration;
 
 internal static partial class Example
 {
-    [Config<string>]
-    public partial record TestValue
+    public sealed class TestConfig : ISectionName
     {
-        public static string SectionName => "Value";
+        public static string SectionName => "TestConfig";
+    }
 
+    [IsValid<string>]
+    public partial struct TestValue
+    {
         public static void Rule(Rule<string> rule) => rule.NotNull();
     }
 
-    [Config]
+    [IsValid]
     public partial record TestObject
     (
         string Name,
-        TestValue Value
-    )
-    {
-        public static string SectionName => "Value";
-    }
+        TestValue TestValue
+    );
 
     private class Test
     {
-        private readonly TestValue.Config value;
+        private readonly Config<TestValue, TestConfig> value;
 
-        public Test(TestValue.Config value)
+        public Test(Config<TestValue, TestConfig> value)
         {
             this.value = value;
         }
 
         private void Run()
         {
-            value.IsValid().Switch
+            value.Get().Switch
             (
                 valid => Logic(valid),
                 error => {},

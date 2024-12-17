@@ -56,7 +56,8 @@ public class ObjectGenerator : IIncrementalGenerator
             name => $"{name}: {IsValidName}<{typeName}, {typeName}.Valid>",
             "System.Collections.Immutable",
             "Definit.Results",
-            "Definit.Validation"
+            "Definit.Validation",
+            "System.Text.Json"
         );
 
         var name = info.Name;
@@ -92,7 +93,10 @@ public class ObjectGenerator : IIncrementalGenerator
 
         public static U<Valid, ValidationError> Create({{name}} value, string? propertyName = null) => Valid.Create(value, propertyName); 
 
-        public readonly struct Valid : {{ValidInterface}}<{{name}}>
+        public static {{name}} Deserialize(string json) => JsonSerializer.Deserialize<{{name}}>(json)!;  
+        public static string Serialize({{name}} value) => JsonSerializer.Serialize(value); 
+
+        public readonly struct Valid : {{ValidInterface}}<{{name}}> 
         {
             public {{name}} Value { get; } 
     

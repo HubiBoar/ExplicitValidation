@@ -8,34 +8,31 @@ public interface ISectionName
 }
 
 public interface IConfig<TValue>
+    where TValue : IValidBase<TValue>
 {
     public string SectionName { get; }
+
+    public U<TValue, ValidationError> Get();
 }
 
 public sealed class Config<TValue, TSectionName> : IConfig<TValue>
-    where TValue : IIsValid
+    where TValue : IValidBase<TValue>
     where TSectionName : ISectionName
 {
     public string SectionName => TSectionName.SectionName;
 
-    internal Func<TValue> Func { get; }
+    private readonly Func<U<TValue, ValidationError>> _func;
 
-    public Config(Func<TValue> func)
+    public Config(Func<U<TValue, ValidationError>> func)
     {
-        Func = func;
+        _func = func;
+    }
+
+    public U<TValue, ValidationError> Get()
+    {
+        return _func();
     }
 }
-
-public static class ConfigExtenstions
-{
-    public static U<TValid, ValidationError> Get<TValid, TValue>(this IConfig<TValue> config)
-        where TValue : IIsValid<TValue, TValid>
-        where TValid : IValid<TValue>
-    {
-        return TValue.Create(config.Func(), config.SectionName);
-    }
-}
-
 
 
 

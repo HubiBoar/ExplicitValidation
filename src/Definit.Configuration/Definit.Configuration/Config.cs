@@ -5,7 +5,7 @@ namespace Definit.Configuration;
 public abstract record Config<TValue>(string SectionName)
     where TValue : IValidBase<TValue>
 {
-    public required Func<U<TValue, ValidationError>> Get { get; init; }
+    public Func<U<TValue, ValidationError>> Get { get; init; } = null!;
 
     public static void Register<TSelf>(IServiceCollection services, IConfiguration configuration)
         where TSelf: Config<TValue>, new()
@@ -26,24 +26,17 @@ public abstract record Config<TValue>(string SectionName)
 
     private static U<TValue, ValidationError> GetValue(IConfiguration configuration, string sectionName)
     {
-        try
+        var section = configuration.GetSection(sectionName);
+        if (section.Exists() is false)
         {
-            var section = configuration.GetSection(sectionName);
-            if (section.Exists() is false)
-            {
-                return new ValidationError(sectionName, $"Config Section: Not Found");
-            }
-
-            if (section.Value is null)
-            {
-                return ValidationError.Null<TValue>(sectionName);
-            }
-
-            return TValue.Deserialize(section.Value!);
+            return new ValidationError(sectionName, $"Config Section: Not Found");
         }
-        catch (Exception exception)
+
+        if (section.Value is null)
         {
-            return ValidationError.Exception(exception);
+            return ValidationError.Null<TValue>(sectionName);
         }
+
+        return TValue.Deserialize(section.Value!);
     }
 }

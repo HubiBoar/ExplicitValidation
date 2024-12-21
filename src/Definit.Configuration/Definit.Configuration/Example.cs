@@ -41,4 +41,9 @@ internal static partial class Example
             var v = valid.Value;
         }
     }
+
+    public static void Register(IServiceCollection services, IConfiguration configuration)
+    {
+        TestConfig.Register<TestConfig>(services, configuration);
+    }
 }

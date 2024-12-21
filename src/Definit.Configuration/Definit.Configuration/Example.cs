@@ -1,13 +1,8 @@
-using Definit.Results;
-
 namespace Definit.Configuration;
 
 internal static partial class Example
 {
-    public sealed class TestConfig : ISectionName
-    {
-        public static string SectionName => "TestConfig";
-    }
+    public sealed record TestConfig() : Config<TestValue.Valid>("TestConfig");
 
     [IsValid<string>]
     public partial struct TestValue
@@ -24,9 +19,9 @@ internal static partial class Example
 
     private class Test
     {
-        private readonly Config<TestValue, TestConfig> value;
+        private readonly TestConfig value;
 
-        public Test(Config<TestValue, TestConfig> value)
+        public Test(TestConfig value)
         {
             this.value = value;
         }

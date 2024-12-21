@@ -28,10 +28,4 @@ public static class ConfigHelper
             return ValidationError.Exception(exception);
         }
     }
-
-    public static U<ValidationError> Register<T>(this IServiceCollection services, IConfiguration configuration)
-        where T : IConfig
-    {
-        return T.Register(services, configuration);
-    }
 }

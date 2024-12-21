@@ -2,99 +2,48 @@
 
 namespace Definit.Configuration;
 
-public interface ISectionName
-{
-    public abstract static string SectionName { get; }
-}
-
-public interface IConfig<TValue>
+public abstract record Config<TValue>(string SectionName)
     where TValue : IValidBase<TValue>
 {
-    public string SectionName { get; }
+    public required Func<U<TValue, ValidationError>> Get { get; init; }
 
-    public U<TValue, ValidationError> Get();
-}
-
-public sealed class Config<TValue, TSectionName> : IConfig<TValue>
-    where TValue : IValidBase<TValue>
-    where TSectionName : ISectionName
-{
-    public string SectionName => TSectionName.SectionName;
-
-    private readonly Func<U<TValue, ValidationError>> _func;
-
-    public Config(Func<U<TValue, ValidationError>> func)
+    public static void Register<TSelf>(IServiceCollection services, IConfiguration configuration)
+        where TSelf: Config<TValue>, new()
     {
-        _func = func;
+        services.AddSingleton<TSelf>(_ => Create<TSelf>(configuration)); 
     }
 
-    public U<TValue, ValidationError> Get()
+    private static TSelf Create<TSelf>(IConfiguration configuration)
+        where TSelf: Config<TValue>, new()
     {
-        return _func();
+        var sectionName = new TSelf().SectionName;
+        
+        return new TSelf()
+        {
+            Get = () => GetValue(configuration, sectionName)
+        };
     }
-}
 
+    private static U<TValue, ValidationError> GetValue(IConfiguration configuration, string sectionName)
+    {
+        try
+        {
+            var section = configuration.GetSection(sectionName);
+            if (section.Exists() is false)
+            {
+                return new ValidationError(sectionName, $"Config Section: Not Found");
+            }
 
+            if (section.Value is null)
+            {
+                return ValidationError.Null<TValue>(sectionName);
+            }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-///DONT WORK ON THIS AND GENERATORS
-
-[System.AttributeUsage
-(
-    System.AttributeTargets.Class,
-    AllowMultiple = false
-)]
-public sealed class ConfigAttribute : Attribute
-{
-}
-
-[System.AttributeUsage
-(
-    System.AttributeTargets.Class,
-    AllowMultiple = false
-)]
-public sealed class ConfigAttribute<TValue> : Attribute
-    where TValue : notnull
-{
-}
-
-public interface IConfig : IIsValid
-{
-    abstract static string SectionName { get; }
-
-    abstract static U<ValidationError> Register(IServiceCollection services, IConfiguration configuration);
-}
-
-public interface IConfig<TValue, TConfig, TValid> 
-    where TValue : notnull
-    where TConfig : IConfig<TValue, TValid>
-    where TValid : IValid<TValue>
-{
-    abstract static string SectionName { get; }
-
-    abstract static U<ValidationError> Register(IServiceCollection services, IConfiguration configuration);
-
-    abstract static void Rule(Rule<TValue> rule);
-}
-
-public interface IConfig<TValue, TValid> : IConfig, IIsValid<TValue, TValid>
-    where TValue : notnull
-    where TValid : IValid<TValue>
-{
+            return TValue.Deserialize(section.Value!);
+        }
+        catch (Exception exception)
+        {
+            return ValidationError.Exception(exception);
+        }
+    }
 }

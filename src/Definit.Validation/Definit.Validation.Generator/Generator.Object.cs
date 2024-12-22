@@ -12,6 +12,7 @@ public class ObjectGenerator : IIncrementalGenerator
     private const string Attribute = "Definit.Validation.IsValidAttribute";
     private const string IsValidName = "Definit.Validation.IIsValid";
     private const string ValidInterface = "Definit.Validation.IValid";
+    private const string ValidBaseInterface = "Definit.Validation.IValidBase";
     
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
@@ -105,7 +106,7 @@ public class ObjectGenerator : IIncrementalGenerator
 
         // Valid
 
-        public readonly struct Valid : {{ValidInterface}}<{{name}}> 
+        public readonly struct Valid : {{ValidInterface}}<{{name}}>, {{ValidBaseInterface}}<{{name}}.Valid> 
         {
             public {{name}} _Parent { get; } 
 

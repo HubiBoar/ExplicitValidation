@@ -1,7 +1,7 @@
 ﻿namespace Definit.Configuration.Tests.Unit;
 
 public sealed record TestValueConfig() : Config<TestValue.Valid>("TestValue");
-public sealed record TestSectionConfig() : Config<TestSection.Valid>("TestValue");
+public sealed record TestSectionConfig() : Config<TestSection.Valid>("TestSection");
 
 [IsValid<string>]
 public partial struct TestValue
@@ -12,6 +12,6 @@ public partial struct TestValue
 [IsValid]
 public partial record TestSection
 (
-    string Name,
-    TestValue TestValue
+    string Value0,
+    TestValue Value1
 );

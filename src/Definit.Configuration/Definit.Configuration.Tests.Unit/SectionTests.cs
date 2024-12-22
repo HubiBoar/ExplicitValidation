@@ -16,12 +16,12 @@ public class SectionTests
             .Build();
 
         //Act
-        var section = TestSectionConfig.(configuration);
+        var section = TestSectionConfig.Create<TestSectionConfig>(configuration);
        
         //Assert
-        section.Is(out TestSection valid);
+        var (valid, _) = section.Get();
         valid.Value0.Should().Be("Value0");
-        valid.Value1.Should().Be("Value1");
+        valid.Value1.Value.Should().Be("Value1");
     }
     
     [Fact]

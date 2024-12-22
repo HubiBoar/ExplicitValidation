@@ -2,10 +2,10 @@ namespace Definit.Configuration;
 
 internal static partial class Example
 {
-    public sealed record TestConfig() : Config<TestValue.Valid>("TestConfig");
+    public sealed record TestConfig() : Config<Email.Valid>("TestConfig");
 
     [IsValid<string>]
-    public partial struct TestValue
+    public partial struct Email
     {
         public static void Rule(Rule<string> rule) => rule.NotNull();
     }
@@ -14,7 +14,8 @@ internal static partial class Example
     public partial record TestObject
     (
         string Name,
-        TestValue TestValue
+        Email TestValue,
+        Email TestValue2
     );
 
     private class Test
@@ -36,9 +37,14 @@ internal static partial class Example
             ); 
         }
 
-        private void Logic(TestValue.Valid valid)
+        private void Logic(Email.Valid valid)
         {
             var v = valid.Value;
+        }
+
+        private void Logic2(TestObject.Valid valid)
+        {
+            var v = valid.TestValue;
         }
     }
 

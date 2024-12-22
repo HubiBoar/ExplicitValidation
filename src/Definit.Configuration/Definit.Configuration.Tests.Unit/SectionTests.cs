@@ -16,7 +16,7 @@ public class SectionTests
             .Build();
 
         //Act
-        var section = TestSection.Create(configuration);
+        var section = TestSectionConfig.(configuration);
        
         //Assert
         section.Is(out TestSection valid);

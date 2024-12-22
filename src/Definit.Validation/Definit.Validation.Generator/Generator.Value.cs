@@ -66,7 +66,7 @@ public class ValueGenerator : IIncrementalGenerator
     {
         var (code, info) = type.BuildTypeHierarchy
         (
-            name => $"{name}: {IsValidName}<{genericTypeSymbol.ToDisplayString()}>, {IsValidName}<{type.Name}, {type.Name}.Valid>",
+            name => $"{name} : {IsValidName}<{genericTypeSymbol.ToDisplayString()}>, {IsValidName}<{type.Name}, {type.Name}.Valid>",
             "Definit.Results",
             "Definit.Validation",
             "System.Text.Json"
@@ -99,36 +99,49 @@ public class ValueGenerator : IIncrementalGenerator
 
         public static implicit operator {{valueType}}({{name}} value) => value.Value;
 
+
+        // Validate
+
         public U<Valid, ValidationError> IsValid(string? propertyName = null) => Valid.Create(this.Value, propertyName);
 
         public U<ValidationError> Validate(string? propertyName = null) => _rule.Validate(this.Value, propertyName ?? _NAME); 
 
-        public static {{name}} Deserialize(string json) => new {{name}}(JsonSerializer.Deserialize<{{valueType}}>(json)!);  
-        public static string Serialize({{name}} value) => JsonSerializer.Serialize(value.Value); 
 
+        // Factory
+        
         public static U<Valid, ValidationError> Create({{name}} value, string? propertyName = null) => Valid.Create(value, propertyName); 
 
+
+        // JSON
+        
+        public static {{name}} Deserialize(string json) => new {{name}}(JsonSerializer.Deserialize<{{valueType}}>(json)!);  
+
+        public static string Serialize({{name}} value) => JsonSerializer.Serialize(value.Value); 
+
+
+        // Valid
+        
         public readonly struct Valid : {{ValidInterface}}<{{name}}>, {{ValidBaseInterface}}<{{name}}.Valid>
         {
-            private const string _NAME = "{{constructorName}}";
+            {{name}} {{ValidInterface}}<{{name}}>.Value => this._Parent;
 
-            {{name}} {{ValidInterface}}<{{name}}>.Value => this.Parent;
+            public {{valueType}} Value => _Parent.Value;
 
-            public {{valueType}} Value => Parent.Value;
-
-            public {{name}} Parent { get; }
+            public {{name}} _Parent { get; }
 
             private Valid({{name}} parent)
             {
-                this.Parent = parent;
+                this._Parent = parent;
             }
 
-            public static U<Valid, ValidationError> Deserialize(string json) => Create({{name}}.Deserialize(json));
-            public static string Serialize(Valid valid) => {{name}}.Serialize(valid.Parent);
+            public static implicit operator {{name}}(Valid value) => value.Value;
+
+
+            // Factory
 
             public static U<Valid, ValidationError> Create({{name}} value, string? propertyName = null)
             {
-                var (_, error) = value.Validate(propertyName ?? _NAME);
+                var (_, error) = value.Validate(propertyName ?? {{name}}._NAME);
                 if(error is not null)
                 {
                     return error.Value;
@@ -136,6 +149,13 @@ public class ValueGenerator : IIncrementalGenerator
 
                 return new Valid(value);
             }
+
+
+            // JSON
+            
+            public static U<Valid, ValidationError> Deserialize(string json) => Create({{name}}.Deserialize(json));
+
+            public static string Serialize(Valid valid) => {{name}}.Serialize(valid._Parent);
         }
         """);
 

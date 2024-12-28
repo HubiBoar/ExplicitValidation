@@ -11,7 +11,7 @@ internal sealed class ValidGenerator : IIncrementalGenerator
 {
     private const string Attribute = "Definit.Validation.IsValidAttribute";
     private const string IsValidName = "Definit.Validation.IIsValid";
-    private const string ValidInterface = "Definit.Validation.Valid";
+    private const string ValidInterface = "Definit.Validation.IsValid";
     private const string IValidInterface = "Definit.Validation.IValid";
     private const string IValidBaseInterface = "Definit.Validation.IValidBase";
     
@@ -86,19 +86,20 @@ internal sealed class ValidGenerator : IIncrementalGenerator
             var properties = type
                 .GetMembers()
                 .OfType<IPropertySymbol>()
-                .Where(x => IsValid(x.Type))
-                .Select(x => (Name: x.Name, Type: x.Type.ToDisplayString()))
+                .Where(x => x.IsIndexer is false && x.IsImplicitlyDeclared is false && x.IsStatic is false)
+                .Select(x => (Self: x, IsValid: IsValid(x.Type), DisplayString: x.Type.ToDisplayString()))
+                .Select(x => (Name: x.Self.Name, IsValid: x.IsValid, TypeName: x.IsValid ? $"{x.DisplayString}.Valid" : x.DisplayString))
                 .ToImmutableArray();
 
             var propertiesDeclarations = string.Join("\n\t", properties
-                .Select(x => $$"""public {{x.Type}}.Valid {{x.Name}} { get; }"""));
+                .Select(x => $$"""public {{x.TypeName}} {{x.Name}} { get; }"""));
 
-            var constructorParams = properties.Length == 0 ? string.Empty : ", " + string.Join(", ", properties.Select(x => $"{x.Type}.Valid {x.Name}"));
+            var constructorParams = properties.Length == 0 ? string.Empty : ", " + string.Join(", ", properties.Select(x => $"{x.TypeName} {x.Name}"));
             var constructorAssignment = string.Join("\n\t\t", properties.Select(x => $"this.{x.Name} = {x.Name};"));
 
-            var validation = CreateValidation(properties.Select(x => x.Name).ToImmutableArray());
+            var validation = CreateValidation(properties.Where(x => x.IsValid).Select(x => x.Name).ToImmutableArray());
 
-            var validCreation = string.Join(", ", properties.Select(x => $"valid_{x.Name}!.Value")).TrimEnd(',');
+            var validCreation = properties.Length == 0 ? string.Empty : ", " + string.Join(", ", properties.Select(x => x.IsValid ? $"valid_{x.Name}!.Value" : $"value.{x.Name}")).TrimEnd(',');
 
             code.AddBlock($$"""
             private const string _NAME = "{{constructorName}}";
@@ -149,7 +150,7 @@ internal sealed class ValidGenerator : IIncrementalGenerator
 
             {{validation}}
 
-                    return new Valid(value, {{validCreation}});
+                    return new Valid(value{{validCreation}});
                 }
 
 

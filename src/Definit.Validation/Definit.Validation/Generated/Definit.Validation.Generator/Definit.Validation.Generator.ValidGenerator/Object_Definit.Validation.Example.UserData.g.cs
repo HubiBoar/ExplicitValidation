@@ -41,13 +41,15 @@ partial class Example
 		
 		    Definit.Validation.Example.UserData Definit.Validation.IValid<Definit.Validation.Example.UserData>.Value => this._Parent;
 		
-		    public Definit.Validation.Example.Email.Valid Email { get; }
+		    public string Name { get; }
+			public Definit.Validation.Example.Email.Valid Email { get; }
 			public Definit.Validation.Example.Address.Valid Address { get; }
 		
-		    private Valid(Definit.Validation.Example.UserData _parent, Definit.Validation.Example.Email.Valid Email, Definit.Validation.Example.Address.Valid Address)
+		    private Valid(Definit.Validation.Example.UserData _parent, string Name, Definit.Validation.Example.Email.Valid Email, Definit.Validation.Example.Address.Valid Address)
 		    {
 		        this._Parent = _parent;
-		        this.Email = Email;
+		        this.Name = Name;
+				this.Email = Email;
 				this.Address = Address;
 		    }
 		
@@ -80,7 +82,7 @@ partial class Example
 		            return new ValidationError(name, errors.ToImmutableArray());
 		        }
 		
-		        return new Valid(value, valid_Email!.Value, valid_Address!.Value);
+		        return new Valid(value, value.Name, valid_Email!.Value, valid_Address!.Value);
 		    }
 		
 		

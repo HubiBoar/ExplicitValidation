@@ -41,12 +41,14 @@ partial class Example
 		
 		    Definit.Validation.Example.Address Definit.Validation.IValid<Definit.Validation.Example.Address>.Value => this._Parent;
 		
-		    public Definit.Validation.Example.Email.Valid EmailProp { get; }
+		    public string PostalCode { get; }
+			public Definit.Validation.Example.Email.Valid EmailProp { get; }
 		
-		    private Valid(Definit.Validation.Example.Address _parent, Definit.Validation.Example.Email.Valid EmailProp)
+		    private Valid(Definit.Validation.Example.Address _parent, string PostalCode, Definit.Validation.Example.Email.Valid EmailProp)
 		    {
 		        this._Parent = _parent;
-		        this.EmailProp = EmailProp;
+		        this.PostalCode = PostalCode;
+				this.EmailProp = EmailProp;
 		    }
 		
 		    public static implicit operator Definit.Validation.Example.Address(Valid value) => value._Parent;
@@ -71,7 +73,7 @@ partial class Example
 		            return new ValidationError(name, errors.ToImmutableArray());
 		        }
 		
-		        return new Valid(value, valid_EmailProp!.Value);
+		        return new Valid(value, value.PostalCode, valid_EmailProp!.Value);
 		    }
 		
 		

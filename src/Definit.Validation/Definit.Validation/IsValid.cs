@@ -19,7 +19,7 @@ public interface IIsValid
     U<ValidationError> Validate(string? propertyName = null);
 }
 
-public interface Valid<TValue> : IIsValid<TValue>;
+public interface IsValid<TValue> : IIsValid<TValue>;
 
 public interface IIsValid<TValue> : IIsValid
 {

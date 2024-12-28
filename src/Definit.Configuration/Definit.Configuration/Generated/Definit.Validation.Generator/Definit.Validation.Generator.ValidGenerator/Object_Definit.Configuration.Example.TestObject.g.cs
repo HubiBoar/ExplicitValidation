@@ -41,13 +41,17 @@ partial class Example
 		
 		    Definit.Configuration.Example.TestObject Definit.Validation.IValid<Definit.Configuration.Example.TestObject>.Value => this._Parent;
 		
-		    public Definit.Configuration.Example.Email.Valid TestValue { get; }
+		    public System.Type EqualityContract { get; }
+			public string Name { get; }
+			public Definit.Configuration.Example.Email.Valid TestValue { get; }
 			public Definit.Configuration.Example.Email.Valid TestValue2 { get; }
 		
-		    private Valid(Definit.Configuration.Example.TestObject _parent, Definit.Configuration.Example.Email.Valid TestValue, Definit.Configuration.Example.Email.Valid TestValue2)
+		    private Valid(Definit.Configuration.Example.TestObject _parent, System.Type EqualityContract, string Name, Definit.Configuration.Example.Email.Valid TestValue, Definit.Configuration.Example.Email.Valid TestValue2)
 		    {
 		        this._Parent = _parent;
-		        this.TestValue = TestValue;
+		        this.EqualityContract = EqualityContract;
+				this.Name = Name;
+				this.TestValue = TestValue;
 				this.TestValue2 = TestValue2;
 		    }
 		
@@ -80,7 +84,7 @@ partial class Example
 		            return new ValidationError(name, errors.ToImmutableArray());
 		        }
 		
-		        return new Valid(value, valid_TestValue!.Value, valid_TestValue2!.Value);
+		        return new Valid(value, value.EqualityContract, value.Name, valid_TestValue!.Value, valid_TestValue2!.Value);
 		    }
 		
 		

@@ -1,3 +1,5 @@
+using Definit.Results;
+
 namespace Definit.Configuration.Tests.Unit;
 
 public class SectionTests
@@ -20,8 +22,8 @@ public class SectionTests
        
         //Assert
         var (valid, _) = section.Get();
-        valid.Value0.Should().Be("Value0");
-        valid.Value1.Value.Should().Be("Value1");
+        valid!.Value.Value0.Should().Be("Value0");
+        valid!.Value.Value1.Should().Be("Value1");
     }
     
     [Fact]

@@ -4,8 +4,8 @@ internal static partial class Example
 {
     public sealed record TestConfig() : Config<Email.Valid>("TestConfig");
 
-    [IsValid<string>]
-    public partial struct Email
+    [IsValid]
+    public partial struct Email : IsValid<string>
     {
         public static void Rule(Rule<string> rule) => rule.NotNull();
     }

@@ -5,7 +5,7 @@ namespace Definit.Validation;
 internal static partial class Example
 {
     [IsValid]
-    private partial struct Email : Valid<string>
+    private partial struct Email : IsValid<string>
     {
         public static void Rule(Rule<string> rule) => rule.NotNull();
     }
@@ -13,7 +13,7 @@ internal static partial class Example
     public static partial class Parent1
     {
         [IsValid]
-        public partial struct Value1 : Valid<string>
+        public partial struct Value1 : IsValid<string>
         {
             public static void Rule(Rule<string> rule) => rule.NotNull();
         }

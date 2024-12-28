@@ -14,20 +14,12 @@ public sealed class IsValidAttribute : Attribute
 {
 }
 
-[System.AttributeUsage
-(
-    System.AttributeTargets.Struct,
-    AllowMultiple = false
-)]
-public sealed class IsValidAttribute<TValue> : Attribute
-    where TValue : notnull
-{
-}
-
 public interface IIsValid
 {
     U<ValidationError> Validate(string? propertyName = null);
 }
+
+public interface Valid<TValue> : IIsValid<TValue>;
 
 public interface IIsValid<TValue> : IIsValid
 {

@@ -2,11 +2,7 @@
 
 namespace Definit.Configuration;
 
-public interface IConfig
-{
-}
-
-public abstract record Config<TValue>(string SectionName) : IConfig 
+public abstract record Config<TValue>(string SectionName)
     where TValue : IValidBase<TValue>
 {
     public Func<U<TValue, ValidationError>> Get { get; init; } = null!;
@@ -42,14 +38,5 @@ public abstract record Config<TValue>(string SectionName) : IConfig
         }
 
         return TValue.Deserialize(section.Value!);
-    }
-}
-
-public static class ConfigExtensions
-{
-    public static TConfig GetConfig<TConfig>(this IConfiguration configuration)
-        where TConfig : IConfig 
-    {
-        return 
     }
 }

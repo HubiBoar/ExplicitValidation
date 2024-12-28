@@ -1,11 +1,13 @@
 ﻿#nullable enable
 
+using System.Text.Json.Serialization;
 using Definit.Results;
 using Definit.Validation;
 using System.Text.Json;
 
 namespace Definit.Configuration.Tests.Unit;
 
+[JsonConverter(typeof(ValidJsonConverter<TestValue>))]
 partial struct TestValue : Definit.Validation.IIsValid<string>, Definit.Validation.IIsValid<TestValue, TestValue.Valid>
 {
 	private readonly static Rule<string> _rule;
@@ -44,7 +46,27 @@ partial struct TestValue : Definit.Validation.IIsValid<string>, Definit.Validati
 	
 	// JSON
 	
-	public static Definit.Configuration.Tests.Unit.TestValue Deserialize(string json) => new Definit.Configuration.Tests.Unit.TestValue(JsonSerializer.Deserialize<string>(json)!);  
+	public static Definit.Configuration.Tests.Unit.TestValue Deserialize(string json)
+	{
+	    return new Definit.Configuration.Tests.Unit.TestValue(FromJson(json));
+	
+	    static string FromJson(string json)
+	    {
+	        try
+	        {
+	            var parsedValue = JsonSerializer.Deserialize<string>(json);
+	            if (parsedValue is not null)
+	            {
+	                return parsedValue;
+	            }
+	        }
+	        catch (JsonException)
+	        {
+	            // ignore
+	        }
+	        return (string)Convert.ChangeType(json, typeof(string));
+	    }
+	}
 	
 	public static string Serialize(Definit.Configuration.Tests.Unit.TestValue value) => JsonSerializer.Serialize(value.Value); 
 	

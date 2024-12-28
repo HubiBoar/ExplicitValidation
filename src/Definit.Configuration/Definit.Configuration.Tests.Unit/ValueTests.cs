@@ -1,7 +1,29 @@
+using Definit.Results;
+
 namespace Definit.Configuration.Tests.Unit;
 
 public class ValueTests
 {
+    [Fact]
+    public void TEST()
+    {
+        //Arrange
+        var values = new Dictionary<string, string>
+        {
+            {"testValue", "TestValue"},
+        };
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(values!)
+            .Build();
+
+        //Act
+        var section = configuration.GetSection("TestValue");
+        var value = section.Value;
+
+        //Assert
+        value.Should().Be("TestValue");
+    }
+
     [Fact]
     public void GetFromConfigTest()
     {
@@ -15,12 +37,12 @@ public class ValueTests
             .Build();
 
         //Act
-//        var section = TestValue.Create(configuration);
+        var value = TestValueConfig.Create<TestValueConfig>(configuration);
 
         //Assert
-//        section.Is(out string valid);
+        var (valid, _) = value.Get();
 
-//        valid.Should().Be("TestValue");
+        valid!.Value.Should().Be("TestValue");
     }
     
     [Fact]
@@ -32,11 +54,11 @@ public class ValueTests
             .AddInMemoryCollection(values!)
             .Build();
 
-        //Act
-//        var section = TestValue.Create(configuration);
+        var value = TestValueConfig.Create<TestValueConfig>(configuration);
 
         //Assert
-//       ((bool)section.Is(out ValidationErrors _)).Should().BeTrue();
+        var (_, error) = value.Get();
+        error.Should().NotBeNull();
     }
     
     [Fact]
@@ -53,9 +75,9 @@ public class ValueTests
             .Build();
 
         //Act
-//        TestValue.Register(services, configuration);
+        TestValueConfig.Register<TestValueConfig>(services, configuration);
 
         //Assert
-//        services.Should().Contain(x => x.ServiceType == typeof(TestValue.Get));
+        services.Should().Contain(x => x.ServiceType == typeof(TestValueConfig));
     }
 }

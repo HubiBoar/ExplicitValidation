@@ -73,7 +73,11 @@ internal sealed class ValidGenerator : IIncrementalGenerator
             var typeName = type.ToDisplayString();
             var (code, info) = type.BuildTypeHierarchy
             (
-                name => $"{name} : {IsValidName}<{typeName}, {typeName}.Valid>",
+                name => $"""
+                [JsonConverter(typeof(ValidJsonConverter<{typeName}>))]
+                {name} : {IsValidName}<{typeName}, {typeName}.Valid>
+                """,
+                "System.Text.Json.Serialization",
                 "System.Collections.Immutable",
                 "Definit.Results",
                 "Definit.Validation",
@@ -119,7 +123,11 @@ internal sealed class ValidGenerator : IIncrementalGenerator
 
             // JSON
 
-            public static {{name}} Deserialize(string json) => JsonSerializer.Deserialize<{{name}}>(json)!;  
+            public static {{name}} Deserialize(string json)
+            {
+                var checkDeserialization = JsonSerializer.Serialize(json);
+                return JsonSerializer.Deserialize<{{name}}>(checkDeserialization)!;
+            }
 
             public static string Serialize({{name}} value) => JsonSerializer.Serialize(value); 
 
@@ -226,7 +234,11 @@ internal sealed class ValidGenerator : IIncrementalGenerator
             var valueType = generic.Name;
             var (code, info) = type.BuildTypeHierarchy
             (
-                name => $"{name} : {IsValidName}<{valueType}>, {IsValidName}<{type.Name}, {type.Name}.Valid>",
+                name => $"""
+                [JsonConverter(typeof(ValidJsonConverter<{type.Name}>))]
+                {name} : {IsValidName}<{valueType}>, {IsValidName}<{type.Name}, {type.Name}.Valid>
+                """,
+                "System.Text.Json.Serialization",
                 "Definit.Results",
                 "Definit.Validation",
                 "System.Text.Json"
@@ -273,7 +285,27 @@ internal sealed class ValidGenerator : IIncrementalGenerator
 
             // JSON
             
-            public static {{name}} Deserialize(string json) => new {{name}}(JsonSerializer.Deserialize<{{valueType}}>(json)!);  
+            public static {{name}} Deserialize(string json)
+            {
+                return new {{name}}(FromJson(json));
+
+                static {{valueType}} FromJson(string json)
+                {
+                    try
+                    {
+                        var parsedValue = JsonSerializer.Deserialize<{{valueType}}>(json);
+                        if (parsedValue is not null)
+                        {
+                            return parsedValue;
+                        }
+                    }
+                    catch (JsonException)
+                    {
+                        // ignore
+                    }
+                    return ({{valueType}})Convert.ChangeType(json, typeof({{valueType}}));
+                }
+            }
 
             public static string Serialize({{name}} value) => JsonSerializer.Serialize(value.Value); 
 

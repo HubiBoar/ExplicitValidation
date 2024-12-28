@@ -36,10 +36,11 @@ public class SectionTests
             .Build();
 
         //Act
-        var section = TestSection.Create(configuration);
+        var section = TestSectionConfig.Create<TestSectionConfig>(configuration);
 
         //Assert
-        ((bool)section.Is(out ValidationError _)).Should().BeTrue();
+        var (_, error) = section.Get();
+        error.Should().NotBeNull();
     }
     
     [Fact]
@@ -55,10 +56,11 @@ public class SectionTests
             .Build();
 
         //Act
-        var section = TestSection.Create(configuration);
+        var section = TestSectionConfig.Create<TestSectionConfig>(configuration);
 
         //Assert
-        ((bool)section.Is(out ValidationError _)).Should().BeTrue();
+        var (_, error) = section.Get();
+        error.Should().NotBeNull();
     }
     
     [Fact]
@@ -76,9 +78,9 @@ public class SectionTests
             .Build();
 
         //Act
-        TestSection.Register(services, configuration);
+        TestSectionConfig.Register<TestSectionConfig>(services, configuration);
 
         //Assert
-        services.Should().Contain(x => x.ServiceType == typeof(TestSection.Get));
+        services.Should().Contain(x => x.ServiceType == typeof(TestSectionConfig));
     }
 }

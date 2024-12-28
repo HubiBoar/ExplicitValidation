@@ -1,5 +1,6 @@
 ﻿#nullable enable
 
+using System.Text.Json.Serialization;
 using System.Collections.Immutable;
 using Definit.Results;
 using Definit.Validation;
@@ -7,6 +8,7 @@ using System.Text.Json;
 
 namespace Definit.Configuration.Tests.Unit;
 
+[JsonConverter(typeof(ValidJsonConverter<Definit.Configuration.Tests.Unit.TestSection>))]
 partial record TestSection : Definit.Validation.IIsValid<Definit.Configuration.Tests.Unit.TestSection, Definit.Configuration.Tests.Unit.TestSection.Valid>
 {
 	private const string _NAME = "TestSection";
@@ -26,7 +28,11 @@ partial record TestSection : Definit.Validation.IIsValid<Definit.Configuration.T
 	
 	// JSON
 	
-	public static Definit.Configuration.Tests.Unit.TestSection Deserialize(string json) => JsonSerializer.Deserialize<Definit.Configuration.Tests.Unit.TestSection>(json)!;  
+	public static Definit.Configuration.Tests.Unit.TestSection Deserialize(string json)
+	{
+	    var checkDeserialization = JsonSerializer.Serialize(json);
+	    return JsonSerializer.Deserialize<Definit.Configuration.Tests.Unit.TestSection>(checkDeserialization)!;
+	}
 	
 	public static string Serialize(Definit.Configuration.Tests.Unit.TestSection value) => JsonSerializer.Serialize(value); 
 	
@@ -39,15 +45,13 @@ partial record TestSection : Definit.Validation.IIsValid<Definit.Configuration.T
 	
 	    Definit.Configuration.Tests.Unit.TestSection Definit.Validation.IValid<Definit.Configuration.Tests.Unit.TestSection>.Value => this._Parent;
 	
-	    public System.Type EqualityContract { get; }
-		public string Value0 { get; }
+	    public string Value0 { get; }
 		public Definit.Configuration.Tests.Unit.TestValue.Valid Value1 { get; }
 	
-	    private Valid(Definit.Configuration.Tests.Unit.TestSection _parent, System.Type EqualityContract, string Value0, Definit.Configuration.Tests.Unit.TestValue.Valid Value1)
+	    private Valid(Definit.Configuration.Tests.Unit.TestSection _parent, string Value0, Definit.Configuration.Tests.Unit.TestValue.Valid Value1)
 	    {
 	        this._Parent = _parent;
-	        this.EqualityContract = EqualityContract;
-			this.Value0 = Value0;
+	        this.Value0 = Value0;
 			this.Value1 = Value1;
 	    }
 	
@@ -73,7 +77,7 @@ partial record TestSection : Definit.Validation.IIsValid<Definit.Configuration.T
 	            return new ValidationError(name, errors.ToImmutableArray());
 	        }
 	
-	        return new Valid(value, value.EqualityContract, value.Value0, valid_Value1!.Value);
+	        return new Valid(value, value.Value0, valid_Value1!.Value);
 	    }
 	
 	

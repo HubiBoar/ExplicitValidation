@@ -74,7 +74,6 @@ internal sealed class ValidGenerator : IIncrementalGenerator
             var (code, info) = type.BuildTypeHierarchy
             (
                 name => $"""
-                [JsonConverter(typeof(ValidJsonConverter<{typeName}>))]
                 {name} : {IsValidName}<{typeName}, {typeName}.Valid>
                 """,
                 "System.Text.Json.Serialization",
@@ -108,7 +107,6 @@ internal sealed class ValidGenerator : IIncrementalGenerator
             code.AddBlock($$"""
             private const string _NAME = "{{constructorName}}";
 
-
             // Validate
 
             public U<ValidationError> Validate(string? propertyName = null) => IsValid(propertyName ?? _NAME).ToResult();
@@ -123,14 +121,9 @@ internal sealed class ValidGenerator : IIncrementalGenerator
 
             // JSON
 
-            public static {{name}} Deserialize(string json)
-            {
-                var checkDeserialization = JsonSerializer.Serialize(json);
-                return JsonSerializer.Deserialize<{{name}}>(checkDeserialization)!;
-            }
+            public static {{name}} Deserialize(string json) => JsonSerializer.Deserialize<{{name}}>(json)!;
 
             public static string Serialize({{name}} value) => JsonSerializer.Serialize(value); 
-
 
             // Valid
 
@@ -287,28 +280,12 @@ internal sealed class ValidGenerator : IIncrementalGenerator
             
             public static {{name}} Deserialize(string json)
             {
-                return new {{name}}(FromJson(json));
+                var value = ({{valueType}})Convert.ChangeType(json, typeof({{valueType}}));
 
-                static {{valueType}} FromJson(string json)
-                {
-                    try
-                    {
-                        var parsedValue = JsonSerializer.Deserialize<{{valueType}}>(json);
-                        if (parsedValue is not null)
-                        {
-                            return parsedValue;
-                        }
-                    }
-                    catch (JsonException)
-                    {
-                        // ignore
-                    }
-                    return ({{valueType}})Convert.ChangeType(json, typeof({{valueType}}));
-                }
+                return new {{name}}(value);
             }
 
             public static string Serialize({{name}} value) => JsonSerializer.Serialize(value.Value); 
-
 
             // Valid
             
@@ -316,7 +293,7 @@ internal sealed class ValidGenerator : IIncrementalGenerator
             {
                 {{name}} {{IValidInterface}}<{{name}}>.Value => this._Parent;
 
-                public {{valueType}} Value => _Parent.Value;
+                public {{valueType}} Out => _Parent.Value;
 
                 public {{name}} _Parent { get; }
 
@@ -325,14 +302,14 @@ internal sealed class ValidGenerator : IIncrementalGenerator
                     this._Parent = parent;
                 }
 
-                public static implicit operator {{name}}(Valid value) => value.Value;
+                public static implicit operator {{name}}(Valid value) => value.Out;
 
 
                 // Factory
 
                 public static U<Valid, ValidationError> Create({{name}} value, string? propertyName = null)
                 {
-                    var (_, error) = value.Validate(propertyName ?? {{name}}._NAME);
+                    var (_, error) = value.Validate(propertyName);
                     if(error is not null)
                     {
                         return error.Value;

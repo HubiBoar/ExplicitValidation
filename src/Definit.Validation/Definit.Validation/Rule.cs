@@ -29,7 +29,7 @@ public sealed record Rule<TValue>()
 
     public U<ValidationError> Validate(TValue value, string propertyName)
     {
-        var (_, error) = Validate(value, propertyName);
+        var (_, error) = ValidateProperty(value, propertyName);
 
         if(error is not null)
         {

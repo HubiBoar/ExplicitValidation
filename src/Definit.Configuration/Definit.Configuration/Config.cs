@@ -32,11 +32,33 @@ public abstract record Config<TValue>(string SectionName)
             return new ValidationError(sectionName, $"Config Section: Not Found");
         }
 
-        if (section.Value is null)
+        if (string.IsNullOrEmpty(section.Value) is false)
+        {
+            return TValue.Deserialize(section.Value!);
+        }
+
+        //THIS WONT WORK WITH NESTED VALUES, FIND A BETTER SOLUTION
+        var conf = new Dictionary<string, object>();
+        foreach (var child in section.GetChildren())
+        {
+            if (child.Value is not null)
+            {
+                conf.Add(child.Key, child.Value);
+            }
+        }
+
+        if (conf.Count == 0)
         {
             return ValidationError.Null<TValue>(sectionName);
         }
 
-        return TValue.Deserialize(section.Value!);
+        var json = System.Text.Json.JsonSerializer.Serialize(conf);
+
+        if (string.IsNullOrEmpty(json))
+        {
+            return ValidationError.Null<TValue>(sectionName);
+        }
+
+        return TValue.Deserialize(json);
     }
 }

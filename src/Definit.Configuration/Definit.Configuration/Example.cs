@@ -39,7 +39,7 @@ internal static partial class Example
 
         private void Logic(Email.Valid valid)
         {
-            var v = valid.Value;
+            var v = valid.Out;
         }
 
         private void Logic2(TestObject.Valid valid)

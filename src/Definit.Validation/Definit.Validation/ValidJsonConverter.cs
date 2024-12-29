@@ -15,7 +15,8 @@ public sealed class ValidJsonConverter<T> : JsonConverter<T>
     public override T Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         var json = JsonDocument.ParseValue(ref reader).RootElement.GetRawText();
-        return T.Deserialize(json);
+        var raw = JsonSerializer.Serialize(json);
+        return T.Deserialize(raw);
     }
 
     public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options)

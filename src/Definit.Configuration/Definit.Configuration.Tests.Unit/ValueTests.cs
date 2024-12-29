@@ -5,26 +5,6 @@ namespace Definit.Configuration.Tests.Unit;
 public class ValueTests
 {
     [Fact]
-    public void TEST()
-    {
-        //Arrange
-        var values = new Dictionary<string, string>
-        {
-            {"testValue", "TestValue"},
-        };
-        var configuration = new ConfigurationBuilder()
-            .AddInMemoryCollection(values!)
-            .Build();
-
-        //Act
-        var section = configuration.GetSection("TestValue");
-        var value = section.Value;
-
-        //Assert
-        value.Should().Be("TestValue");
-    }
-
-    [Fact]
     public void GetFromConfigTest()
     {
         //Arrange
@@ -42,7 +22,7 @@ public class ValueTests
         //Assert
         var (valid, _) = value.Get();
 
-        valid!.Value.Should().Be("TestValue");
+        valid!.Value.Out.Should().Be("TestValue");
     }
     
     [Fact]

@@ -11,7 +11,7 @@ public class SectionTests
        var values = new Dictionary<string, string>
        {
            {"TestSection:Value0", "Value0"},
-           {"TestSection:Value1", "Value1"},
+           {"TestSection:Value1", "5"},
        };
        var configuration = new ConfigurationBuilder()
            .AddInMemoryCollection(values!)
@@ -24,7 +24,7 @@ public class SectionTests
     
        var (valid, _) = section.Get();
        valid!.Value.Value0.Should().Be("Value0");
-       valid!.Value.Value1.Out.Should().Be("Value1");
+       valid!.Value.Value1.Out.Should().Be(5);
     }
 
  //  [Fact]

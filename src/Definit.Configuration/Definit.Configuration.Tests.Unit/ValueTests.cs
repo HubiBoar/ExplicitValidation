@@ -10,7 +10,7 @@ public class ValueTests
         //Arrange
         var values = new Dictionary<string, string>
         {
-            {"testValue", "TestValue"},
+            {"testValue", "5"},
         };
         var configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(values!)
@@ -22,7 +22,7 @@ public class ValueTests
         //Assert
         var (valid, _) = value.Get();
 
-        valid!.Value.Out.Should().Be("TestValue");
+        valid!.Value.Out.Should().Be(5);
     }
     
     [Fact]

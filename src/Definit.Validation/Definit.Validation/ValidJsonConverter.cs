@@ -14,9 +14,14 @@ public sealed class ValidJsonConverter<T> : JsonConverter<T>
 {
     public override T Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        var json = JsonDocument.ParseValue(ref reader).RootElement.GetRawText();
-        var raw = JsonSerializer.Serialize(json);
-        return T.Deserialize(raw);
+        var json = JsonDocument.ParseValue(ref reader).RootElement.GetString();
+
+        if (string.IsNullOrEmpty(json))
+        {
+            json = JsonDocument.ParseValue(ref reader).RootElement.GetRawText();
+        }
+
+        return T.Deserialize(json);
     }
 
     public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options)
